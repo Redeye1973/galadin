@@ -1836,11 +1836,13 @@ const stemming = (b) => (b.honger + b.energie + b.plezier + b.mooi + b.gezelscha
 
 
 function simMinuut(S, t) {
-  const nacht = isNacht(t), ids = bewonerIds(S), uit = [];
+  const ids = bewonerIds(S), uit = [];
   simKapot(S, t, uit);
   const drup = !!kapotVoor(S, 'drup');
   for (const id of ids) {
     const b = S.bewoners[id];
+
+    const nacht = isNacht(t) && !(b.wakker > t);
     if (b.bezig && (t >= b.tot && !(b.bezig === 'slapen' && nacht))) { const was = b.bezig; b.bezig = null; naAfloop(S, b, was, t, uit); }
     if (nacht && b.bezig !== 'slapen' && kanBezig(S, 'slapen')) { const k = bedKamer(S, id); if (k) { stop(b); b.kamer = k; b.bezig = 'slapen'; b.tot = t + 60 * MIN; } }
     if (!nacht && b.bezig === 'slapen' && b.energie >= 100) b.bezig = null;
@@ -2292,7 +2294,7 @@ function vraag(S, id, wat, t, extra) {
   if (wat === 'repareren' && !kapotLijst(S).length) return { ok: false, reden: 'Er is niets stuk.' };
   if (!kanBezig(S, wat)) return { ok: false, reden: 'Daar heb je nog geen kamer voor.' };
   const nee = (zin) => ({ ok: true, ja: false, zin });
-  if (b.bezig === 'slapen' && isNacht(t)) return nee('Zzz...');
+  if (b.bezig === 'slapen' && isNacht(t) && !(b.wakker > t)) return nee('Zzz...');
   if (wat === 'slapen') { if (b.energie > 85 && !isNacht(t)) return nee('Ik ben nog helemaal niet moe.'); }
   else if (b.energie < 12) return nee('Ik ben te moe. Ik wil eerst slapen.');
   if ((wat === 'koken' || wat === 'eten') && b.honger > 92) return nee('Ik zit nog helemaal vol.');
@@ -2305,6 +2307,22 @@ function vraag(S, id, wat, t, extra) {
   if (wat === 'koken' && r.wat === 'eten') zin = kentRecepten(b) ? 'De kast is leeg. Dan maar een boterham.' : 'Ik kan nog niet koken. Dan maar een boterham.';
   if (wat === 'repareren' && !kanMaken(b, dingVan(b.repareert))) zin = 'Ik weet niet hoe dat moet, maar ik probeer het.';
   return { ok: true, ja: true, kamer: r.kamer, wat: r.wat, zin };
+}
+
+
+
+
+
+const WAKKER_UREN = 2;
+function wek(S, id, t) {
+  const b = S.bewoners[id];
+  if (!b) return { ok: false };
+  if (b.energie < 12) return { ok: true, ja: false, zin: 'Mmm... nee. Ik ben echt te moe. Morgen weer.' };
+  b.wakker = t + WAKKER_UREN * 60 * MIN;
+  if (b.bezig === 'slapen') { b.bezig = null; b.tot = t; }
+  b.rust = t;
+  const st = stemming(b);
+  return { ok: true, ja: true, zin: st >= 60 ? 'Hè? O, jij bent het! Ik kom eruit.' : 'Gaap... nu al? Vooruit dan.' };
 }
 
 
@@ -3481,7 +3499,10 @@ function bewonerVel(id) {
     '<div class="doen"><button class="knop2" data-zwaai="' + id + '">Even zwaaien</button>' +
     lekkers.map((l) => '<button class="knop2" data-lekkers="' + l.id + '" data-wie="' + id + '"><img class="px" src="' + sprUrl(l.icoon) + '" alt="">' + esc(l.naam) + ' (' + S.voorraad.lekkers[l.id] + ')</button>').join('') + '</div>' +
 
-    (b.bezig === 'slapen' && isNacht(Date.now()) ? '<div class="weetje">Het is nacht. ' + esc(b.naam) + ' slaapt tot 6 uur, dan staat ze weer op.</div>' :
+    (b.bezig === 'slapen' && isNacht(Date.now()) && !(b.wakker > Date.now()) ? '<div class="weetje">Het is nacht. ' + esc(b.naam) + ' slaapt tot 6 uur, dan staat ze weer op.</div>' +
+      '<div class="doen"><button class="knop2" data-wek="' + id + '">Wakker maken</button>' +
+      (bewonerIds(S).filter((o) => S.bewoners[o].bezig === 'slapen').length > 1 ? '<button class="knop2" data-wek="allemaal">Iedereen wakker maken</button>' : '') + '</div>' :
+      (isNacht(Date.now()) && b.wakker > Date.now() ? '<div class="weetje">' + esc(b.naam) + ' is wakker gemaakt en blijft op tot ' + new Date(b.wakker).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) + '. Daarna gaat ze weer slapen.</div>' : '') +
 
       '<p class="label">Vraag haar iets</p><div class="doen">' + Object.keys(BEZIG).map((w) => {
         const kan = kanBezig(S, w);
@@ -4022,6 +4043,15 @@ function klikLeven(ds, t, nu) {
     if (r.ja) kijkNaar(ds.wie, true);
     setTimeout(() => zegIets(ds.wie, r.zin), 250);
     melding(b.naam + ': „' + r.zin + '”' + (r.ja ? ' Ze ' + watDoet(S, b) + '.' : ''));
+    return true;
+  }
+  if (ds.wek) {
+    const wie = ds.wek === 'allemaal' ? bewonerIds(S).filter((o) => S.bewoners[o].bezig === 'slapen') : [ds.wek];
+    const uit = wie.map((o) => [o, wek(S, o, nu)]);
+    geluid(uit.some(([, r]) => r.ja) ? 'samen' : 'fout');
+    veranderd(); sluitVel(); renderBewonerRij();
+    uit.forEach(([o, r], i) => setTimeout(() => zegIets(o, r.zin), 250 + i * 500));
+    melding(uit.map(([o, r]) => S.bewoners[o].naam + ': „' + r.zin + '”').join(' '));
     return true;
   }
   if (ds.zwaai) { const r = zwaai(S, ds.zwaai, nu); geluid('samen'); if (r.telt) hartjesHuis(ds.zwaai); veranderd(); sluitVel(); setTimeout(() => zegIets(ds.zwaai, r.zin), 250); melding(S.bewoners[ds.zwaai].naam + ': „' + r.zin + '”'); return true; }
