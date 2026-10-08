@@ -3306,10 +3306,7 @@ function huisTik(cv, e) {
 const ST = { K: 7, R: 8, soorten: ['ring', 'staafje', 'roos', 'vleermuis', 'hart', 'zwaluw'], zetten: 20, perMunt: 25, volPerDag: 3,
 
 
-
-
-
-  zettenE: 15, bonus4: 2, bonus5: 3, bonusKetenVanaf: 3, bonusMax: 4, perMuntE: 25 };
+  perMuntE: 25 };
 const ST_NAAM = { ring: 'ringetje', staafje: 'staafje', roos: 'roos', vleermuis: 'vleermuis', hart: 'hart', zwaluw: 'zwaluw' };
 
 function stenenRnd(st) { st.zaad = (st.zaad * 16807) % 2147483647; return (st.zaad - 1) / 2147483646; }
@@ -3363,8 +3360,8 @@ function stenenVul(st) {
   }
 }
 function stenenNieuw(zaad, eindeloos) {
-  const st = { zaad: (zaad % 2147483646) + 1, veld: [], zetten: eindeloos ? ST.zettenE : ST.zetten, punten: 0, klaar: false, langste: 0, beste: 0,
-    eindeloos: !!eindeloos, gedaan: 0, erbij: 0 };
+  const st = { zaad: (zaad % 2147483646) + 1, veld: [], zetten: eindeloos ? 0 : ST.zetten, punten: 0, klaar: false, langste: 0, beste: 0,
+    eindeloos: !!eindeloos, gedaan: 0, betaald: 0 };
   stenenVul(st);
   return st;
 }
@@ -3390,7 +3387,7 @@ function stenenZet(st, a, b) {
   [v[a], v[b]] = [v[b], v[a]];
   let g = stenenGroepen(v);
   if (!g.weg.length) { [v[a], v[b]] = [v[b], v[a]]; return { ok: false, terug: true }; }
-  st.zetten--;
+  if (!st.eindeloos) st.zetten--;
   const stappen = [];
   let keten = 0, som = 0;
   while (g.weg.length) {
@@ -3402,28 +3399,35 @@ function stenenZet(st, a, b) {
   }
   st.langste = Math.max(st.langste, keten); st.beste = Math.max(st.beste, som);
   st.gedaan++;
-  let bonus = 0;
-  if (st.eindeloos) {
-    for (const s of stappen) bonus += (s.keten >= ST.bonusKetenVanaf ? 1 : 0) + s.lang.reduce((n, l) => n + (l >= 5 ? ST.bonus5 : l === 4 ? ST.bonus4 : 0), 0);
-    bonus = Math.min(ST.bonusMax, bonus);
-    st.zetten += bonus; st.erbij += bonus;
-  }
   let geschud = false;
   if (!stenenMogelijk(st.veld).length) { stenenVul(st); geschud = true; }
-  if (st.zetten <= 0) st.klaar = true;
-  return { ok: true, stappen, geschud, punten: som, bonus };
+  if (!st.eindeloos && st.zetten <= 0) st.klaar = true;
+  return { ok: true, stappen, geschud, punten: som };
 }
 
-function stenenUitslag(S, punten, t, eindeloos) {
+
+
+function stenenUitslag(S, punten, t, eindeloos, betaald) {
   const dag = dagSleutel(t), Z = S.stenen;
   if (Z.dag !== dag) { Z.dag = dag; Z.n = 0; }
 
-  const vol = Z.n < ST.volPerDag, record = punten > (eindeloos ? Z.recordE || 0 : Z.record);
+  const vol = true, record = punten > (eindeloos ? Z.recordE || 0 : Z.record);
   Z.n++; Z.gespeeld++;
   if (record) { if (eindeloos) Z.recordE = punten; else Z.record = punten; }
   const munten = Math.round(Math.floor(punten / (eindeloos ? ST.perMuntE : ST.perMunt)) * (vol ? 1 : OPNIEUW_DEEL));
-  S.munten += munten; S.totaal.stenen = (S.totaal.stenen || 0) + munten;
-  return { munten, vol, record, over: Math.max(0, ST.volPerDag - Z.n) };
+  const nog = Math.max(0, munten - (betaald || 0));
+  S.munten += nog; S.totaal.stenen = (S.totaal.stenen || 0) + nog;
+  return { munten, vol, record };
+}
+
+
+
+function stenenTussendoor(S, st) {
+  if (!st.eindeloos) return 0;
+  const m = Math.floor(st.punten / ST.perMuntE), erbij = m - st.betaald;
+  if (erbij <= 0) return 0;
+  st.betaald = m; S.munten += erbij; S.totaal.stenen = (S.totaal.stenen || 0) + erbij;
+  return erbij;
 }
 
 
@@ -3442,7 +3446,7 @@ function startStenen(el, eindeloos) {
   Object.assign(Stenen, { actief: true, st, el, kies: -1, fasen: [], veld: st.veld.slice(), hint: null, laatst: performance.now(), sleep: null, punt: [] });
   el.innerHTML = '<div class="hud"><button class="rond" id="stenenStop" aria-label="Stoppen">×</button><div class="doel"><b>Studio Zwarte Roos' + (eindeloos ? ' · eindeloos' : '') + '</b><span id="stenenTel"></span></div></div>' +
     '<canvas id="stenenDoek" width="' + ST.K * TEGEL + '" height="' + ST.R * TEGEL + '" aria-label="Het bord: wissel twee steentjes om"></canvas>' +
-    '<p class="label" style="text-align:center">' + (eindeloos ? 'Eindeloos: een rij van vier geeft twee zetten erbij, een rij van vijf drie. Zo lang je zetten hebt, ga je door.' : 'Wissel twee buren om: drie dezelfde op een rij verdwijnen. Vier of vijf tellen zwaarder.') + '</p>';
+    '<p class="label" style="text-align:center">' + (eindeloos ? 'Eindeloos: speel zo lang je wilt. De munten komen er meteen bij. Tik op het kruisje als je klaar bent.' : 'Wissel twee buren om: drie dezelfde op een rij verdwijnen. Vier of vijf tellen zwaarder.') + '</p>';
   Stenen.cv = el.querySelector('#stenenDoek'); Stenen.ctx = Stenen.cv.getContext('2d');
   ST.soorten.forEach(stenenPlaatje);
   const plek = (e) => { const r = Stenen.cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * ST.K, y: (e.clientY - r.top) / r.height * ST.R }; };
@@ -3488,7 +3492,7 @@ function stenenDoe(a, b) {
     Stenen.fasen.push({ soort: 'val', veld: s.na, val: s.val, duur: 90 + 70 * Math.max(...s.val) });
   }
   if (r.geschud) Stenen.fasen.push({ soort: 'schud', veld: Stenen.st.veld.slice(), duur: 500 });
-  if (r.bonus) Stenen.fasen[Stenen.fasen.length - 1].bonus = r.bonus;
+  if (stenenTussendoor(S, Stenen.st)) { veranderd(); renderKop(); }
   stenenHud();
 }
 function stenenLus(nu) {
@@ -3507,7 +3511,6 @@ function stenenLus(nu) {
     }
   }
   if (f && nu - f.t0 >= f.duur) {
-    if (f.bonus) { Stenen.punt.push({ tekst: '+' + f.bonus + (f.bonus === 1 ? ' zet' : ' zetten'), x: ST.K * TEGEL / 2, y: 40, t0: nu, kleur: '#d9b8ff' }); geluid('ster'); }
     Stenen.fasen.shift();
     if (!Stenen.fasen.length) {
       Stenen.veld = Stenen.st.veld.slice(); Stenen.laatst = nu; stenenHud();
@@ -3565,14 +3568,14 @@ function stenenTeken(nu) {
 }
 function stenenHud() {
   const el = $('stenenTel'), st = Stenen.st;
-  if (el) el.textContent = meervoud(st.zetten, 'zet', 'zetten') + ' · ' + getal(st.punten) + ' punten · ' + meervoud(Math.floor(st.punten / (st.eindeloos ? ST.perMuntE : ST.perMunt)), 'munt', 'munten');
+  if (el) el.textContent = (st.eindeloos ? meervoud(st.gedaan, 'zet', 'zetten') + ' gedaan' : meervoud(st.zetten, 'zet', 'zetten')) + ' · ' + getal(st.punten) + ' punten · ' + meervoud(Math.floor(st.punten / (st.eindeloos ? ST.perMuntE : ST.perMunt)), 'munt', 'munten');
 }
 function stenenEinde(gestopt) {
   if (!Stenen.actief) return;
   Stenen.actief = false;
   const st = Stenen.st;
 
-  stenenKlaar({ punten: st.punten, langste: st.langste, gestopt, zettenOver: st.zetten, eindeloos: st.eindeloos, gedaan: st.gedaan, erbij: st.erbij });
+  stenenKlaar({ punten: st.punten, langste: st.langste, gestopt, zettenOver: st.zetten, eindeloos: st.eindeloos, gedaan: st.gedaan, betaald: st.betaald });
 }
 
 
@@ -4370,21 +4373,20 @@ function renderBoek() {
 
 function renderStudio() {
   if (Stenen.actief) return;
-  const el = $('tab-studio'), Z = S.stenen, vandaag = Z.dag === dagSleutel(Date.now()) ? Z.n : 0, over = Math.max(0, ST.volPerDag - vandaag);
+  const el = $('tab-studio'), Z = S.stenen;
   el.innerHTML = '<div class="thema"><small>Bijbaantje</small><h2>Studio Zwarte Roos</h2><p>' + esc(S.bewoners.ik.naam) + ' helpt in de tattoo- en piercingstudio. Ruim de bakjes op: wissel twee buren om en maak rijen van drie dezelfde. Voor de punten krijg je munten.</p></div>' +
     '<div class="steenrij">' + ST.soorten.map((s) => '<img class="px" src="' + sprUrl('stenen/' + s) + '" alt="' + esc(ST_NAAM[s]) + '">').join('') + '</div>' +
     '<button class="hoofdknop" data-doe="stenenstart">Aan het werk!</button>' +
-    '<button class="knop2" data-doe="stenenstart" data-eindeloos="1" style="width:100%;margin-top:8px">Eindeloos: doorgaan zolang je zetten verdient</button>' +
-    '<p class="label" style="text-align:center">' + (over ? 'Vandaag nog ' + meervoud(over, 'potje', 'potjes') + ' voor de volle munten' : 'Vandaag al ' + ST.volPerDag + ' keer gespeeld: nu nog ' + Math.round(OPNIEUW_DEEL * 100) + '% van de munten') +
+    '<button class="knop2" data-doe="stenenstart" data-eindeloos="1" style="width:100%;margin-top:8px">Eindeloos: speel zo lang je wilt</button>' +
+    '<p class="label" style="text-align:center">' + meervoud(Z.gespeeld, 'potje', 'potjes') + ' gespeeld' +
     ' · record ' + getal(Z.record) + ' punten' + (Z.recordE ? ' · eindeloos ' + getal(Z.recordE) : '') + '</p>';
 }
 function stenenKlaar(u) {
-  const r = stenenUitslag(S, u.punten, Date.now(), u.eindeloos);
+  const r = stenenUitslag(S, u.punten, Date.now(), u.eindeloos, u.betaald);
   geluid(r.munten >= 60 ? 'applaus' : 'ster'); veranderd(); renderKop();
-  openVel('Klaar voor vandaag?', '<div class="uitslag">' + getal(u.punten) + ' punten · +' + r.munten + ' munten' + (r.vol ? '' : ' (' + Math.round(OPNIEUW_DEEL * 100) + '%)') + '</div>' +
+  openVel('Klaar voor vandaag?', '<div class="uitslag">' + getal(u.punten) + ' punten · +' + r.munten + ' munten' + '</div>' +
     (r.record && u.punten ? '<div class="weetje"><b>Nieuw record!</b></div>' : '') +
-    '<p>' + (u.gestopt && u.zettenOver ? 'Je stopte met nog ' + meervoud(u.zettenOver, 'zet', 'zetten') + ' over. ' : '') + (u.langste > 2 ? 'Je langste ketting: ' + u.langste + ' rijen achter elkaar. ' : '') + (u.eindeloos ? 'Eindeloos: ' + meervoud(u.gedaan, 'zet', 'zetten') + ' gedaan, ' + u.erbij + ' erbij verdiend. ' : '') +
-    (r.over ? 'Vandaag tellen nog ' + meervoud(r.over, 'potje', 'potjes') + ' voor de volle munten.' : 'Vanaf nu krijg je vandaag ' + Math.round(OPNIEUW_DEEL * 100) + '% van de munten; morgen weer alles.') + '</p>' +
+    '<p>' + (u.gestopt && u.zettenOver && !u.eindeloos ? 'Je stopte met nog ' + meervoud(u.zettenOver, 'zet', 'zetten') + ' over. ' : '') + (u.langste > 2 ? 'Je langste ketting: ' + u.langste + ' rijen achter elkaar. ' : '') + (u.eindeloos ? 'Eindeloos: ' + meervoud(u.gedaan, 'zet', 'zetten') + ' gedaan.' : '') + '</p>' +
     '<div class="rij2"><button class="knop2" data-doe="stenenstart"' + (u.eindeloos ? ' data-eindeloos="1"' : '') + '>Nog een keer</button><button class="knop2" data-sluit>Klaar</button></div>');
   renderStudio();
 }
