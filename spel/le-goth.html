@@ -145,6 +145,15 @@ img.nieuwe { height: 200px; image-rendering: pixelated; background: radial-gradi
 .kopknoppen { display: flex; gap: 6px; flex: none; flex-wrap: wrap; justify-content: flex-end; }
 
 .huiskader { position: relative; }
+
+#kijkDoek { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--accent); image-rendering: pixelated; background: #1c1621; }
+#huisDoek[hidden], #kijkDoek[hidden], .kijkbalk[hidden] { display: none; }
+#kijkDoek.zoomt { animation: kijkin .32s ease-out; }
+@keyframes kijkin { from { transform: scale(.5); opacity: .3; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { #kijkDoek.zoomt { animation: none; } }
+.kijkbalk { margin-top: 10px; }
+.kijkbalk h3 { margin: 0 0 2px; font-size: 17px; }
+.kijkbalk p { margin: 0 0 10px; min-height: 2.6em; }
 .bellen { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 14px; }
 .bel { position: absolute; transform: translate(-50%, -100%); width: max-content; max-width: 66%; padding: 6px 10px; border-radius: 14px; background: #f4ecf2; color: #1d0f2a;
   font-size: 13px; font-weight: 600; line-height: 1.25; text-align: center; box-shadow: 0 3px 10px rgba(0, 0, 0, .55); }
@@ -2682,7 +2691,8 @@ const EZEL = { y0: 35, y1: 69, x0: 145.5, x1: 138.5, w: 15 };
 const TUIN_X = [30, 62, 96, 288, 322, 354], TUIN_Y = 105, DEUR = [192, 100];
 const HOUT_TINT = [1.12, 0.8, 0.55];
 const MUUR = [28, 22, 33], AARDE = [36, 26, 24], NACHT = [10, 8, 30];
-const Huis = { zicht: {}, deeltjes: [], vakken: [], stroken: [], popVakken: [], katVak: null, statisch: null, sleutel: '', laatst: 0, kat: null, bron: {}, bellen: [], pakje: 0, donker: {} };
+const Huis = { zicht: {}, deeltjes: [], vakken: [], stroken: [], popVakken: [], katVak: null, statisch: null, sleutel: '', laatst: 0, kat: null, bron: {}, bellen: [], pakje: 0, donker: {},
+  kijk: null, kijkWie: [], kijkVakken: [], kijkKat: null };
 
 function huisIndeling() {
   const vakken = [], stroken = [], leeg = [];
@@ -2877,6 +2887,8 @@ function tekenHuis(S, cv, nu) {
   Huis.laatst = nu;
   werkZichtBij(S, nu, dt);
   werkKatBij(S, nu, dt);
+  volgKijk(S);
+  const kijk = Huis.kijk && vakVan(Huis.kijk), groot = kijk ? { pops: [], kat: null, deeltjes: [] } : null;
   const B = new Buf(HUIS_W, stat.h);
   B.d.set(stat.d);
 
@@ -2884,6 +2896,8 @@ function tekenHuis(S, cv, nu) {
   for (const id of bewonerIds(S)) { const b = S.bewoners[id], z = Huis.zicht[id]; if (b.bezig === 'slapen' && z.kamer === b.kamer) slapers[z.kamer] = true; else wakker[z.kamer] = true; }
   for (const kamer of Object.keys(slapers)) if (!wakker[kamer]) donkerKamer(B, stat, kamer);
   tekenDingen(S, B, nu, echt);
+
+  if (kijk) groot.basis = kamerUit(B, kijk);
   Huis.popVakken = [];
   for (const id of bewonerIds(S)) {
     const b = S.bewoners[id], z = Huis.zicht[id], v = vakVan(z.kamer);
@@ -2902,6 +2916,7 @@ function tekenHuis(S, cv, nu) {
     const h = POP_H * POP_SCHAAL;
 
     Huis.popVakken.push({ id, x0: x - 16, y0: y - h, x1: x + 16, y1: y + 2 });
+    if (kijk && v === kijk) groot.pops.push({ id, b, x: v.x + z.x - kijk.x, y: VLOER - hop, alfa: z.alfa });
   }
 
   Huis.katVak = null;
@@ -2911,6 +2926,7 @@ function tekenHuis(S, cv, nu) {
     const kx = Math.round(kv.x + kz.x), ky = kv.y + VLOER + 3 - (kz.loopt ? Math.abs(Math.sin(kz.fase * Math.PI)) * 1.5 : 0);
     tekenSprite(B, naam, kx, Math.round(ky), { schaal: 0.3, alfa: kz.alfa, spiegel: naam === 'kat/loop' ? kz.richting < 0 : naam === 'kat/zit' ? kz.richting > 0 : false });
     Huis.katVak = { x0: kx - 13, y0: ky - 22, x1: kx + 13, y1: ky + 3 };
+    if (kijk && kv === kijk) groot.kat = { naam, x: kz.x, y: ky - kv.y, alfa: kz.alfa, spiegel: naam === 'kat/loop' ? kz.richting < 0 : naam === 'kat/zit' ? kz.richting > 0 : false };
     if (slaap && Math.random() < dt / 2600) Huis.deeltjes.push({ soort: 'iconen/zzz', x: kx + 8, y: ky - 12, vx: 4, vy: -6, t0: nu, leven: 1800, schaal: 0.35 });
   }
 
@@ -2921,11 +2937,68 @@ function tekenHuis(S, cv, nu) {
   Huis.deeltjes = Huis.deeltjes.filter((q) => {
     const t = (nu - q.t0) / 1000;
     if (t * 1000 > q.leven) return false;
-    tekenSprite(B, q.soort, q.x + q.vx * t, q.y + q.vy * t, { midden: true, schaal: q.schaal, alfa: Math.min(1, (1 - t * 1000 / q.leven) * 1.5) });
+    const dx = q.x + q.vx * t, dy = q.y + q.vy * t, da = Math.min(1, (1 - t * 1000 / q.leven) * 1.5);
+    tekenSprite(B, q.soort, dx, dy, { midden: true, schaal: q.schaal, alfa: da });
+    if (kijk) groot.deeltjes.push({ soort: q.soort, x: dx - kijk.x, y: dy - kijk.y, schaal: q.schaal, alfa: da });
     return true;
   });
-  cv.getContext('2d').putImageData(new ImageData(B.d, HUIS_W, stat.h), 0, 0);
+
+  if (kijk) tekenKijk(S, groot); else cv.getContext('2d').putImageData(new ImageData(B.d, HUIS_W, stat.h), 0, 0);
   werkBellenBij(S, nu, stat.h);
+}
+
+
+
+
+
+
+
+const KIJK_ZOOM = 2;
+function kamerUit(B, v) {
+  const d = new Uint8ClampedArray(KAMER_W * KAMER_H * 4);
+  for (let y = 0; y < KAMER_H; y++) { const i = ((v.y + y) * B.w + v.x) * 4; d.set(B.d.subarray(i, i + KAMER_W * 4), y * KAMER_W * 4); }
+  return d;
+}
+function volgKijk(S) {
+  if (!Huis.kijk) return;
+  const hier = bewonerIds(S).filter((id) => Huis.zicht[id] && Huis.zicht[id].kamer === Huis.kijk);
+  if (hier.length) { Huis.kijkWie = hier; return; }
+  const wie = Huis.kijkWie.find((id) => Huis.zicht[id]);
+  if (wie) Huis.kijk = Huis.zicht[wie].kamer;
+}
+function tekenKijk(S, groot) {
+  const cv = document.getElementById('kijkDoek'), Z = KIJK_ZOOM, W = KAMER_W * Z, H = KAMER_H * Z;
+  if (!cv) return;
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const B = new Buf(W, H), src = groot.basis;
+  for (let y = 0; y < H; y++) {
+    const rij = Math.floor(y / Z) * KAMER_W * 4, uit = y * W * 4;
+    for (let x = 0; x < W; x++) { const i = rij + Math.floor(x / Z) * 4, j = uit + x * 4; B.d[j] = src[i]; B.d[j + 1] = src[i + 1]; B.d[j + 2] = src[i + 2]; B.d[j + 3] = 255; }
+  }
+  Huis.kijkVakken = [];
+  for (const p of groot.pops) {
+    const x = Math.round(p.x * Z), y = Math.round(p.y * Z), h = POP_H * POP_SCHAAL * Z;
+    if (S.gekozen === p.id) B.ell(x, VLOER * Z, 14 * Z, 2.5 * Z, [217, 184, 255], 0.5 * p.alfa);
+    tekenBuf(B, popBuf(p.b.aan, p.b.huid, p.b.lippen), x, y, POP_SCHAAL * Z, p.alfa);
+    Huis.kijkVakken.push({ id: p.id, x0: x - 16 * Z, y0: y - h, x1: x + 16 * Z, y1: y + 2 * Z });
+  }
+  Huis.kijkKat = null;
+  if (groot.kat) {
+    const k = groot.kat, x = Math.round(k.x * Z), y = Math.round(k.y * Z);
+    tekenSprite(B, k.naam, x, y, { schaal: 0.3 * Z, alfa: k.alfa, spiegel: k.spiegel });
+    Huis.kijkKat = { x0: x - 13 * Z, y0: y - 22 * Z, x1: x + 13 * Z, y1: y + 3 * Z };
+  }
+  for (const q of groot.deeltjes) tekenSprite(B, q.soort, q.x * Z, q.y * Z, { midden: true, schaal: q.schaal * Z, alfa: q.alfa });
+  cv.getContext('2d').putImageData(new ImageData(B.d, W, H), 0, 0);
+}
+
+function kijkTik(cv, e) {
+  const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * cv.width, y = (e.clientY - r.top) / r.height * cv.height;
+  const p = Huis.kijkVakken.slice().reverse().find((q) => x >= q.x0 && x <= q.x1 && y >= q.y0 && y <= q.y1);
+  if (p) return { bewoner: p.id };
+  const k = Huis.kijkKat;
+  if (k && x >= k.x0 && x <= k.x1 && y >= k.y0 && y <= k.y1) return { kat: true };
+  return { kamer: Huis.kijk };
 }
 
 
@@ -2970,9 +3043,12 @@ function werkBellenBij(S, nu, h) {
     const slaapt = !kat && b && b.bezig === 'slapen' && z.kamer === b.kamer, bed = slaapt ? bedPlek(S, q.id) : null;
     const x = v.x + (bed ? bed[0] : z.x), y = v.y + (bed ? bed[1] - 8 : kat ? VLOER - 24 : VLOER - POP_H * POP_SCHAAL - 4);
 
-    const W = q.el.parentNode.clientWidth, w = q.el.offsetWidth;
-    q.el.style.left = clamp(x / HUIS_W * W, w / 2 + 4, Math.max(w / 2 + 4, W - w / 2 - 4)) + 'px';
-    q.el.style.top = (y / h * 100) + '%';
+    const W = q.el.parentNode.clientWidth, w = q.el.offsetWidth, kijk = Huis.kijk && vakVan(Huis.kijk);
+
+    if (kijk && v !== kijk) { q.el.style.opacity = '0'; return true; }
+    const fx = kijk ? (x - kijk.x) / KAMER_W : x / HUIS_W, fy = kijk ? (y - kijk.y) / KAMER_H : y / h;
+    q.el.style.left = clamp(fx * W, w / 2 + 4, Math.max(w / 2 + 4, W - w / 2 - 4)) + 'px';
+    q.el.style.top = (Math.max(0.16, fy) * 100) + '%';
     q.el.style.opacity = String(Math.min(1, (q.tot - nu) / 400));
     return true;
   });
@@ -3469,11 +3545,59 @@ function renderHuis() {
     (nieuw ? '<button class="knop2 licht" data-doe="brieven"><img class="px" src="' + sprUrl('iconen/brief') + '" alt="">' + meervoud(nieuw, 'brief', 'brieven') + '</button>' : '') +
     (S.uitnodigingen > 0 && gast ? '<button class="knop2 licht" data-doe="uitnodigen"><img class="px" data-icoon="ster" src="' + sprUrl('iconen/ster') + '" alt="">Uitnodigen</button>' : '') + '</div></div>' +
     '<div class="chips" id="bewonerRij"></div>' +
-    '<div class="huiskader"><canvas id="huisDoek" width="' + HUIS_W + '" height="' + HUIS_H + '" aria-label="Het poppenhuis: tik op een kamer, een bewoner of de kat"></canvas><div id="huisBellen" class="bellen"></div></div>' +
-    '<p class="label" style="text-align:center">Tik op een kamer, een bewoner of de kat</p>';
+    '<div class="huiskader"><canvas id="huisDoek" width="' + HUIS_W + '" height="' + HUIS_H + '" aria-label="Het poppenhuis: tik op een kamer, een bewoner of de kat"></canvas>' +
+    '<canvas id="kijkDoek" width="' + KAMER_W * KIJK_ZOOM + '" height="' + KAMER_H * KIJK_ZOOM + '" aria-label="De kamer van dichtbij: tik op een bewoner, de kat of de kamer" hidden></canvas>' +
+    '<div id="huisBellen" class="bellen"></div></div>' +
+    '<div id="kijkBalk" class="kijkbalk" hidden><h3 id="kijkKop"></h3><p id="kijkWat"></p><div class="doen">' +
+    '<button class="knop2 licht" data-kijk="uit">Terug naar het huis</button><button class="knop2" data-kijk="kamer">Iets vragen</button></div></div>' +
+    '<p class="label" id="huisTip" style="text-align:center"></p>';
   Huis.bellen = [];
   renderBewonerRij();
+  kijkToon();
   tekenHuis(S, $('huisDoek'), performance.now());
+}
+
+
+
+function kijkIn(kamer) {
+  const v = vakVan(kamer), cv = $('kijkDoek');
+  if (!v || !cv) return;
+  Huis.kijk = kamer; Huis.kijkWie = [];
+
+  cv.style.transformOrigin = (v.x ? 'right' : 'left') + ' center';
+  cv.classList.remove('zoomt'); void cv.offsetWidth; cv.classList.add('zoomt');
+  kijkToon();
+  tekenHuis(S, $('huisDoek'), performance.now());
+  const top = cv.parentNode.getBoundingClientRect().top + window.scrollY - 150;
+  window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+}
+function kijkUit() {
+  const kamer = Huis.kijk;
+  if (!kamer) return;
+  Huis.kijk = null; Huis.kijkWie = [];
+  kijkToon();
+  tekenHuis(S, $('huisDoek'), performance.now());
+
+  const cv = $('huisDoek'), v = vakVan(kamer);
+  if (cv && v) { const r = cv.getBoundingClientRect(), schaal = r.height / cv.height; window.scrollTo({ top: Math.max(0, r.top + window.scrollY + (v.y + KAMER_H / 2) * schaal - window.innerHeight / 2), behavior: 'auto' }); }
+}
+function kijkToon() {
+  const aan = !!Huis.kijk, huis = $('huisDoek');
+  if (!huis) return;
+  huis.hidden = aan; $('kijkDoek').hidden = !aan; $('kijkBalk').hidden = !aan;
+  $('huisTip').textContent = aan ? 'Tik op een bewoner, de kat of de kamer' : 'Tik op een kamer, een bewoner of de kat';
+  kijkTekst();
+}
+
+function kijkTekst() {
+  const kop = $('kijkKop'), wat = $('kijkWat');
+  if (!Huis.kijk || !kop || !wat) return;
+  const naam = deKamer(Huis.kijk).replace(/^(de|het) /, ''), hier = bewonerIds(S).filter((id) => Huis.zicht[id] && Huis.zicht[id].kamer === Huis.kijk);
+  const zin = hier.map((id) => { const b = S.bewoners[id], onderweg = b.kamer !== Huis.kijk; return b.naam + ' ' + (onderweg ? 'loopt naar ' + deKamer(b.kamer) : b.bezig ? watDoet(S, b) : 'is hier') + '.'; }).join(' ') ||
+    'Er is hier nu niemand.';
+  const titel = naam.charAt(0).toUpperCase() + naam.slice(1);
+  if (kop.textContent !== titel) kop.textContent = titel;
+  if (wat.textContent !== zin) wat.textContent = zin;
 }
 
 function renderBewonerRij() {
@@ -3695,14 +3819,23 @@ function renderTab() {
   if (UI.tab === 'boek') renderBoek();
   renderKop();
 }
-function naarTab(tab) { UI.tab = tab; if (tab !== 'show') UI.show.bezig = false; UI.show.uitslag = null; sluitVel(); renderTab(); window.scrollTo(0, 0); if (tab === 'huis') kijkNaar('ik'); }
+function naarTab(tab) { UI.tab = tab; Huis.kijk = null; if (tab !== 'show') UI.show.bezig = false; UI.show.uitslag = null; sluitVel(); renderTab(); window.scrollTo(0, 0); if (tab === 'huis') kijkNaar('ik'); }
 
 function klik(e) {
   if (e.target.id === 'huisDoek') {
     const r = huisTik(e.target, e);
     if (!r) return;
     geluid('klik');
-    if (r.bewoner) bewonerVel(r.bewoner); else if (r.kat) katVel(); else if (r.tuin) tuinVel(); else kamerVel(r.kamer);
+    if (r.bewoner) bewonerVel(r.bewoner); else if (r.kat) katVel(); else if (r.tuin) tuinVel();
+
+    else if (S.kamers.includes(r.kamer) && bewonerIds(S).some((id) => Huis.zicht[id] && Huis.zicht[id].kamer === r.kamer)) kijkIn(r.kamer);
+    else kamerVel(r.kamer);
+    return;
+  }
+  if (e.target.id === 'kijkDoek') {
+    const r = kijkTik(e.target, e);
+    geluid('klik');
+    if (r.bewoner) bewonerVel(r.bewoner); else if (r.kat) katVel(); else kamerVel(r.kamer);
     return;
   }
   const t = e.target.closest('button, [data-sluit]');
@@ -4018,7 +4151,7 @@ function noodBel(nu) {
 
 function kijkNaar(id, zacht) {
   const cv = $('huisDoek'), b = S.bewoners[id], v = b && Huis.vakken.find((q) => q.kamer === b.kamer);
-  if (!cv || !v || UI.tab !== 'huis') return;
+  if (!cv || !v || UI.tab !== 'huis' || Huis.kijk) return;
   const r = cv.getBoundingClientRect(), schaal = r.height / cv.height;
   const midden = r.top + window.scrollY + (v.y + KAMER_H / 2) * schaal;
   window.scrollTo({ top: Math.max(0, midden - window.innerHeight / 2), behavior: zacht ? 'smooth' : 'auto' });
@@ -4034,6 +4167,7 @@ function pakjeBijDeur() {
 
 
 function klikLeven(ds, t, nu) {
+  if (ds.kijk) { if (ds.kijk === 'uit') kijkUit(); else kamerVel(Huis.kijk); return true; }
   if (ds.vraag) {
     const r = vraag(S, ds.wie, ds.vraag, nu, { recept: ds.recept, plaat: ds.plaat, ding: ds.ding });
     if (!r.ok) { geluid('fout'); melding(r.reden); return true; }
@@ -4295,7 +4429,7 @@ async function start() {
     if (t - vorig >= 50) {
       vorig = t;
       const cv = $('huisDoek');
-      if (UI.tab === 'huis' && cv) tekenHuis(S, cv, t);
+      if (UI.tab === 'huis' && cv) { tekenHuis(S, cv, t); if (Huis.kijk) kijkTekst(); }
 
       if (AC) muziekBij(S);
     }
