@@ -90,6 +90,7 @@ main { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling
 .hud { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; }
 .hud .doel span { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; color: var(--inkt2); font-variant-numeric: tabular-nums; }
 .hud .doel b { color: var(--inkt); font-family: var(--kop); font-size: 16px; }
+#kiekDoek { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; touch-action: none; border-radius: 12px; background: #070a12; cursor: pointer; }
 #treinDoek { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; touch-action: none; border-radius: 12px; background: #070a12; }
 
 #tab-spelen:has(#treinStuur) { min-height: 100%; }
@@ -1356,7 +1357,7 @@ function nieuweStaat(nu) {
     dieren: { c1: nieuwDier('c1', nu, { naam: 'Pip', vacht: 'driekleur' }), c2: nieuwDier('c2', nu, { naam: 'Moos', vacht: 'hollander' }) },
     gekozen: 'c1',
     asiel: { dag: '', aanbod: [] }, gehad: ['driekleur', 'hollander'],
-    spel: { trein: { record: 0, gespeeld: 0, gegeten: 0 } },
+    spel: { trein: { record: 0, gespeeld: 0, gegeten: 0 }, kiek: { record: 0, gespeeld: 0, hapjes: 0 } },
     weetjes: [], totaal: { verdiendDieren: 0, verdiendSpel: 0, geadopteerd: 0, afgestaan: 0, verschoond: 0, geborsteld: 0 },
     bonus: { dag: '', reeks: 0 }, welkom: false, opgeslagen: 0,
   };
@@ -2175,6 +2176,157 @@ function treinEinde(gestopt) {
 
 
 
+
+
+
+
+const KK = { W: 320, H: 180, kol: 4, rij: 2, duur: 45, levens: 3, tegelijk: 3,
+  tussen: [0.85, 0.42],
+  blijft: [1.5, 0.85],
+  verbodenNa: 5, verbodenKans: 0.22, op: 0.16, na: 0.3 };
+const kiekMeng = (paar, f) => paar[0] + (paar[1] - paar[0]) * Math.min(1, Math.max(0, f));
+
+function kiekRnd(st) { st.zaad = (st.zaad * 16807) % 2147483647; return (st.zaad - 1) / 2147483646; }
+function kiekNieuw(zaad, soorten) {
+  const gaten = [];
+  for (let i = 0; i < KK.kol * KK.rij; i++) gaten.push({ wat: null, soort: '', t: 0, tot: 0, raak: 0 });
+  return { zaad: (zaad % 2147483646) + 1, t: 0, volgende: 0.6, gaten, soorten: soorten || 1, raak: 0, gemist: 0, levens: KK.levens, klaar: false, reden: '', fout: '' };
+}
+
+function kiekOp(st) {
+  const vrij = [];
+  st.gaten.forEach((g, i) => { if (!g.wat) vrij.push(i); });
+  if (!vrij.length || st.gaten.length - vrij.length >= KK.tegelijk) return false;
+  const g = st.gaten[vrij[Math.floor(kiekRnd(st) * vrij.length)]], f = st.t / KK.duur;
+  const mag = st.t >= KK.verbodenNa && !st.gaten.some((q) => q.wat === 'verboden');
+  if (mag && kiekRnd(st) < KK.verbodenKans) { g.wat = 'verboden'; g.soort = TR_VERBODEN[Math.floor(kiekRnd(st) * TR_VERBODEN.length)]; }
+  else { g.wat = 'cavia'; g.soort = Math.floor(kiekRnd(st) * st.soorten); }
+  g.t = 0; g.raak = 0; g.tot = kiekMeng(KK.blijft, f);
+  return true;
+}
+function kiekStap(st, dt) {
+  const uit = [];
+  if (st.klaar) return uit;
+  st.t += dt;
+  for (const g of st.gaten) {
+    if (!g.wat) continue;
+    g.t += dt;
+    if (g.raak) { if (g.t - g.raak >= KK.na) g.wat = null; continue; }
+    if (g.t >= g.tot) { if (g.wat === 'cavia') { st.gemist++; uit.push('weg'); } g.wat = null; }
+  }
+  st.volgende -= dt;
+  if (st.volgende <= 0) {
+    if (kiekOp(st)) uit.push('op');
+    st.volgende = kiekMeng(KK.tussen, st.t / KK.duur) * (0.7 + 0.6 * kiekRnd(st));
+  }
+  if (st.t >= KK.duur) { st.klaar = true; st.reden = 'tijd'; uit.push('klaar'); }
+  return uit;
+}
+
+function kiekTik(st, i) {
+  const g = st.gaten[i];
+  if (st.klaar || !g || !g.wat || g.raak) return 'mis';
+  g.raak = g.t || 1e-4;
+  if (g.wat === 'cavia') { st.raak++; return 'raak'; }
+  st.levens--; st.fout = g.soort;
+  if (st.levens <= 0) { st.klaar = true; st.reden = 'verboden'; }
+  return 'fout';
+}
+const kiekMunten = (st) => Math.floor(st.raak / 2);
+
+
+
+const KIEK_HUIS = ['hooihut', 'huisje', 'fleecetent', 'huisje', 'fleecetent', 'hooihut', 'huisje', 'hooihut'];
+const Kiek = { actief: false, cv: null, ctx: null, buf: null, st: null, laatst: 0, el: null, kleuren: ['driekleur'], flits: 0 };
+const kiekPlek = (i) => [(i % KK.kol + 0.5) * (KK.W / KK.kol), Math.floor(i / KK.kol) * (KK.H / KK.rij) + 80];
+function startKiek(el, kleuren, opties = {}) {
+
+  const alleVachten = Object.keys(SPR).filter((n) => n.startsWith('kop/')).map((n) => n.slice(4));
+  const lijst = kleuren.slice();
+  for (const v of alleVachten) if (lijst.length < 4 && !lijst.includes(v)) lijst.push(v);
+  Object.assign(Kiek, { actief: true, el, kleuren: lijst.length ? lijst : ['driekleur'], flits: 0, laatst: performance.now(), opties });
+  Kiek.st = kiekNieuw(Date.now() & 0x7fffffff, Kiek.kleuren.length);
+  el.innerHTML = '<div class="hud"><button class="rond" id="kiekStop" aria-label="Stoppen"><svg viewBox="0 0 24 24"><path d="M15.4 5 8.4 12l7 7 1.4-1.4L11.2 12l5.6-5.6z"/></svg></button>' +
+    '<div class="doel"><span><b>Kiekeboe</b><em id="kiekTel" style="font-style:normal"></em></span></div></div>' +
+    '<canvas id="kiekDoek" width="' + KK.W + '" height="' + KK.H + '"></canvas>' +
+    '<p id="kiekTip" style="margin:0;font-size:12.5px;color:var(--inkt2);text-align:center">Tik een cavia aan zodra ze haar kop opsteekt: dan krijgt ze een hapje. Nooit tikken: ui, avocado en chocolade!' + (opties.record ? ' Record: ' + opties.record + '.' : '') + '</p>';
+  Kiek.cv = el.querySelector('#kiekDoek'); Kiek.ctx = Kiek.cv.getContext('2d'); Kiek.buf = new Buf(KK.W, KK.H);
+
+  Kiek.cv.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); audioStart();
+    const r = Kiek.cv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    const i = clamp(Math.floor(y * KK.rij), 0, KK.rij - 1) * KK.kol + clamp(Math.floor(x * KK.kol), 0, KK.kol - 1), st = Kiek.st;
+    const wat = kiekTik(st, i);
+    if (wat === 'raak') { geluid(st.raak % 5 ? 'hap' : 'wheek'); kiekHud(); }
+    if (wat === 'fout') {
+      geluid('fout'); tril(60); Kiek.flits = performance.now(); kiekHud();
+      const tip = $('kiekTip'), w = TR_VERBODEN_UITLEG[st.fout];
+      if (tip && w) tip.innerHTML = '<b style="color:var(--goud)">' + esc(w) + '</b>';
+      if (st.klaar) { kiekTeken(performance.now()); setTimeout(() => kiekEinde(false), 700); }
+    }
+  });
+  el.querySelector('#kiekStop').onclick = () => kiekEinde(true);
+  kiekHud();
+  requestAnimationFrame(kiekLus);
+}
+function kiekLus(nu) {
+  if (!Kiek.actief) return;
+  requestAnimationFrame(kiekLus);
+  if (document.hidden) { Kiek.laatst = nu; return; }
+  let dt = Math.min(0.05, (nu - Kiek.laatst) / 1000);
+  Kiek.laatst = nu;
+  if (Kiek.st.klaar) return;
+  while (dt > 0) {
+    const stap = Math.min(dt, 1 / 120);
+    dt -= stap;
+    for (const g of kiekStap(Kiek.st, stap)) if (g === 'klaar') { kiekTeken(nu); kiekHud(); setTimeout(() => kiekEinde(false), 500); return; }
+  }
+  kiekHud(true);
+  kiekTeken(nu);
+}
+function kiekTeken(nu) {
+  const B = Kiek.buf, st = Kiek.st, bg = SPR['spel/gras'];
+  if (bg) B.d.set(bg.buf.d); else B.rh(0, 0, KK.W, KK.H, [98, 156, 74]);
+  st.gaten.forEach((g, i) => {
+    const [x, y] = kiekPlek(i), huis = 'spullen/' + KIEK_HUIS[i], hs = SPR[huis], hh = hs ? hs.buf.h * 1.4 : 40;
+    B.ell(x, y - 1, 30, 5, [40, 70, 30], 0.35);
+    if (g.wat) {
+
+      const eind = g.raak ? 1 - (g.t - g.raak) / KK.na : (g.tot - g.t) / KK.op;
+      const f = clamp(Math.min(g.t / KK.op, eind), 0, 1);
+      const naam = g.wat === 'cavia' ? 'kop/' + Kiek.kleuren[g.soort % Kiek.kleuren.length] : 'voer/' + g.soort, s = SPR[naam];
+      if (s) {
+        const schaal = (g.wat === 'cavia' ? 36 : 26) / s.buf.h, hoog = s.buf.h * schaal;
+
+
+        tekenSprite(B, naam, x, y - hh * 0.88 + hoog * (1 - f), { schaal, spiegel: g.wat === 'cavia' && i % 2 === 1 });
+        if (g.raak && g.wat === 'cavia') tekenSprite(B, 'iconen/hart', x + 16, y - hh - 22 - (g.t - g.raak) * 30, { midden: true, schaal: 0.5, alfa: clamp(eind * 1.5, 0, 1) });
+      }
+    }
+    if (hs) tekenSprite(B, huis, x, y, { schaal: 1.4 }); else B.rh(x - 24, y - 34, 48, 34, [120, 84, 50]);
+  });
+
+  const fl = 1 - (nu - Kiek.flits) / 350;
+  if (Kiek.flits && fl > 0) B.rh(0, 0, KK.W, KK.H, [220, 40, 40], 0.3 * fl);
+  Kiek.ctx.putImageData(new ImageData(B.d, KK.W, KK.H), 0, 0);
+}
+function kiekHud(alleenTijd) {
+  const st = Kiek.st, tel = $('kiekTel'), over = Math.max(0, Math.ceil(KK.duur - st.t));
+  if (alleenTijd && over === Kiek.over) return;
+  Kiek.over = over;
+  if (tel) tel.textContent = st.raak + (st.raak === 1 ? ' hapje' : ' hapjes') + ' · ' + '♥'.repeat(Math.max(0, st.levens)) + ' · ' + over + ' s';
+}
+function kiekEinde(gestopt) {
+  if (!Kiek.actief) return;
+  Kiek.actief = false;
+  const st = Kiek.st;
+  kiekUitslag({ raak: st.raak, gemist: st.gemist, munten: kiekMunten(st), reden: gestopt ? 'gestopt' : st.reden, fout: st.fout });
+}
+
+
+
+
+
 const UI = { tab: 'hok', winkelCat: 'voer', vuil: true, velOpen: false, instellingen: { geluid: true, trillen: true } };
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -2341,11 +2493,28 @@ function inrichtVel() {
 
 
 function renderSpelen() {
-  if (Trein.actief) return;
-  const el = $('tab-spelen'), p = S.dieren[S.gekozen], T = S.spel.trein;
+  if (Trein.actief || Kiek.actief) return;
+  const el = $('tab-spelen'), p = S.dieren[S.gekozen], T = S.spel.trein, K = S.spel.kiek;
   el.innerHTML = '<h2 style="font-size:22px">Spelen</h2><div class="lijst">' +
     '<button class="kaart spelkaart" data-spel="trein"><img class="px" src="' + sprUrl('iconen/spel') + '" alt=""><div><h3>Caviatreintje</h3><p>' + esc(p ? p.naam : 'Je cavia') + ' loopt voorop over het gras, de anderen erachteraan. Haal groente; elke groente maakt het treintje langer. Niet tegen het hek, en niets eten wat een cavia nooit mag!</p>' +
-    '<div class="bezit">record: ' + T.record + ' groente · ' + T.gespeeld + ' keer gespeeld</div></div><span class="loon">' + muntImg() + '</span></button></div>';
+    '<div class="bezit">record: ' + T.record + ' groente · ' + T.gespeeld + ' keer gespeeld</div></div><span class="loon">' + muntImg() + '</span></button>' +
+    '<button class="kaart spelkaart" data-spel="kiek"><img class="px" src="' + sprUrl('spullen/huisje') + '" alt=""><div><h3>Kiekeboe</h3><p>De cavia\'s steken om de beurt hun kop uit hun huisje. Tik ze snel aan voor een hapje, voor ze weer wegduiken. Niet tikken op wat een cavia nooit mag eten!</p>' +
+    '<div class="bezit">record: ' + K.record + ' hapjes · ' + K.gespeeld + ' keer gespeeld</div></div><span class="loon">' + muntImg() + '</span></button></div>';
+}
+function kiekUitslag(u) {
+  const K = S.spel.kiek, nieuw = u.raak > K.record;
+  K.gespeeld++; K.hapjes += u.raak; if (nieuw) K.record = u.raak;
+  S.munten += u.munten; S.totaal.verdiendSpel += u.munten;
+  if (u.reden === 'verboden') nieuwWeetje(S, Date.now(), 'nietgeven');
+  veranderd(); renderKop();
+  const reden = { verboden: (TR_VERBODEN_UITLEG[u.fout] || 'Dat mag een cavia niet eten!') + ' Drie keer mis.', tijd: 'De tijd is om.', gestopt: 'Gestopt.' }[u.reden] || '';
+  const html = '<div class="groot-beeld"><img class="px" src="' + kopUrl(S.gekozen) + '" alt=""></div>' +
+    '<p style="text-align:center;font:700 22px var(--kop);margin:8px 0">' + u.raak + (u.raak === 1 ? ' hapje' : ' hapjes') + (nieuw && u.raak ? ' · nieuw record!' : '') + '</p>' +
+    '<p class="uitleg" style="text-align:center">' + esc(reden) + '</p>' +
+    '<dl class="feiten"><dt>Hapjes gegeven</dt><dd>' + u.raak + '</dd><dt>Te laat</dt><dd>' + u.gemist + '</dd><dt>Munten</dt><dd>' + u.munten + '</dd></dl>' +
+    '<div class="rij"><button class="knop2" data-spel="kiek">Nog een keer</button><button class="knop2" data-spelen="1">Klaar</button></div>';
+  openVel('Kiekeboe', html);
+  renderSpelen();
 }
 function treinKleuren() {
   const ids = alle(S).sort((a, b) => (a === S.gekozen ? -1 : b === S.gekozen ? 1 : S.dieren[a].sinds - S.dieren[b].sinds));
@@ -2369,7 +2538,7 @@ function treinUitslag(u) {
 
 
 const CATS = [{ id: 'voer', naam: 'Voer' }, { id: 'spullen', naam: 'Spullen' }, { id: 'verblijf', naam: 'Verblijven' }, { id: 'asiel', naam: 'Asiel' }];
-function naarWinkel(cat) { sluitVel(); if (Trein.actief) treinEinde(true); UI.tab = 'winkel'; UI.winkelCat = cat || 'voer'; renderTab(); }
+function naarWinkel(cat) { sluitVel(); if (Trein.actief) treinEinde(true); if (Kiek.actief) kiekEinde(true); UI.tab = 'winkel'; UI.winkelCat = cat || 'voer'; renderTab(); }
 function renderWinkel() {
   const el = $('tab-winkel'), t = Date.now();
   let html = '<div class="chips">' + CATS.map((c) => '<button class="chip" data-cat="' + c.id + '" aria-pressed="' + (UI.winkelCat === c.id) + '">' + c.naam + '</button>').join('') + '</div><div class="lijst">';
@@ -2404,7 +2573,7 @@ function renderBoek() {
   const bekend = WEETJES.filter((w) => S.weetjes.includes(w.id));
   html += '</div><div class="boek-kop" style="margin-top:14px"><h2>Weetjes</h2><span>' + bekend.length + ' van ' + WEETJES.length + '</span></div>';
   html += bekend.length ? bekend.map((w) => '<div class="weetje">' + esc(w.tekst) + '</div>').join('') : '<p class="uitleg">Elke dag komt er een weetje bij, en als je iets voor het eerst doet. Tik ook eens op "Kijken".</p>';
-  html += '<dl class="feiten"><dt>Geadopteerd</dt><dd>' + S.totaal.geadopteerd + '</dd><dt>Verschoond</dt><dd>' + S.totaal.verschoond + ' keer</dd><dt>Geborsteld</dt><dd>' + S.totaal.geborsteld + ' keer</dd><dt>Caviatreintje</dt><dd>record ' + S.spel.trein.record + ', samen ' + getal(S.spel.trein.gegeten) + ' groente</dd><dt>Verdiend</dt><dd>' + getal(S.totaal.verdiendDieren + S.totaal.verdiendSpel) + ' munten</dd></dl>';
+  html += '<dl class="feiten"><dt>Geadopteerd</dt><dd>' + S.totaal.geadopteerd + '</dd><dt>Verschoond</dt><dd>' + S.totaal.verschoond + ' keer</dd><dt>Geborsteld</dt><dd>' + S.totaal.geborsteld + ' keer</dd><dt>Caviatreintje</dt><dd>record ' + S.spel.trein.record + ', samen ' + getal(S.spel.trein.gegeten) + ' groente</dd><dt>Kiekeboe</dt><dd>record ' + S.spel.kiek.record + ', samen ' + getal(S.spel.kiek.hapjes) + ' hapjes</dd><dt>Verdiend</dt><dd>' + getal(S.totaal.verdiendDieren + S.totaal.verdiendSpel) + ' munten</dd></dl>';
   el.innerHTML = html;
 }
 function dierVel(id) {
@@ -2478,7 +2647,7 @@ function klik(e) {
     melding(ds.adopteer && alle(S).length >= verblijf(S).cap ? 'Het hok is vol. Een groter verblijf heeft meer plek.' : 'Nog niet genoeg munten. Spelen en blije cavia\'s leveren munten op.', 'iconen/munt'); return;
   }
   if (t.getAttribute('aria-disabled') === 'true' && ds.actie === 'dokter') { melding('Niemand is ziek.'); return; }
-  if (ds.tab) { UI.tab = ds.tab; sluitVel(); if (ds.tab !== 'spelen' && Trein.actief) treinEinde(true); renderAlles(); renderTab(); geluid('klik'); return; }
+  if (ds.tab) { UI.tab = ds.tab; sluitVel(); if (ds.tab !== 'spelen' && Trein.actief) treinEinde(true); if (ds.tab !== 'spelen' && Kiek.actief) kiekEinde(true); renderAlles(); renderTab(); geluid('klik'); return; }
   if (ds.actie) return doeActie(ds.actie);
   if (ds.actie2 === 'inrichten') return inrichtVel();
   if (ds.kies) { S.gekozen = ds.kies; veranderd(); return; }
@@ -2530,7 +2699,11 @@ function klik(e) {
     melding(r.naam + ' gaat naar het asiel, en dat zoekt een nieuw thuis voor haar.', 'iconen/hart');
     nieuwWeetje(S, Date.now(), 'vrijlaten'); sluitVel(); veranderd(); renderTab(); renderAlles(); return;
   }
-  if (ds.spel) { sluitVel(); UI.tab = 'spelen'; renderTab(); startTrein($('tab-spelen'), treinKleuren(), { record: S.spel.trein.record }); return; }
+  if (ds.spel) {
+    sluitVel(); UI.tab = 'spelen'; renderTab();
+    if (ds.spel === 'kiek') startKiek($('tab-spelen'), treinKleuren(), { record: S.spel.kiek.record }); else startTrein($('tab-spelen'), treinKleuren(), { record: S.spel.trein.record });
+    return;
+  }
   if (ds.spelen) { sluitVel(); UI.tab = 'spelen'; renderTab(); return; }
   if (ds.modus) { S.modus = ds.modus; begrens(S); veranderd(); instellingenVel(); melding('Speelstand: ' + modus(S).naam); return; }
   if (ds.schakel) { UI.instellingen[ds.schakel] = !UI.instellingen[ds.schakel]; bewaarInstellingen(); instellingenVel(); return; }
@@ -2660,6 +2833,7 @@ function toonDagBonus() {
 window.terugKnop = () => {
   if (!$('vel').hidden) { sluitVel(); return true; }
   if (Trein.actief) { treinEinde(true); return true; }
+  if (Kiek.actief) { kiekEinde(true); return true; }
   if (UI.tab !== 'hok') { UI.tab = 'hok'; renderTab(); renderAlles(); return true; }
   return false;
 };
