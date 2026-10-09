@@ -146,6 +146,16 @@ img.nieuwe { height: 200px; image-rendering: pixelated; background: radial-gradi
 
 .huiskader { position: relative; }
 
+.bed { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--lijn); border-radius: 12px; }
+.bed.leeg { grid-template-columns: 1fr auto; color: var(--inkt2); }
+.bed span b { display: block; } .bed small { color: var(--inkt2); font-size: 12px; }
+.bed .groei { display: block; height: 5px; border-radius: 3px; background: var(--vlak2); margin-top: 4px; overflow: hidden; }
+.bed .groei b { display: block; height: 100%; background: var(--accent); }
+.stip { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .45); vertical-align: -2px; margin-right: 6px; }
+.recept { display: inline-grid; padding: 6px 10px; border: 1px solid var(--lijn); border-radius: 10px; font-size: 12px; }
+.recept small { color: var(--inkt2); } .recept.dicht { opacity: .5; }
+.tekstknop { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; font: inherit; }
+
 .maanregel { font-size: 12px; color: var(--accent); margin: 2px 0 0; }
 .dagkaart { width: 132px; height: 190px; margin: 6px auto 12px; border-radius: 14px; border: 2px solid var(--accent); background: linear-gradient(160deg, #2a1c38, #120d16); display: grid; place-items: center; align-content: center; gap: 10px; }
 .dagkaart span { font-size: 64px; line-height: 1; color: var(--goud); }
@@ -1924,6 +1934,7 @@ function simMinuut(S, t) {
     if (b.bezig !== 'slapen' && st >= 60) S.inkomenRest += st >= 85 ? 0.12 : 0.08;
   }
   simKat(S, t);
+  kasMinuut(S);
   if (S.inkomenRest >= 1) { const n = Math.floor(S.inkomenRest); S.munten += n; S.inkomenRest -= n; S.totaal.verdiendHuis += n; }
   S.laatsteTik = t;
   return uit;
@@ -2860,12 +2871,12 @@ function trekKaart(S, t) {
 const spookUur = (t) => new Date(t).getHours() < 3;
 const spookNacht = (t) => dagSleutel(t - 12 * UUR);
 function spookKamer(S, t) {
-  if (!spookUur(t)) return null;
+  if (!spookUur(t) && !drankWerkt(S, 'spookzicht', t)) return null;
   const d = new Date(t);
   return S.kamers[Math.floor(hash2(d.getMonth() * 40 + d.getDate(), Math.floor((d.getHours() * 60 + d.getMinutes()) / 10), 13) * S.kamers.length) % S.kamers.length];
 }
 function spookTik(S, t) {
-  if (!spookUur(t)) return { ok: false };
+  if (!spookUur(t) && !drankWerkt(S, 'spookzicht', t)) return { ok: false };
   const nacht = spookNacht(t);
   if (!S.spook) S.spook = { nacht: '', gezien: 0 };
   if (S.spook.nacht === nacht) return { ok: true, eerste: false, zin: 'Woe-oe! Het spookje draait een rondje om je vinger. Stel het een vraag.' };
@@ -2911,6 +2922,179 @@ function antwoordZinnen(S, b) {
   }
   S.antwoord = null;
   return z;
+}
+
+
+
+
+
+
+
+
+
+
+
+const KAS = { bedden: 4, stappen: 3 };
+const PLANT = {
+  maanbloem: { naam: 'Maanbloem', soort: 'kruid', uren: 3, prijs: 15, tekst: 'Gaat alleen \'s nachts open.' },
+  drakenmunt: { naam: 'Drakenmunt', soort: 'kruid', uren: 3, prijs: 15, tekst: 'Prikt op je tong.' },
+  spinnenkruid: { naam: 'Spinnenkruid', soort: 'kruid', uren: 4, prijs: 20, tekst: 'Groeit in draden.' },
+  sterrenmos: { naam: 'Sterrenmos', soort: 'kruid', uren: 4, prijs: 20, tekst: 'Geeft een beetje licht.' },
+  pompoen: { naam: 'Pompoen', soort: 'pompoen', uren: 6, prijs: 25, tekst: 'Voor de keuken: drie porties eten.' },
+  roos: { naam: 'Roos', soort: 'roos', uren: 5, prijs: 40, tekst: 'Zwart, rood of wit te koop; de rest kweek je zelf.' },
+};
+const KRUIDEN = ['maanbloem', 'drakenmunt', 'spinnenkruid', 'sterrenmos'];
+
+const ROOS = {
+  rood: { naam: 'rode roos', waarde: 20, koop: true }, zwart: { naam: 'zwarte roos', waarde: 25, koop: true }, wit: { naam: 'witte roos', waarde: 20, koop: true },
+  wijnrood: { naam: 'wijnrode roos', waarde: 45 }, roze: { naam: 'oudroze roos', waarde: 40 }, zilver: { naam: 'zilvergrijze roos', waarde: 50 },
+  paars: { naam: 'paarse roos', waarde: 90 }, blauw: { naam: 'middernachtblauwe roos', waarde: 250 },
+};
+const KRUIS = { 'rood+zwart': 'wijnrood', 'rood+wit': 'roze', 'wit+zwart': 'zilver', 'wijnrood+zilver': 'paars', 'paars+zwart': 'blauw' };
+const KAS_STAAT = () => ({ bed: [null, null, null, null], zaad: { roos: {} }, oogst: {}, rozen: {}, gezien: [], drank: {}, ontdekt: [] });
+
+const kasVan = (S) => { if (!S.kas) S.kas = KAS_STAAT(); return S.kas; };
+function plantZaad(S, i, soort, kleur, t) {
+  const K = kasVan(S), p = PLANT[soort];
+  if (!p || i < 0 || i >= KAS.bedden) return { ok: false };
+  if (K.bed[i]) return { ok: false, reden: 'In dit bed staat al iets.' };
+  if (soort === 'roos') {
+    const heeft = (K.zaad.roos[kleur] || 0) > 0;
+    if (!ROOS[kleur]) return { ok: false };
+    if (!heeft) { if (!ROOS[kleur].koop) return { ok: false, reden: 'Dit zaad heb je niet. Kruis twee rozen.' }; if (S.munten < p.prijs) return { ok: false, reden: 'Te weinig munten.' }; S.munten -= p.prijs; } else K.zaad.roos[kleur]--;
+  } else { if (S.munten < p.prijs) return { ok: false, reden: 'Te weinig munten.' }; S.munten -= p.prijs; }
+  K.bed[i] = { soort, kleur: soort === 'roos' ? kleur : '', stap: 0, v: 0, water: true };
+  return { ok: true };
+}
+function geefWater(S, i) {
+  const b = kasVan(S).bed[i];
+  if (!b) return { ok: false };
+  if (b.water || b.stap >= KAS.stappen) return { ok: false, reden: b.stap >= KAS.stappen ? 'Hij is klaar om te oogsten.' : 'Deze plant heeft nog water.' };
+  b.water = true;
+  return { ok: true };
+}
+
+function kasMinuut(S) {
+  const K = S.kas;
+  if (!K) return;
+  const tuiniert = Object.values(S.bewoners).some((b) => b.bezig === 'tuinieren' && b.kamer === 'kas');
+  for (const b of K.bed) {
+    if (!b || b.stap >= KAS.stappen) continue;
+    if (tuiniert) b.water = true;
+    if (!b.water) continue;
+    b.v += KAS.stappen / (PLANT[b.soort].uren * 60);
+    if (b.v >= 1) { b.v = 0; b.stap++; b.water = false; }
+  }
+}
+function oogst(S, i) {
+  const K = kasVan(S), b = K.bed[i];
+  if (!b) return { ok: false };
+  if (b.stap < KAS.stappen) return { ok: false, reden: 'Nog niet rijp.' };
+  K.bed[i] = null;
+  if (b.soort === 'pompoen') { S.voorraad.eten += 3; return { ok: true, zin: 'Een dikke pompoen: drie porties eten voor de keuken.' }; }
+  if (b.soort === 'roos') {
+    K.rozen[b.kleur] = (K.rozen[b.kleur] || 0) + 1;
+    const nieuw = !K.gezien.includes(b.kleur);
+    if (nieuw) K.gezien.push(b.kleur);
+    return { ok: true, nieuw, zin: 'Een ' + ROOS[b.kleur].naam + (nieuw ? '. Die had je nog niet!' : '.') };
+  }
+  K.oogst[b.soort] = (K.oogst[b.soort] || 0) + 2;
+  return { ok: true, zin: 'Twee takjes ' + PLANT[b.soort].naam.toLowerCase() + ' voor het keteltje.' };
+}
+
+
+function kruisRozen(S, a, b) {
+  const K = kasVan(S);
+  if (!ROOS[a] || !ROOS[b]) return { ok: false };
+  if ((K.rozen[a] || 0) < 1 || (K.rozen[b] || 0) < (a === b ? 2 : 1)) return { ok: false, reden: 'Die rozen heb je niet (meer).' };
+  K.rozen[a]--; K.rozen[b]--;
+  let kleur = KRUIS[[a, b].sort().join('+')] || (a === b ? a : rnd(S) < 0.5 ? a : b);
+  if (kleur === 'blauw' && rnd(S) >= 0.34) kleur = 'paars';
+  K.zaad.roos[kleur] = (K.zaad.roos[kleur] || 0) + 1;
+  return { ok: true, kleur, zin: 'Een zaadje van een ' + ROOS[kleur].naam + '.' };
+}
+function verkoopRoos(S, kleur) {
+  const K = kasVan(S);
+  if (!(K.rozen[kleur] > 0)) return { ok: false };
+  K.rozen[kleur]--; S.munten += ROOS[kleur].waarde;
+  return { ok: true, munten: ROOS[kleur].waarde };
+}
+
+
+
+
+const DRANKJES = {
+  'maanbloem+sterrenmos': { id: 'katpraat', naam: 'Kattentong', uur: 1, tekst: 'Een uur lang versta je de kat. Tik op hem en typ.' },
+  'drakenmunt+drakenmunt': { id: 'rijm', naam: 'Rijmelarij', uur: 1, tekst: 'Een uur lang antwoordt ze op rijm als je met haar typt.' },
+  'spinnenkruid+sterrenmos': { id: 'zweef', naam: 'Zweefdruppels', uur: 1, tekst: 'De kat zweeft een uur lang door het huis.' },
+  'drakenmunt+maanbloem': { id: 'giechel', naam: 'Giechelsap', uur: 0, tekst: 'Iedereen krijgt de slappe lach: veel plezier.' },
+  'maanbloem+maanbloem': { id: 'slaap', naam: 'Maanmelk', uur: 0, tekst: 'Iedereen is in één slok uitgerust.' },
+  'sterrenmos+sterrenmos': { id: 'glinster', naam: 'Glinsterdauw', uur: 0, tekst: 'Iedereen ziet er stralend uit.' },
+  'maanbloem+spinnenkruid': { id: 'spookzicht', naam: 'Spookzicht', uur: 1, tekst: 'Een uur lang zie je het spookje, ook overdag.' },
+  'drakenmunt+sterrenmos': { id: 'geluk', naam: 'Gelukselixer', uur: 1, tekst: 'Een uur lang levert de studio dubbele munten op.' },
+  'drakenmunt+spinnenkruid': { id: 'honing', naam: 'Drakenhoning', uur: 0, tekst: 'Niemand heeft meer honger.' },
+  'spinnenkruid+spinnenkruid': { id: 'groei', naam: 'Groeiwater', uur: 0, tekst: 'Alles in de kas groeit meteen een stap.' },
+};
+const drankWerkt = (S, id, t) => !!S.kas && S.kas.drank[id] > t;
+function brouw(S, a, b, t) {
+  const K = kasVan(S), sleutel = [a, b].sort().join('+'), d = DRANKJES[sleutel];
+  if (!d || !KRUIDEN.includes(a) || !KRUIDEN.includes(b)) return { ok: false };
+  if ((K.oogst[a] || 0) < 1 || (K.oogst[b] || 0) < (a === b ? 2 : 1)) return { ok: false, reden: 'Daar heb je niet genoeg takjes van.' };
+  K.oogst[a]--; K.oogst[b]--;
+  const nieuw = !K.ontdekt.includes(d.id);
+  if (nieuw) K.ontdekt.push(d.id);
+  const alle = Object.values(S.bewoners), vul = (wat, n) => { for (const x of alle) x[wat] = Math.min(100, x[wat] + n); };
+  if (d.uur) K.drank[d.id] = t + d.uur * UUR;
+  if (d.id === 'giechel') vul('plezier', 30);
+  if (d.id === 'slaap') vul('energie', 100);
+  if (d.id === 'glinster') vul('mooi', 100);
+  if (d.id === 'honing') vul('honger', 50);
+  if (d.id === 'groei') for (const p of K.bed) if (p && p.stap < KAS.stappen) { p.stap++; p.v = 0; p.water = false; }
+  return { ok: true, drank: d, nieuw };
+}
+
+
+
+
+function katPraat(S, tekst, t) {
+
+  const zonder = String(tekst || '').replace(/\b(kat|poes|kater|katje)\b/gi, ' ');
+  const p = praatSoort(tekst).soort === 'leeg' ? { soort: 'leeg' } : praatSoort(zonder).soort === 'leeg' ? { soort: 'kat' } : praatSoort(zonder), k = S.kat, b = S.bewoners.ik, K = (l) => kiesZin(l, t, tekst);
+  if (p.soort === 'leeg') return { zin: '' };
+
+  const overHaar = praatHeeft(praatSchoon(tekst), ['vriendin', 'haar', 'zij', 'baasje', 'vrouwtje', b.naam.toLowerCase()]);
+  const zin = (() => {
+    switch (overHaar ? 'vriendin' : p.soort) {
+      case 'groet': return K(['Miauw. O, je verstaat me. Jammer.', 'Ja, hallo. Ik lag net lekker.']);
+      case 'hoe': return k.slaapt ? 'Ik sliep. Dus uitstekend, tot nu.' : 'Ik heb vandaag zestien uur geslapen. Prima dus.';
+      case 'honger': return 'Altijd. Maar niemand hier kan een blikje openen zonder dat ik eerst moet schreeuwen.';
+      case 'moe': return 'Ik ben nooit moe. Ik rust preventief.';
+      case 'doet': return k.slaapt ? 'Ik bewaak het huis. Met mijn ogen dicht.' : 'Ik loop achter ' + b.naam + ' aan. Iemand moet opletten.';
+      case 'naam': return 'Ik heet ' + k.naam + '. Jullie hebben dat bedacht; ik heb er nooit op gereageerd.';
+      case 'spook': { const kamer = spookKamer(S, t); return kamer ? 'Dat witte ding zit nu in ' + praatKamer(kamer) + '. Ik blaas ernaar. Het lacht me uit.' : 'Dat witte ding komt pas na middernacht. Dan zit ik al klaar.'; }
+      case 'maan': return volleMaan(t) ? 'Volle maan. Om drie uur ren ik door de gang. Dat is traditie.' : 'Nog geen volle maan. Dan pas wordt het gezellig.';
+      case 'kaart': return 'Morgen ligt ' + kaartVan(t + DAG).naam + ' klaar. Ik heb vast gekeken.';
+      case 'wens': { const m = watMist(S, b); return (S.wens ? 'Zij wil dit: ' + wensZin(S.wens) : m ? 'Zij klaagt: ' + m : 'Zij heeft alles.') + ' Ik wil tonijn.'; }
+      case 'vriendin': { const laag = BEHOEFTEN.map((x) => [x.naam.toLowerCase(), b[x.id]]).sort((a, c) => a[1] - c[1])[0]; return laag[1] < 50 ? 'Tussen ons: bij ' + b.naam + ' is ' + laag[0] + ' het laagst. Ze zegt het niet, maar ik zie het.' : b.naam + ' redt zich prima. Zonder mij was dat anders.'; }
+      case 'lief': return K(['Dat weet ik.', 'Ga door.']);
+      case 'naar': return 'Dit onthoud ik. Katten vergeten niets.';
+      case 'dank': return 'Graag gedaan. Wat het ook was.';
+      case 'kat': return 'Je praat tegen hem.';
+      case 'verzoek': return 'Nee. Vraag het ' + b.naam + ' maar, die doet dat soort dingen.';
+      case 'tijd': return 'Tijd om te eten. Het is altijd tijd om te eten.';
+      case 'echt': return 'Ik ben het enige echte in dit huis.';
+      case 'doei': return 'Ja ja. Doe de deur zacht dicht.';
+    }
+    return K(['Miauw.', 'Daar heb ik geen mening over. Bijna.', 'Vraag me iets over het huis. Ik zie alles.']);
+  })();
+  return { zin, soort: p.soort };
+}
+
+const RIJM = [['aan', 'en dan ga ik er weer aan'], ['en', 'dat moet je even weten'], ['er', 'en dat zeg ik niet meer'], ['ij', 'zei de heks tegen mij'], ['oor', 'en zo gaat het maar door'], ['is', 'zo zeker als een vleermuis'], ['uit', 'en daarmee is het uit'], ['ol', 'mijn hoofd zit er vol'], ['ag', 'wat een dag, wat een dag'], ['eid', 'in alle eeuwigheid']];
+function rijmStaart(zin) {
+  const w = String(zin).toLowerCase().replace(/[^a-z ]/g, '').trim().split(' ').pop() || '';
+  const r = RIJM.find(([eind]) => w.endsWith(eind));
+  return String(zin).replace(/[.!?]+$/, '') + ', ' + (r ? r[1] : 'abracadabra, simsalabim') + '!';
 }
 
 
@@ -3325,7 +3509,8 @@ function tekenHuis(S, cv, nu) {
   const kz = Huis.kat, kv = kz && vakVan(kz.kamer);
   if (kv && kz.alfa > 0.02) {
     const slaap = S.kat.slaapt, naam = slaap ? 'kat/slaap' : kz.loopt ? 'kat/loop' : 'kat/zit';
-    const kx = Math.round(kv.x + kz.x), ky = kv.y + VLOER + 3 - (kz.loopt ? Math.abs(Math.sin(kz.fase * Math.PI)) * 1.5 : 0);
+    const zweeft = drankWerkt(S, 'zweef', echt);
+    const kx = Math.round(kv.x + kz.x), ky = kv.y + VLOER + 3 - (kz.loopt ? Math.abs(Math.sin(kz.fase * Math.PI)) * 1.5 : 0) - (zweeft ? 34 + Math.sin(nu / 420) * 6 : 0);
     tekenSprite(B, naam, kx, Math.round(ky), { schaal: 0.3, alfa: kz.alfa, spiegel: naam === 'kat/loop' ? kz.richting < 0 : naam === 'kat/zit' ? kz.richting > 0 : false });
     Huis.katVak = { x0: kx - 13, y0: ky - 22, x1: kx + 13, y1: ky + 3 };
     if (kijk && kv === kijk) groot.kat = { naam, x: kz.x, y: ky - kv.y, alfa: kz.alfa, spiegel: naam === 'kat/loop' ? kz.richting < 0 : naam === 'kat/zit' ? kz.richting > 0 : false };
@@ -3597,7 +3782,7 @@ function stenenUitslag(S, punten, t, eindeloos, betaald) {
   Z.n++; Z.gespeeld++;
   if (record) { if (eindeloos) Z.recordE = punten; else Z.record = punten; }
   const munten = Math.round(Math.floor(punten / (eindeloos ? ST.perMuntE : ST.perMunt)) * (vol ? 1 : OPNIEUW_DEEL));
-  const nog = Math.max(0, munten - (betaald || 0));
+  const nog = Math.max(0, munten - (betaald || 0)) * (drankWerkt(S, 'geluk', t) ? 2 : 1);
   S.munten += nog; S.totaal.stenen = (S.totaal.stenen || 0) + nog;
   return { munten, vol, record };
 }
@@ -3608,7 +3793,8 @@ function stenenTussendoor(S, st) {
   if (!st.eindeloos) return 0;
   const m = Math.floor(st.punten / ST.perMuntE), erbij = m - st.betaald;
   if (erbij <= 0) return 0;
-  st.betaald = m; S.munten += erbij; S.totaal.stenen = (S.totaal.stenen || 0) + erbij;
+  const keer = drankWerkt(S, 'geluk', Date.now()) ? 2 : 1;
+  st.betaald = m; S.munten += erbij * keer; S.totaal.stenen = (S.totaal.stenen || 0) + erbij * keer;
   return erbij;
 }
 
@@ -3994,15 +4180,16 @@ function praatLogHtml(sleutel) {
   return (UI.praatLog[sleutel] || []).map((q) => '<p class="' + (q.zij ? 'zij' : 'jij') + '"><b>' + esc(q.wie) + ':</b> ' + esc(q.tekst) + '</p>').join('');
 }
 function praatVak(sleutel) {
-  const naam = sleutel === 'kijk' ? 'haar' : S.bewoners[sleutel].naam;
+  const naam = sleutel === 'kijk' ? 'haar' : sleutel === 'kat' ? S.kat.naam : S.bewoners[sleutel].naam;
   return '<div class="praat"><div class="praatlog" data-praatlog="' + sleutel + '">' + praatLogHtml(sleutel) + '</div><div class="naamrij">' +
     '<input class="praatin" maxlength="80" autocomplete="off" autocapitalize="sentences" enterkeyhint="send" placeholder="Zeg of vraag ' + esc(naam) + ' iets…" aria-label="Zeg of vraag iets">' +
     '<button class="knop2 licht" data-praat="' + sleutel + '">Zeg</button></div></div>';
 }
 function praatZeg(sleutel, veld, nu) {
-  const tekst = veld.value.trim(), id = praatWie(sleutel), b = S.bewoners[id];
+  const kat = sleutel === 'kat', tekst = veld.value.trim(), id = kat ? 'kat' : praatWie(sleutel), b = kat ? S.kat : S.bewoners[id];
   if (!tekst || !b) return;
-  const r = praat(S, id, tekst, nu);
+  const r = kat ? katPraat(S, tekst, nu) : praat(S, id, tekst, nu);
+  if (!kat && r.zin && drankWerkt(S, 'rijm', nu)) r.zin = rijmStaart(r.zin);
   const log = UI.praatLog[sleutel] = (UI.praatLog[sleutel] || []).concat([{ wie: 'Jij', tekst }, { wie: b.naam, tekst: r.zin, zij: true }]).slice(-6);
   document.querySelectorAll('[data-praatlog="' + sleutel + '"]').forEach((el) => { el.innerHTML = praatLogHtml(sleutel); el.scrollTop = el.scrollHeight; });
   veld.value = ''; veld.focus();
@@ -4444,6 +4631,7 @@ function kamerExtra(kamer) {
       S.platen.map((id) => '<button class="knop2" data-vraag="muziek" data-plaat="' + id + '" data-wie="' + wie + '">' + plaatje('iconen/plaat') + esc(plaatVan(id).naam) + '</button>').join('') +
       '<button class="knop2" data-winkelcat="platen">Meer platen</button></div>';
   }
+  if (kamer === 'kas') html += kasHtml();
   if (kamer === 'atelier') {
     const v = S.voorraad;
     html += '<p>Op de plank: ' + meervoud(v.hout, 'blok hout', 'blokken hout') + ', ' + meervoud(v.steen, 'blok steen', 'blokken steen') + ', ' + meervoud(v.doek, 'doek', 'doeken') + '.</p>';
@@ -4511,6 +4699,7 @@ function brievenVel() {
 function katVel() {
   const k = S.kat;
   openVel(k.naam, '<div class="toneel">' + plaatje(k.slaapt ? 'kat/slaap' : 'kat/zit', 'kat') + '</div><p><b>' + esc(k.naam) + ' ' + (k.slaapt ? 'ligt te slapen' : 'scharrelt rond') + ' in ' + deKamer(k.kamer) + '.</b></p>' +
+    (drankWerkt(S, 'katpraat', Date.now()) ? '<div class="weetje">Kattentong werkt: je verstaat hem.</div>' + praatVak('kat') : '') +
     '<p>De kat van het huis. Hij slaapt veel, loopt haar vaak achterna en komt nooit in de badkamer. Is hij wakker in dezelfde kamer, dan voelt ze zich minder alleen.</p>' +
     '<button class="hoofdknop" data-doe="kataai">Aaien</button><p class="label">Zijn naam</p><div class="naamrij"><input id="katNaam" maxlength="14" autocomplete="off" value="' + esc(k.naam) + '"><button class="knop2" data-doe="katnaam">Opslaan</button></div>', { soort: 'kat' });
 }
@@ -4645,6 +4834,7 @@ function pakjeBijDeur() {
 
 function klikLeven(ds, t, nu) {
   if (ds.kijk) { if (ds.kijk === 'uit') kijkUit(); else kamerVel(Huis.kijk); return true; }
+  if (ds.kas) return kasKlik(ds, nu);
   if (ds.praat) { praatZeg(ds.praat, t.parentNode.querySelector('.praatin'), nu); return true; }
   if (ds.vraag) {
     const r = vraag(S, ds.wie, ds.vraag, nu, { recept: ds.recept, plaat: ds.plaat, ding: ds.ding });
@@ -4738,6 +4928,77 @@ document.addEventListener('keydown', (e) => {
   e.preventDefault();
   e.target.parentNode.querySelector('button').click();
 });
+
+
+
+const ROOS_KLEUR = { rood: '#c8323c', zwart: '#2a2230', wit: '#f1ecf2', wijnrood: '#7a1c34', roze: '#c98a9c', zilver: '#b9bcc8', paars: '#8a4fc0', blauw: '#2c3f9e' };
+const roosStip = (k) => '<i class="stip" style="background:' + ROOS_KLEUR[k] + '"></i>';
+function kasHtml() {
+  const K = kasVan(S), t = Date.now();
+  let html = '<p class="label">De bedden</p><div class="vakken">';
+  K.bed.forEach((b, i) => {
+    if (!b) { html += '<div class="bed leeg"><span>Leeg bed</span><button class="knop2" data-kas="kies" data-i="' + i + '">Planten</button></div>'; return; }
+    const p = PLANT[b.soort], rijp = b.stap >= KAS.stappen, naam = b.soort === 'roos' ? ROOS[b.kleur].naam : p.naam.toLowerCase();
+    html += '<div class="bed">' + (b.soort === 'roos' ? roosStip(b.kleur) : '') + '<span><b>' + esc(naam.charAt(0).toUpperCase() + naam.slice(1)) + '</b><small>' +
+      (rijp ? 'rijp!' : 'stap ' + (b.stap + 1) + ' van ' + KAS.stappen + (b.water ? ' · groeit' : ' · heeft dorst')) + '</small><i class="groei"><b style="width:' + Math.round((b.stap + (rijp ? 0 : b.v)) / KAS.stappen * 100) + '%"></b></i></span>' +
+      (rijp ? '<button class="knop2 licht" data-kas="oogst" data-i="' + i + '">Oogsten</button>' : b.water ? '' : '<button class="knop2" data-kas="water" data-i="' + i + '">Water</button>') + '</div>';
+  });
+  html += '</div><p class="klein">Elke stap heeft één keer water nodig. Als ze in de kas tuiniert, geeft zij alles water.</p>';
+
+  const rozen = Object.keys(ROOS).filter((k) => K.rozen[k] > 0), zaden = Object.keys(ROOS).filter((k) => K.zaad.roos[k] > 0);
+  html += '<p class="label">Rozen (' + K.gezien.length + ' van ' + Object.keys(ROOS).length + ' kleuren gekweekt)</p>';
+  if (rozen.length) html += '<div class="doen">' + rozen.map((k) => '<button class="knop2" data-kas="roos" data-kleur="' + k + '" aria-pressed="' + (UI.kruis === k) + '">' + roosStip(k) + esc(ROOS[k].naam) + ' ×' + K.rozen[k] + '</button>').join('') + '</div>' +
+    '<p class="klein">' + (UI.kruis ? 'Tik op de roos waarmee je de ' + esc(ROOS[UI.kruis].naam) + ' wilt kruisen, of <button class="tekstknop" data-kas="verkoop" data-kleur="' + UI.kruis + '">verkoop hem voor ' + ROOS[UI.kruis].waarde + ' munten</button>.' : 'Tik op een roos om hem te kruisen of te verkopen. Twee rozen kruisen geeft een zaadje.') + '</p>';
+  else html += '<p class="klein">Nog geen rozen. Plant er een: zwart, rood en wit zijn te koop, de andere vijf kleuren kweek je door te kruisen.</p>';
+  if (zaden.length) html += '<p class="klein">Zaadjes: ' + zaden.map((k) => roosStip(k) + esc(ROOS[k].naam) + ' ×' + K.zaad.roos[k]).join(', ') + '.</p>';
+
+  const kruid = KRUIDEN.filter((k) => K.oogst[k] > 0);
+  html += '<p class="label">Het keteltje (' + K.ontdekt.length + ' van ' + Object.keys(DRANKJES).length + ' drankjes ontdekt)</p>';
+  if (kruid.length) html += '<div class="doen">' + kruid.map((k) => '<button class="knop2" data-kas="kruid" data-kruid="' + k + '" aria-pressed="' + (UI.ketel === k) + '">' + esc(PLANT[k].naam) + ' ×' + K.oogst[k] + '</button>').join('') + '</div>' +
+    '<p class="klein">' + (UI.ketel ? esc(PLANT[UI.ketel].naam) + ' ligt in het keteltje. Tik op het tweede kruid (twee keer hetzelfde mag ook).' : 'Tik twee kruiden aan en kijk wat eruit komt.') + '</p>';
+  else html += '<p class="klein">Nog geen kruiden. Kweek maanbloem, drakenmunt, spinnenkruid of sterrenmos.</p>';
+  const actief = Object.values(DRANKJES).filter((d) => drankWerkt(S, d.id, t));
+  if (actief.length) html += '<div class="weetje">' + actief.map((d) => '<b>' + esc(d.naam) + '</b> werkt nog ' + Math.max(1, Math.ceil((K.drank[d.id] - t) / MIN)) + ' min: ' + esc(d.tekst)).join('<br>') + '</div>';
+  html += '<div class="doen">' + Object.entries(DRANKJES).map(([sleutel, d]) => K.ontdekt.includes(d.id)
+    ? '<span class="recept"><b>' + esc(d.naam) + '</b><small>' + esc(sleutel.split('+').map((x) => PLANT[x].naam.toLowerCase()).join(' + ')) + '</small></span>' : '<span class="recept dicht"><b>?</b><small>nog niet ontdekt</small></span>').join('') + '</div>';
+  return html;
+}
+function plantVel(i) {
+  const K = kasVan(S);
+  const rij = (naam, tekst, prijs, attr) => '<div class="rij"><span><b>' + naam + '</b><small>' + esc(tekst) + '</small></span><button class="knop2" data-kas="plant" data-i="' + i + '" ' + attr + (S.munten >= prijs ? '' : ' disabled') + '>' + (prijs ? muntImg() + prijs : 'Zaadje') + '</button></div>';
+  let html = '';
+  for (const s of KRUIDEN.concat(['pompoen'])) html += rij(esc(PLANT[s].naam), PLANT[s].tekst + ' Rijp in ' + PLANT[s].uren + ' uur.', PLANT[s].prijs, 'data-soort="' + s + '"');
+  for (const k of Object.keys(ROOS)) {
+    const zaad = K.zaad.roos[k] > 0;
+    if (zaad || ROOS[k].koop) html += rij(roosStip(k) + esc(ROOS[k].naam.charAt(0).toUpperCase() + ROOS[k].naam.slice(1)), zaad ? 'Een zaadje dat je zelf kweekte (' + K.zaad.roos[k] + ').' : 'Rijp in ' + PLANT.roos.uren + ' uur.', zaad ? 0 : PLANT.roos.prijs, 'data-soort="roos" data-kleur="' + k + '"');
+  }
+  openVel('Wat plant je?', html);
+}
+function kasKlik(ds, nu) {
+  const K = kasVan(S), terug = () => { veranderd(); renderKop(); kamerVel('kas'); };
+  if (ds.kas === 'kies') { plantVel(+ds.i); return true; }
+  if (ds.kas === 'plant') { const r = plantZaad(S, +ds.i, ds.soort, ds.kleur, nu); if (!r.ok) { geluid('fout'); melding(r.reden || 'Dat kan niet.'); return true; } geluid('klik'); terug(); return true; }
+  if (ds.kas === 'water') { const r = geefWater(S, +ds.i); if (r.ok) geluid('klik'); else melding(r.reden || ''); terug(); return true; }
+  if (ds.kas === 'oogst') { const r = oogst(S, +ds.i); if (!r.ok) return true; geluid(r.nieuw ? 'applaus' : 'ster'); terug(); melding(r.zin); return true; }
+  if (ds.kas === 'verkoop') { const r = verkoopRoos(S, ds.kleur); UI.kruis = null; if (r.ok) { geluid('munt'); melding('Verkocht voor ' + r.munten + ' munten.'); } terug(); return true; }
+  if (ds.kas === 'roos') {
+    if (!UI.kruis) { UI.kruis = ds.kleur; kamerVel('kas'); return true; }
+    if (UI.kruis === ds.kleur && K.rozen[ds.kleur] < 2) { UI.kruis = null; kamerVel('kas'); return true; }
+    const r = kruisRozen(S, UI.kruis, ds.kleur); UI.kruis = null;
+    if (r.ok) { geluid('ster'); melding(r.zin + ' Plant het in een leeg bed.'); } else melding(r.reden || '');
+    terug(); return true;
+  }
+  if (ds.kas === 'kruid') {
+    if (!UI.ketel) { UI.ketel = ds.kruid; kamerVel('kas'); return true; }
+    const r = brouw(S, UI.ketel, ds.kruid, nu); UI.ketel = null;
+    if (!r.ok) { geluid('fout'); melding(r.reden || 'Dat lukt niet.'); terug(); return true; }
+    geluid(r.nieuw ? 'applaus' : 'ster'); veranderd(); renderKop();
+    openVel(r.drank.naam, '<div class="dagkaart"><span>♨</span><b>' + esc(r.drank.naam) + '</b></div><p style="text-align:center">' + (r.nieuw ? '<b>Nieuw drankje ontdekt!</b> ' : '') + esc(r.drank.tekst) + '</p><button class="hoofdknop" data-kas="terug">Proost</button>');
+    return true;
+  }
+  if (ds.kas === 'terug') { kamerVel('kas'); return true; }
+  return false;
+}
 
 
 
