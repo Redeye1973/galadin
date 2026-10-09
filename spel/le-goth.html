@@ -146,6 +146,26 @@ img.nieuwe { height: 200px; image-rendering: pixelated; background: radial-gradi
 
 .huiskader { position: relative; }
 
+.maten { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.maat { padding: 10px 2px; border-radius: 10px; border: 1px solid var(--lijn); background: var(--vlak2); font-size: 12.5px; font-weight: 600; }
+.maat small { display: block; font-size: 10px; color: var(--inkt2); font-weight: 400; }
+.maat.b-drum { border-color: #c8323c; } .maat.b-bas { border-color: #3fb6a8; } .maat.b-riff { border-color: #e9c46a; } .maat.b-koor { border-color: #8a4fc0; }
+.maat.b-klok { border-color: #f1ecf2; } .maat.b-solo { border-color: #ff8ad0; } .maat.b-stilte { opacity: .55; }
+.naai { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+.raster { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; aspect-ratio: 1; max-width: 232px; padding: 4px; border-radius: 10px; background: #0c0a10; border: 1px solid var(--lijn); touch-action: manipulation; }
+.raster button { border: 0; border-radius: 3px; background-color: transparent; outline: 1px solid rgba(255, 255, 255, .08); padding: 0; min-height: 0; }
+.naai img { width: 96px; height: auto; }
+.verf { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--lijn); }
+.verf[aria-pressed="true"] { border-color: var(--goud); box-shadow: 0 0 0 2px var(--goud); }
+.plakboek { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.plakboek figure { margin: 0; padding: 6px 6px 8px; background: #f1ecf2; color: #1d0f2a; border-radius: 4px; transform: rotate(-1deg); box-shadow: 0 3px 8px rgba(0, 0, 0, .5); }
+.plakboek figure:nth-child(even) { transform: rotate(1.2deg); }
+.plakboek img { display: block; width: 100%; height: auto; }
+.plakboek figcaption { font-size: 11px; line-height: 1.25; margin-top: 5px; }
+.plakboek .tekstknop { color: #7a1c34; margin-left: 6px; }
+#kijkDoek.flits { animation: flits .35s ease-out; }
+@keyframes flits { from { filter: brightness(3); } to { filter: none; } }
+
 .bed { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--lijn); border-radius: 12px; }
 .bed.leeg { grid-template-columns: 1fr auto; color: var(--inkt2); }
 .bed span b { display: block; } .bed small { color: var(--inkt2); font-size: 12px; }
@@ -1935,6 +1955,7 @@ function simMinuut(S, t) {
   }
   simKat(S, t);
   kasMinuut(S);
+  bandMinuut(S);
   if (S.inkomenRest >= 1) { const n = Math.floor(S.inkomenRest); S.munten += n; S.inkomenRest -= n; S.totaal.verdiendHuis += n; }
   S.laatsteTik = t;
   return uit;
@@ -3104,6 +3125,144 @@ function rijmStaart(zin) {
 
 
 
+
+
+
+
+const BLOKJES = { bas: 'Bas', riff: 'Gitaar', drum: 'Drums', koor: 'Koor', klok: 'Klokken', solo: 'Solo', stilte: 'Stilte' };
+const BAND = { maten: 8, oefenen: 30, maxOefenen: 180 };
+const BAND_STAAT = () => ({ naam: 'De Zwarte Rozen', lied: ['bas', 'drum', 'riff', 'drum', 'koor', 'drum', 'solo', 'klok'], geoefend: 0, optredens: 0, fans: 0, beste: 0 });
+const bandVan = (S) => { if (!S.band) S.band = BAND_STAAT(); return S.band; };
+function liedScore(lied) {
+  const echt = lied.filter((x) => x !== 'stilte'), soorten = new Set(echt).size, drums = lied.filter((x) => x === 'drum').length, solo = lied.filter((x) => x === 'solo').length, stil = lied.length - echt.length;
+  let reeks = 1, langste = 1;
+  for (let i = 1; i < lied.length; i++) { reeks = lied[i] === lied[i - 1] ? reeks + 1 : 1; langste = Math.max(langste, reeks); }
+  const delen = [
+    ['afwisseling', 10 * Math.min(5, soorten), soorten >= 5 ? 'veel afwisseling' : 'weinig afwisseling: gebruik meer soorten blokjes'],
+    ['drums', drums >= 3 ? 10 : 0, drums >= 3 ? 'een stevig ritme' : 'te weinig drums (zet ze in drie maten of meer)'],
+    ['solo', solo >= 1 && solo <= 2 ? 10 : 0, solo === 0 ? 'er zit geen solo in' : solo > 2 ? 'te veel solo\'s' : 'een mooie solo'],
+    ['reeks', langste <= 2 ? 10 : 0, langste <= 2 ? 'het blijft boeien' : 'drie keer hetzelfde achter elkaar wordt saai'],
+    ['stilte', stil > 2 ? -10 * (stil - 2) : 0, stil > 2 ? 'te veel stilte' : ''],
+    ['begin', lied[0] !== 'stilte' ? 5 : 0, lied[0] === 'stilte' ? 'het begint met stilte' : ''],
+    ['slot', ['koor', 'klok', 'drum'].includes(lied[lied.length - 1]) ? 5 : 0, ['koor', 'klok', 'drum'].includes(lied[lied.length - 1]) ? 'een echt slot' : 'het houdt zomaar op (eindig met koor, klokken of drums)'],
+  ];
+  const score = Math.max(0, Math.min(100, 20 + delen.reduce((s, d) => s + d[1], 0)));
+  return { score, goed: delen.filter((d) => d[1] > 0 && d[2]).map((d) => d[2]), beter: delen.filter((d) => d[1] <= 0 && d[2]).map((d) => d[2]) };
+}
+function zetBlokje(S, maat, blokje) { const B = bandVan(S); if (!BLOKJES[blokje] || maat < 0 || maat >= BAND.maten) return false; B.lied[maat] = blokje; return true; }
+function bandMinuut(S) {
+  const n = Object.values(S.bewoners).filter((b) => b.bezig === 'repeteren').length;
+  if (n) { const B = bandVan(S); B.geoefend = Math.min(BAND.maxOefenen, B.geoefend + n); }
+}
+function optreden(S) {
+  const B = bandVan(S);
+  if (B.geoefend < BAND.oefenen) return { ok: false, reden: 'De band heeft nog niet genoeg geoefend (' + Math.floor(B.geoefend) + ' van ' + BAND.oefenen + ' minuten). Vraag haar te repeteren.' };
+  const q = liedScore(B.lied), leden = Object.keys(S.bewoners).length, zaal = S.kamers.includes('balzaal');
+  const munten = Math.round(q.score * (0.6 + 0.2 * leden) * (zaal ? 1.5 : 1)), fans = Math.round(q.score / 5 * leden);
+  B.geoefend -= BAND.oefenen; B.optredens++; B.fans += fans; B.beste = Math.max(B.beste, q.score);
+  S.munten += munten;
+  for (const b of Object.values(S.bewoners)) { b.plezier = Math.min(100, b.plezier + 15); b.gezelschap = Math.min(100, b.gezelschap + 15); }
+  const oordeel = q.score >= 85 ? 'De zaal gaat uit zijn dak!' : q.score >= 65 ? 'Een goed optreden. Er wordt meegeklapt.' : q.score >= 45 ? 'Het publiek klapt beleefd.' : 'Er loopt iemand weg om patat te halen.';
+  return { ok: true, score: q.score, munten, fans, leden, zaal, oordeel, goed: q.goed, beter: q.beter };
+}
+
+
+
+
+const BEZOEKERS = [
+  { id: 'tante', naam: 'tante Agaath', intro: 'Tante Agaath houdt van netjes: thee uit een kopje, een keurige jurk en praten over het weer.',
+    eten: ['thee'], stijl: ['victoriaans', 'romantisch'], praat: 'weer', cadeau: 'een zakje zaad van witte rozen' },
+  { id: 'moeder', naam: 'haar moeder', intro: 'Haar moeder wil maar één ding weten: of ze wel goed eet en of het echt goed gaat.',
+    eten: ['maaltijd'], stijl: ['compleet'], praat: 'eerlijk', cadeau: 'een tas boodschappen (vijf porties eten)' },
+  { id: 'oma', naam: 'oma Hekate', intro: 'Oma Hekate was vroeger zelf heks. Hoe zwarter hoe beter, en ze wil alles horen over het spook.',
+    eten: ['drankje', 'maaltijd'], stijl: ['heks', 'vampier', 'deathrock'], praat: 'spook', cadeau: 'twee takjes van elk kruid' },
+];
+const TAFEL = { thee: 'Thee met koekjes', maaltijd: 'Een gekookte maaltijd', boterham: 'Een droge boterham', drankje: 'Een zelfgebrouwen drankje' };
+const GESPREK = { weer: 'Over het weer', eerlijk: 'Eerlijk vertellen hoe het gaat', spook: 'Over het spook in huis' };
+const bezoekerNu = (S) => BEZOEKERS[((S.bezoek && S.bezoek.n) || 0) % BEZOEKERS.length];
+
+function draagStijl(aan) {
+  let beste = '', p0 = 0;
+  for (const s of Object.keys(STIJL)) { const p = punten(aan, s); if (p > p0) { p0 = p; beste = s; } }
+  return { stijl: beste, heel: compleet(aan) };
+}
+
+function tafelKan(S) {
+  const b = S.bewoners.ik, kruid = S.kas ? KRUIDEN.find((k) => S.kas.oogst[k] > 0) : null;
+  return { thee: true, boterham: true, maaltijd: kentRecepten(b) && S.voorraad.eten > 0, drankje: !!kruid };
+}
+function bezoek(S, eten, praat) {
+  if (!S.kamers.includes('logeerkamer')) return { ok: false, reden: 'Voor bezoek heb je de logeerkamer nodig.' };
+  const kan = tafelKan(S), b = S.bewoners.ik;
+  if (!TAFEL[eten] || !GESPREK[praat] || !kan[eten]) return { ok: false, reden: 'Dat kan nu niet op tafel.' };
+  if (b.bezig === 'slapen') return { ok: false, reden: b.naam + ' slaapt. Bezoek komt als ze wakker is.' };
+  const wie = bezoekerNu(S), d = draagStijl(b.aan);
+  if (eten === 'maaltijd') S.voorraad.eten--;
+  if (eten === 'drankje') { const k = KRUIDEN.find((x) => S.kas.oogst[x] > 0); S.kas.oogst[k]--; }
+  const goed = { eten: wie.eten.includes(eten), kleren: wie.stijl.includes('compleet') ? d.heel : d.heel && wie.stijl.includes(d.stijl), praat: wie.praat === praat };
+  const n = (goed.eten ? 1 : 0) + (goed.kleren ? 1 : 0) + (goed.praat ? 1 : 0), munten = [10, 30, 80, 150][n];
+  S.munten += munten;
+  if (!S.bezoek) S.bezoek = { n: 0, top: 0 };
+  S.bezoek.n++;
+  if (n === 3) {
+    S.bezoek.top++;
+    if (wie.id === 'tante') { const K = kasVan(S); K.zaad.roos.wit = (K.zaad.roos.wit || 0) + 2; }
+    if (wie.id === 'moeder') S.voorraad.eten += 5;
+    if (wie.id === 'oma') { const K = kasVan(S); for (const k of KRUIDEN) K.oogst[k] = (K.oogst[k] || 0) + 2; }
+  }
+  b.gezelschap = Math.min(100, b.gezelschap + 20 + 10 * n);
+  const zin = n === 3 ? 'Het was een geweldig bezoek. ' + wie.naam.charAt(0).toUpperCase() + wie.naam.slice(1) + ' laat iets achter: ' + wie.cadeau + '.'
+    : n === 2 ? 'Het ging best goed. Bij het weggaan krijgt ze een dikke zoen.' : n === 1 ? 'Het was een beetje stijf. Er vielen lange stiltes.' : 'Het bezoek stond na tien minuten weer buiten, met een briefje van tien "voor iets fatsoenlijks".';
+  return { ok: true, wie, n, goed, munten, zin, droeg: d };
+}
+
+
+
+
+
+const PRINT_KLEUR = [null, [241, 236, 242], [200, 50, 60], [138, 79, 192], [233, 196, 106], [63, 182, 168], [16, 16, 20]];
+const PRINT_LEEG = '0'.repeat(64);
+const printGoed = (p) => typeof p === 'string' && /^[0-6]{64}$/.test(p);
+function printWaarde(p) {
+  if (!printGoed(p)) return 0;
+  const vol = [...p].filter((c) => c !== '0').length, kleuren = new Set([...p].filter((c) => c !== '0')).size;
+  if (!vol) return 0;
+  let sym = true;
+  for (let y = 0; y < 8 && sym; y++) for (let x = 0; x < 4; x++) if (p[y * 8 + x] !== p[y * 8 + 7 - x]) { sym = false; break; }
+  return 15 + 5 * kleuren + (vol >= 16 ? 10 : 0) + (sym ? 20 : 0);
+}
+function zetPrint(S, p, aan) { if (!printGoed(p)) return false; S.print = p; S.printAan = !!aan && p !== PRINT_LEEG; return true; }
+function verkoopPrint(S) {
+  const p = S.print;
+  if (!printGoed(p) || p === PRINT_LEEG) return { ok: false, reden: 'Teken eerst iets.' };
+  if (!S.printVerkocht) S.printVerkocht = [];
+  if (S.printVerkocht.includes(p)) return { ok: false, reden: 'Dit ontwerp ligt al in haar winkeltje. Maak een nieuw.' };
+  const munten = printWaarde(p);
+  S.printVerkocht.push(p); if (S.printVerkocht.length > 40) S.printVerkocht.shift();
+  S.munten += munten;
+  return { ok: true, munten };
+}
+
+
+
+
+const FOTO_MAX = 12;
+function plakFoto(S, url, tekst, t) {
+  if (!S.kamers.includes('donkerekamer')) return { ok: false, reden: 'Om foto\'s te ontwikkelen heb je de donkere kamer nodig.' };
+  if (typeof url !== 'string' || url.length < 50) return { ok: false };
+  if (!S.fotos) S.fotos = [];
+  S.fotos.unshift({ url, tekst: String(tekst || '').slice(0, 90), t });
+  if (S.fotos.length > FOTO_MAX) S.fotos.length = FOTO_MAX;
+  return { ok: true };
+}
+
+
+
+
+
+
+
+
 const POP_W = 128, POP_H = 192;
 
 const _popCache = new Map();
@@ -3140,7 +3299,8 @@ function kleurPop(b, huid, lippen) {
 
 
 function popBuf(aan, huid, lippen) {
-  const sleutel = JSON.stringify([aan, huid, lippen]);
+  const print = typeof S !== 'undefined' && S && S.printAan && S.bewoners && S.bewoners.ik && aan === S.bewoners.ik.aan && printGoed(S.print) ? S.print : '';
+  const sleutel = JSON.stringify([aan, huid, lippen, print]);
   if (_popCache.has(sleutel)) return _popCache.get(sleutel);
   const b = new Buf(POP_W, POP_H);
   if (SPR['pop/basis']) legOver(b, SPR['pop/basis'].buf);
@@ -3149,6 +3309,9 @@ function popBuf(aan, huid, lippen) {
     const id = aan[cat], s = id && SPR['kleding/' + id];
     if (s) legOver(b, s.buf);
   }
+
+
+  if (print) for (let i = 0; i < 64; i++) { const c = +print[i]; if (c) b.rh(56 + (i % 8) * 2, 58 + Math.floor(i / 8) * 2, 2, 2, PRINT_KLEUR[c]); }
   if (SPR['pop/handen']) {
     const h = new Buf(POP_W, POP_H);
     legOver(h, SPR['pop/handen'].buf);
@@ -4162,7 +4325,7 @@ function renderHuis() {
     '<canvas id="kijkDoek" width="' + KAMER_W * KIJK_ZOOM + '" height="' + KAMER_H * KIJK_ZOOM + '" aria-label="De kamer van dichtbij: tik op een bewoner, de kat of de kamer" hidden></canvas>' +
     '<div id="huisBellen" class="bellen"></div></div>' +
     '<div id="kijkBalk" class="kijkbalk" hidden><h3 id="kijkKop"></h3><p id="kijkWat"></p>' + praatVak('kijk') + '<div class="doen">' +
-    '<button class="knop2 licht" data-kijk="uit">Terug naar het huis</button><button class="knop2" data-kijk="kamer">Iets vragen</button></div></div>' +
+    '<button class="knop2 licht" data-kijk="uit">Terug naar het huis</button><button class="knop2" data-kijk="kamer">Iets vragen</button><button class="knop2" data-kijk="foto">Foto</button></div></div>' +
     '<p class="label" id="huisTip" style="text-align:center"></p>';
   Huis.bellen = [];
   renderBewonerRij();
@@ -4463,7 +4626,7 @@ function renderTab() {
   if (UI.tab === 'boek') renderBoek();
   renderKop();
 }
-function naarTab(tab) { UI.tab = tab; Huis.kijk = null; if (tab !== 'show') UI.show.bezig = false; UI.show.uitslag = null; sluitVel(); renderTab(); window.scrollTo(0, 0); if (tab === 'huis') kijkNaar('ik'); }
+function naarTab(tab) { UI.tab = tab; Huis.kijk = null; stopLied(); if (tab !== 'show') UI.show.bezig = false; UI.show.uitslag = null; sluitVel(); renderTab(); window.scrollTo(0, 0); if (tab === 'huis') kijkNaar('ik'); }
 
 function klik(e) {
   if (e.target.id === 'huisDoek') {
@@ -4632,6 +4795,10 @@ function kamerExtra(kamer) {
       '<button class="knop2" data-winkelcat="platen">Meer platen</button></div>';
   }
   if (kamer === 'kas') html += kasHtml();
+  if (kamer === 'oefenruimte') html += bandHtml();
+  if (kamer === 'naaikamer') html += naaiHtml();
+  if (kamer === 'logeerkamer') html += bezoekHtml();
+  if (kamer === 'donkerekamer') html += fotoHtml();
   if (kamer === 'atelier') {
     const v = S.voorraad;
     html += '<p>Op de plank: ' + meervoud(v.hout, 'blok hout', 'blokken hout') + ', ' + meervoud(v.steen, 'blok steen', 'blokken steen') + ', ' + meervoud(v.doek, 'doek', 'doeken') + '.</p>';
@@ -4833,8 +5000,9 @@ function pakjeBijDeur() {
 
 
 function klikLeven(ds, t, nu) {
-  if (ds.kijk) { if (ds.kijk === 'uit') kijkUit(); else kamerVel(Huis.kijk); return true; }
+  if (ds.kijk) { if (ds.kijk === 'uit') kijkUit(); else if (ds.kijk === 'foto') maakFoto(nu); else kamerVel(Huis.kijk); return true; }
   if (ds.kas) return kasKlik(ds, nu);
+  if (ds.uit) return uitKlik(ds, t, nu);
   if (ds.praat) { praatZeg(ds.praat, t.parentNode.querySelector('.praatin'), nu); return true; }
   if (ds.vraag) {
     const r = vraag(S, ds.wie, ds.vraag, nu, { recept: ds.recept, plaat: ds.plaat, ding: ds.ding });
@@ -4997,6 +5165,144 @@ function kasKlik(ds, nu) {
     return true;
   }
   if (ds.kas === 'terug') { kamerVel('kas'); return true; }
+  return false;
+}
+
+
+
+
+
+
+
+
+const BAND_AKK = [[50, 'm'], [46, 'M'], [41, 'M'], [48, 'M'], [50, 'm'], [46, 'M'], [45, 'M'], [50, 'm']];
+const Band = { uit: null, tot: 0, maat: 2.0 };
+function stopLied() {
+  if (Band.uit && AC) { const oud = Band.uit; oud.gain.setTargetAtTime(0.0001, AC.currentTime, 0.05); setTimeout(() => oud.disconnect(), 500); }
+  Band.uit = null; Band.tot = 0;
+}
+
+function speelLied(lied) {
+  if (!AC || !UI.instellingen.geluid) return 0;
+  stopLied();
+  const uit = AC.createGain(), m = Band.maat, q = m / 4, t0 = AC.currentTime + 0.08;
+  uit.gain.value = 0.5; uit.connect(HOOFD); Band.uit = uit;
+  let n = 0;
+  lied.forEach((blok, i) => {
+    const t = t0 + i * m, [grond, soort] = BAND_AKK[i % BAND_AKK.length], drie = AKK[soort];
+    if (blok === 'bas') for (let k = 0; k < 4; k++) { muziekToon(uit, grond - 12, t + k * q, q * 0.9, 0.22, 'triangle', true); n++; }
+    if (blok === 'riff') [0, drie[1], drie[2], 12, drie[2], drie[1], 0, drie[2]].forEach((d, k) => { muziekToon(uit, grond + d, t + k * q / 2, q / 2 * 0.9, 0.08, 'sawtooth', false); n++; });
+    if (blok === 'drum') for (let k = 0; k < 4; k++) { muziekSlag(uit, k % 2 ? 'tik' : 'bons', t + k * q); muziekSlag(uit, 'tik', t + k * q + q / 2); n += 2; }
+    if (blok === 'koor') drie.forEach((d) => { muziekToon(uit, grond + 12 + d, t, m * 0.95, 0.07, 'sine', true); n++; });
+    if (blok === 'klok') { muziekToon(uit, grond + 24, t, m * 0.9, 0.11, 'sine', false); muziekToon(uit, grond + 31, t + q, m * 0.6, 0.06, 'sine', false); n += 2; }
+    if (blok === 'solo') [4, 3, 2, 4, 5, 4, 2, 0].forEach((g, k) => { muziekToon(uit, 62 + LADDER[(g + i) % 7] + (g + i >= 7 ? 12 : 0), t + k * q / 2, q / 2 * 0.95, 0.09, 'square', false); n++; });
+  });
+  Band.tot = performance.now() + lied.length * m * 1000 + 300;
+  return n;
+}
+function bandHtml() {
+  const B = bandVan(S), q = liedScore(B.lied), leden = bewonerIds(S).length;
+  return '<p class="label">' + esc(B.naam) + ' · ' + meervoud(leden, 'bandlid', 'bandleden') + ' · ' + getal(B.fans) + ' fans</p>' +
+    '<div class="naamrij"><input id="bandNaam" maxlength="22" autocomplete="off" value="' + esc(B.naam) + '"><button class="knop2" data-uit="bandnaam">Zo heet de band</button></div>' +
+    '<p class="label">Het liedje: tik op een maat om het blokje te wisselen</p><div class="maten">' + B.lied.map((x, i) => '<button class="maat b-' + x + '" data-uit="maat" data-i="' + i + '"><small>' + (i + 1) + '</small>' + esc(BLOKJES[x]) + '</button>').join('') + '</div>' +
+    '<div class="doen"><button class="knop2 licht" data-uit="speel">Laat horen</button><button class="knop2" data-uit="stop">Stil</button></div>' +
+    '<p class="klein">Het liedje scoort nu <b>' + q.score + '</b> van 100.' + (q.goed.length ? ' Goed: ' + esc(q.goed.join(', ')) + '.' : '') + (q.beter.length ? ' Beter kan: ' + esc(q.beter.join('; ')) + '.' : '') + '</p>' +
+    '<p class="label">Optreden</p><p class="klein">Geoefend: ' + Math.floor(B.geoefend) + ' minuten (een optreden kost ' + BAND.oefenen + '). ' + (S.kamers.includes('balzaal') ? 'Jullie spelen in de balzaal: anderhalf keer zoveel munten.' : 'Met een balzaal levert een optreden anderhalf keer zoveel op.') + ' Meer bewoners = meer bandleden = meer publiek.</p>' +
+    '<button class="hoofdknop" data-uit="optreden"' + (B.geoefend >= BAND.oefenen ? '' : ' disabled') + '>Optreden! (' + B.optredens + ' gedaan)</button>';
+}
+
+
+const printCss = (c) => (c ? 'rgb(' + PRINT_KLEUR[c].join(',') + ')' : 'transparent');
+function naaiHtml() {
+  const p = printGoed(S.print) ? S.print : PRINT_LEEG, k = UI.printKleur == null ? 2 : UI.printKleur;
+  return '<p class="label">Een print voor op haar kleren</p><div class="naai"><div class="raster" id="printRaster">' + [...p].map((c, i) => '<button data-uit="px" data-i="' + i + '" style="background:' + printCss(+c) + '"></button>').join('') + '</div>' +
+    '<img class="px" id="printPop" src="' + lookUrl(S.bewoners.ik) + '" alt=""></div>' +
+    '<div class="doen" id="printPalet">' + PRINT_KLEUR.map((_, c) => '<button class="verf" data-uit="verf" data-k="' + c + '" aria-pressed="' + (c === k) + '" style="background:' + (c ? printCss(c) : 'repeating-linear-gradient(45deg,#444 0 4px,#222 4px 8px)') + '" aria-label="' + (c ? 'kleur ' + c : 'gum') + '"></button>').join('') + '</div>' +
+    '<div class="doen"><button class="knop2" data-uit="printaan" aria-pressed="' + !!S.printAan + '">' + (S.printAan ? 'Ze draagt hem' : 'Aantrekken') + '</button><button class="knop2" data-uit="printwis">Wissen</button>' +
+    '<button class="knop2 licht" data-uit="printverkoop">In haar winkeltje (<span id="printWaarde">' + printWaarde(p) + '</span> munten)</button></div>' +
+    '<p class="klein">Meer kleuren, meer vakjes en links en rechts gelijk leveren meer op. Elk ontwerp kun je één keer verkopen.</p>';
+}
+
+
+function bezoekHtml() {
+  const wie = bezoekerNu(S), kan = tafelKan(S), k = UI.bezoek || (UI.bezoek = { eten: 'thee', praat: 'weer' }), d = draagStijl(S.bewoners.ik.aan);
+  if (!kan[k.eten]) k.eten = 'thee';
+  return '<p class="label">Op de thee: ' + esc(wie.naam) + '</p><p>' + esc(wie.intro) + '</p>' +
+    '<p class="label">Wat zet je op tafel?</p><div class="doen">' + Object.keys(TAFEL).map((e) => '<button class="knop2" data-uit="tafel" data-wat="' + e + '" aria-pressed="' + (k.eten === e) + '"' + (kan[e] ? '' : ' disabled') + '>' + esc(TAFEL[e]) + '</button>').join('') + '</div>' +
+    '<p class="label">Waar praten jullie over?</p><div class="doen">' + Object.keys(GESPREK).map((g) => '<button class="knop2" data-uit="gesprek" data-wat="' + g + '" aria-pressed="' + (k.praat === g) + '">' + esc(GESPREK[g]) + '</button>').join('') + '</div>' +
+    '<p class="klein">Ze draagt nu ' + (d.heel ? 'een outfit in de stijl ' + esc(d.stijl ? STIJL[d.stijl].naam.toLowerCase() : 'van alles wat') : 'geen hele outfit') + '. Omkleden kan bij Kleden.</p>' +
+    '<button class="hoofdknop" data-uit="bezoek">Laat ' + esc(wie.naam) + ' binnen</button>' +
+    (S.bezoek ? '<p class="klein">Bezoek gehad: ' + S.bezoek.n + ' keer, waarvan ' + S.bezoek.top + ' keer geweldig.</p>' : '');
+}
+
+
+function fotoHtml() {
+  const f = S.fotos || [];
+  return '<p class="label">Het plakboek (' + f.length + ' van ' + FOTO_MAX + ')</p>' +
+    (f.length ? '<div class="plakboek">' + f.map((x, i) => '<figure><img class="px" src="' + x.url + '" alt=""><figcaption>' + esc(x.tekst) + '<button class="tekstknop" data-uit="fotoweg" data-i="' + i + '">weg</button></figcaption></figure>').join('') + '</div>'
+      : '<p class="klein">Nog geen foto\'s. Tik in het huis op een kamer waar iemand is; onder de grote kamer staat de knop Foto.</p>') +
+    '<p class="klein">Er passen er ' + FOTO_MAX + ' in; daarna valt de oudste eraf.</p>';
+}
+function maakFoto(nu) {
+  const bron = $('kijkDoek');
+  if (!bron || !Huis.kijk) return;
+  const cv = document.createElement('canvas');
+  cv.width = 192; cv.height = 120;
+  const c = cv.getContext('2d');
+  c.imageSmoothingEnabled = false; c.drawImage(bron, 0, 0, 192, 120);
+  const d = new Date(nu), tekst = ($('kijkWat') ? $('kijkWat').textContent : '') + ' ' + d.getDate() + ' ' + ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'][d.getMonth()] + '.';
+  const r = plakFoto(S, cv.toDataURL('image/jpeg', 0.72), tekst, nu);
+  if (!r.ok) { geluid('fout'); melding(r.reden || 'De foto is mislukt.'); return; }
+  geluid('klik'); veranderd();
+  const k = $('kijkDoek'); k.classList.remove('flits'); void k.offsetWidth; k.classList.add('flits');
+  melding('Klik! De foto zit in het plakboek, in de donkere kamer.');
+}
+
+function uitKlik(ds, t, nu) {
+  const B = bandVan(S);
+  switch (ds.uit) {
+    case 'maat': { const soorten = Object.keys(BLOKJES), i = +ds.i; zetBlokje(S, i, soorten[(soorten.indexOf(B.lied[i]) + 1) % soorten.length]); geluid('klik'); veranderd(); kamerVel('oefenruimte'); return true; }
+    case 'speel': audioStart(); speelLied(B.lied); return true;
+    case 'stop': stopLied(); return true;
+    case 'bandnaam': { const v = $('bandNaam'), naam = v ? v.value.trim().slice(0, 22) : ''; if (naam) { B.naam = naam; veranderd(); kamerVel('oefenruimte'); melding('De band heet nu ' + naam + '.'); } return true; }
+    case 'optreden': {
+      const r = optreden(S);
+      if (!r.ok) { geluid('fout'); melding(r.reden); return true; }
+      audioStart(); speelLied(B.lied); geluid('applaus'); veranderd(); renderKop();
+      openVel(B.naam + ' live', '<div class="uitslag">' + r.score + ' van 100 · +' + r.munten + ' munten</div><p style="text-align:center"><b>' + esc(r.oordeel) + '</b></p>' +
+        '<p>' + meervoud(r.leden, 'bandlid', 'bandleden') + (r.zaal ? ', in de balzaal' : ', in de oefenruimte') + '. ' + r.fans + ' nieuwe fans.' + (r.goed.length ? ' Wat goed ging: ' + esc(r.goed.join(', ')) + '.' : '') + (r.beter.length ? ' Wat beter kan: ' + esc(r.beter.join('; ')) + '.' : '') + '</p>' +
+        '<button class="hoofdknop" data-uit="naarband">Terug naar de oefenruimte</button>');
+      return true;
+    }
+    case 'naarband': stopLied(); kamerVel('oefenruimte'); return true;
+    case 'verf': UI.printKleur = +ds.k; document.querySelectorAll('#printPalet .verf').forEach((b) => b.setAttribute('aria-pressed', String(b === t))); return true;
+    case 'px': {
+      const p = printGoed(S.print) ? S.print : PRINT_LEEG, i = +ds.i, c = UI.printKleur == null ? 2 : UI.printKleur;
+      zetPrint(S, p.slice(0, i) + c + p.slice(i + 1), S.printAan || S.print == null);
+      t.style.background = printCss(c); veranderd();
+      const pop = $('printPop'), w = $('printWaarde'); if (pop) pop.src = lookUrl(S.bewoners.ik); if (w) w.textContent = printWaarde(S.print);
+      return true;
+    }
+    case 'printaan': S.printAan = !S.printAan && printGoed(S.print) && S.print !== PRINT_LEEG; veranderd(); Huis.sleutel = ''; kamerVel('naaikamer'); renderBewonerRij(); return true;
+    case 'printwis': zetPrint(S, PRINT_LEEG, false); veranderd(); kamerVel('naaikamer'); return true;
+    case 'printverkoop': { const r = verkoopPrint(S); if (!r.ok) { geluid('fout'); melding(r.reden); return true; } geluid('munt'); veranderd(); renderKop(); melding('Je ontwerp ligt in haar winkeltje: ' + r.munten + ' munten.'); return true; }
+    case 'tafel': (UI.bezoek || (UI.bezoek = { eten: 'thee', praat: 'weer' })).eten = ds.wat; kamerVel('logeerkamer'); return true;
+    case 'gesprek': (UI.bezoek || (UI.bezoek = { eten: 'thee', praat: 'weer' })).praat = ds.wat; kamerVel('logeerkamer'); return true;
+    case 'bezoek': {
+      const k = UI.bezoek || { eten: 'thee', praat: 'weer' }, r = bezoek(S, k.eten, k.praat), naam = S.bewoners.ik.naam;
+      if (!r.ok) { geluid('fout'); melding(r.reden); return true; }
+      geluid(r.n >= 2 ? 'applaus' : 'ster'); veranderd(); renderKop();
+      const regel = (goed, ja, nee) => '<p>' + (goed ? '✓ ' : '✗ ') + esc(goed ? ja : nee) + '</p>';
+      openVel(r.wie.naam.charAt(0).toUpperCase() + r.wie.naam.slice(1) + ' op de thee', '<div class="uitslag">' + r.n + ' van 3 · +' + r.munten + ' munten</div>' +
+        regel(r.goed.eten, 'Wat er op tafel stond, viel in de smaak.', TAFEL[k.eten] + ': dat was niet waar ze op hoopte.') +
+        regel(r.goed.kleren, 'Ze vond dat ' + naam + ' er goed uitzag.', r.droeg.heel ? '"Moet dat nou, al dat ' + (r.droeg.stijl ? STIJL[r.droeg.stijl].naam.toLowerCase() : 'zwart') + '?"' : 'Ze schrok: ' + naam + ' was maar half aangekleed.') +
+        regel(r.goed.praat, 'Het gesprek liep als een trein.', 'Het gesprek viel steeds stil.') +
+        '<p style="text-align:center"><b>' + esc(r.zin) + '</b></p><p class="klein" style="text-align:center">De volgende keer komt ' + esc(bezoekerNu(S).naam) + '.</p><button class="hoofdknop" data-uit="naarlogeer">Opruimen</button>');
+      return true;
+    }
+    case 'naarlogeer': kamerVel('logeerkamer'); return true;
+    case 'fotoweg': if (S.fotos) { S.fotos.splice(+ds.i, 1); veranderd(); kamerVel('donkerekamer'); } return true;
+  }
   return false;
 }
 
