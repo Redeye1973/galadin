@@ -87,6 +87,7 @@ main { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling
 .hud { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; }
 .hud .doel span { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; color: var(--inkt2); font-variant-numeric: tabular-nums; }
 .hud .doel b { color: var(--inkt); font-family: var(--kop); font-size: 16px; }
+#miniDoek { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; touch-action: none; border-radius: 12px; background: #070a12; cursor: pointer; }
 #zweefDoek { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; touch-action: none; border-radius: 12px; background: #070a12; }
 .spelkaart .loon { display: flex; align-items: center; color: var(--goud); }
 .spelkaart .loon img { width: 22px; height: 22px; }
@@ -1254,6 +1255,7 @@ const WEETJES = [
   { id: 'wiel', tekst: 'Een loopwiel voor suikereekhoorns heeft een dicht loopvlak, zodat de staart en de pootjes niet klem raken.' },
   { id: 'temperatuur', tekst: 'Suikereekhoorns komen uit een warm land. Ze hebben het het fijnst tussen 24 en 27 graden.' },
   { id: 'maanlamp', tekst: 'In een nachtdierenhuis draaien ze dag en nacht om met lampen, zodat je de dieren wakker ziet. Artis begon daar in 1963 als een van de eersten in Europa mee.' },
+  { id: 'omhangen', tekst: 'Verzorgers hangen het speelgoed en de takken geregeld op een andere plek. Wat altijd hetzelfde blijft, wordt saai, en van verveling krijgen ze stress.' },
   { id: 'hand', tekst: 'Een suikereekhoorn went aan je door elke avond rustig samen te zijn, als hij wakker is.' },
   { id: 'buidelzakje', tekst: 'Dierenartsen raden aan een suikereekhoorn te laten wennen in een stoffen zakje. Doe dat als hij wakker is: wakker maken als hij slaapt geeft stress.' },
   { id: 'handen', tekst: 'Na het verzorgen altijd je handen wassen: suikereekhoorns kunnen bacteriën bij zich dragen die mensen ziek maken.' },
@@ -1324,7 +1326,7 @@ function nieuweStaat(nu) {
   return {
     v: STAAT_VERSIE, rng: (nu % 2147483646) + 1, munten: 300, inkomenRest: 0, modus: 'normaal', laatsteTik: minuutVan(nu), gestart: nu,
     verblijf: 1, verblijven: [1], inrichting, bezit,
-    kooi: { water: 100, vuil: 0, bak: { nectar: 2, insect: 1, fruit: 1 }, gestoven: false },
+    kooi: { water: 100, vuil: 0, bak: { nectar: 2, insect: 1, fruit: 1 }, gestoven: false, omgehangen: nu, kruik: '' },
     voorraad: { nectar: 6, meelwormen: 6, fruit: 4 }, calciumpoeder: false,
 
     dieren: {
@@ -1332,7 +1334,7 @@ function nieuweStaat(nu) {
       'grijs~2': Object.assign(nieuwDier('grijs~2', nu, { naam: 'Suki', geslacht: 'v', band: 35 })),
     },
     gekozen: 'grijs',
-    spel: { zweef: { record: 0, gespeeld: 0, bomen: 0 } },
+    spel: { zweef: { record: 0, gespeeld: 0, bomen: 0 }, uil: { record: 0, gespeeld: 0 }, kist: { record: 0, gespeeld: 0 }, gom: { record: 0, gespeeld: 0 }, vlinder: { record: 0, gespeeld: 0 } },
     aanmeldingen: [], volgendeAanmelding: nu + SPEL.aanmeldEerste * UUR,
     weetjes: [], totaal: { verdiendDieren: 0, verdiendSpel: 0, jongen: 0, opgenomen: 2, doorgeplaatst: 0, afgewezen: 0 },
     bonus: { dag: '', reeks: 0 }, welkom: false, opgeslagen: 0,
@@ -1418,6 +1420,7 @@ const BAK_EFFECT = {
 
 function simMinuut(S, t, m) {
   const nacht = isNacht(t), h = 1 / 60, v = m.verval;
+  const koud = nacht && koudeNacht(t) && !kruikLigt(S, t);
   const binnen = inKooi(S, t), groep = binnen.filter((id) => !S.dieren[id].jong || S.dieren[id].jong.fase === 'jong').length;
   for (const id of alle(S)) {
     const p = S.dieren[id];
@@ -1438,7 +1441,7 @@ function simMinuut(S, t, m) {
     if (!nacht && p.slaapt) p.slaapt = false;
     const ziekF = p.ziek ? 1.4 : 1;
     if (p.slaapt) {
-      p.honger -= 1.5 * h * v; p.dorst -= 1.5 * h * v; p.energie += 12 * h;
+      p.honger -= 1.5 * h * v; p.dorst -= 1.5 * h * v; p.energie += 12 * h * (koud ? 0.45 : 1);
     } else {
       if (p.bezig && t >= p.tot) p.bezig = null;
       if (!p.bezig) { const [wat, duur] = kiesBezig(S, id, p, t); if (wat) { p.bezig = wat; p.tot = t + duur * MIN; } }
@@ -1452,7 +1455,7 @@ function simMinuut(S, t, m) {
       if (p.bezig === 'rusten') { p.energie += 2; if (p.energie >= 95) p.bezig = null; }
 
 
-      if (!p.bezig) p.plezier += ((groep > 1 ? 1.5 : 0) + verrijking(S)) * h;
+      if (!p.bezig) p.plezier += ((groep > 1 ? 1.5 : 0) + verrijking(S) * frisheid(S, t)) * h;
     }
     if (p.ziek) p.gezond -= 3 * h * v;
     else if (p.honger > 20 && p.dorst > 20 && p.calcium > 20) p.gezond += 2 * h;
@@ -1781,6 +1784,61 @@ function voorspel(S, nu) {
 
 
 
+function frisheid(S, t) {
+  const d = Math.max(0, (t - (S.kooi.omgehangen || S.gestart || t)) / DAG);
+  return d <= 1 ? 1.4 - 0.4 * d : Math.max(0.6, 1 - 0.2 * (d - 1));
+}
+const frisNaam = (f) => (f > 1.15 ? 'nieuw' : f > 0.85 ? 'gewend' : 'saai');
+const SPEELDING = ['klimmen', 'zitten', 'spelen', 'verstoppen'];
+function hangOm(S, t) {
+  const lijst = ingericht(S), speel = lijst.map((id, i) => i).filter((i) => SPUL[lijst[i]] && SPEELDING.includes(SPUL[lijst[i]].doet));
+  if (speel.length < 2) return { ok: false, reden: 'Er is te weinig om om te hangen. Koop een touw, een tak of een schommel.', winkel: 'spullen' };
+
+  S.kooi.schuif = ((S.kooi.schuif || 0) + 1) % 60;
+  const blij = frisheid(S, t) < 1.25;
+  S.kooi.omgehangen = t;
+  if (blij) for (const id of alle(S)) S.dieren[id].plezier += 5;
+  begrens(S);
+  return { ok: true, blij };
+}
+
+
+function luister(S, id, t) {
+  const p = S.dieren[id];
+  if (!p) return { geluid: null, zin: '' };
+  const n = p.naam;
+  if (p.jong && p.jong.fase !== 'jong') return { geluid: null, zin: n + ' zit nog bij zijn moeder. Daar hoor je alleen zacht gepiep.' };
+  if (p.slaapt) return { geluid: null, zin: n + ' slaapt. Slapend zijn ze helemaal stil.' };
+  if (p.band < 20) return { geluid: 'krab', zin: 'Krrr! Dat ratelende geluid maakt een suikereekhoorn die bang is. ' + n + ' kent je nog niet. Draag hem in het buidelzakje en geef een meelworm uit je hand.' };
+  if (p.honger < 25 || p.dorst < 25) return { geluid: 'blaf', zin: 'Waf, waf, waf! Blaffen is roepen. ' + n + ' wil dat er iemand komt: kijk of er eten en water is.' };
+  if (inKooi(S, t).length < 2) return { geluid: 'blaf', zin: 'Waf, waf! ' + n + ' roept de anderen. Alleen voelt een suikereekhoorn zich niet veilig.' };
+  if (p.band >= 80) return { geluid: null, zin: n + ' komt naar het gaas zodra hij je ziet, en maakt geen geluid. Een rustige suikereekhoorn hoor je bijna niet.' };
+  return { geluid: null, zin: n + ' is rustig en stil. Hij went aan je: ' + (p.band < 40 ? 'hij kijkt nog de kat uit de boom.' : 'hij kent je al goed.') };
+}
+
+
+
+
+const nachtSleutel = (t) => dagSleutel(t - 12 * UUR);
+function koudeNacht(t) {
+  const d = new Date(t - 12 * UUR), m = d.getMonth();
+  if (m >= 3 && m <= 8) return false;
+  return hash2(d.getFullYear(), m * 40 + d.getDate(), 77) < 0.25;
+}
+const kruikLigt = (S, t) => S.kooi.kruik === nachtSleutel(t);
+function legKruik(S, t) {
+  if (!koudeNacht(t)) return { ok: false, reden: 'Het wordt vannacht niet koud.' };
+  if (kruikLigt(S, t)) return { ok: false, reden: 'De kruik ligt al in het nest.' };
+  S.kooi.kruik = nachtSleutel(t);
+  for (const id of alle(S)) S.dieren[id].plezier += 3;
+  begrens(S);
+  return { ok: true };
+}
+
+
+
+
+
 
 
 
@@ -1797,14 +1855,15 @@ const spulGeo = (id) => (GEO.spullen && GEO.spullen[id]) || { w: 32, h: 32, anke
 
 
 function plaatsDingen(S) {
-  const g = verblijfGeo(S.verblijf), tel = { hang: 0, staand: 0, wand: 0 }, uit = [];
+  const g = verblijfGeo(S.verblijf), tel = { hang: 0, staand: 0, wand: 0 }, uit = [], sch = S.kooi.schuif || 0;
+
   ingericht(S).forEach((id, i) => {
     const s = SPUL[id], sg = spulGeo(id);
     if (!s) return;
     const n = tel[s.soort]++;
     let ax, ay;
-    if (s.soort === 'hang') { const p = g.hang[n]; if (!p) return; [ax, ay] = p; }
-    else if (s.soort === 'staand') { const x = g.staand[n]; if (x == null) return; ax = x; ay = g.vloer; }
+    if (s.soort === 'hang') { if (n >= g.hang.length) return; [ax, ay] = g.hang[(n + sch) % g.hang.length]; }
+    else if (s.soort === 'staand') { if (n >= g.staand.length) return; ax = g.staand[(n + sch) % g.staand.length]; ay = g.vloer; }
     else { const p = g.wand[n]; if (!p) return; [ax, ay] = p; }
     const x0 = Math.round(ax - sg.anker[0]), y0 = Math.round(ay - sg.anker[1]);
     uit.push({ id, i, x0, y0, w: sg.w, h: sg.h, plekken: sg.plekken.map(([px, py, soort]) => ({ x: x0 + px, y: y0 + py, soort, ding: i })) });
@@ -1814,7 +1873,7 @@ function plaatsDingen(S) {
 
 
 function kooiStil(S) {
-  const g = verblijfGeo(S.verblijf), sleutel = S.verblijf + '|' + ingericht(S).join(',') + '|' + Object.keys(SPR).length;
+  const g = verblijfGeo(S.verblijf), sleutel = S.verblijf + '|' + ingericht(S).join(',') + '|' + (S.kooi.schuif || 0) + '|' + Object.keys(SPR).length;
   if (Kooi.stil && Kooi.sleutel === sleutel) return Kooi.stil;
   Kooi.W = g.w; Kooi.H = g.h;
   const B = new Buf(g.w, g.h), bg = SPR['verblijven/' + S.verblijf];
@@ -2212,6 +2271,457 @@ function zweefEinde(gestopt) {
 
 
 
+
+const MINI = {};
+const Kast = { actief: null, st: null, cv: null, ctx: null, buf: null, laatst: 0, stap: null, teken: null, hud: null, uit: null };
+const MINI_W = 320, MINI_H = 180;
+const hartjes = (n) => '♥'.repeat(Math.max(0, n)) + '♡'.repeat(Math.max(0, 3 - n));
+
+
+function miniKader(el, id, tip, tik) {
+  const m = MINI[id], rec = S.spel[id].record;
+  el.innerHTML = '<div class="hud"><button class="rond" id="miniStop" aria-label="Stoppen"><svg viewBox="0 0 24 24"><path d="M15.4 5 8.4 12l7 7 1.4-1.4L11.2 12l5.6-5.6z"/></svg></button>' +
+    '<div class="doel"><span><b>' + esc(m.naam) + '</b><em id="miniTel" style="font-style:normal"></em></span></div></div>' +
+    '<canvas id="miniDoek" width="' + MINI_W + '" height="' + MINI_H + '"></canvas>' +
+    '<p id="miniTip" style="margin:0;font-size:12.5px;color:var(--inkt2);text-align:center">' + esc(tip) + (rec ? ' Record: ' + rec + '.' : '') + '</p>';
+  const cv = el.querySelector('#miniDoek');
+  Object.assign(Kast, { actief: id, cv, ctx: cv.getContext('2d'), buf: new Buf(MINI_W, MINI_H), laatst: performance.now() });
+  cv.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); audioStart();
+    const r = cv.getBoundingClientRect();
+    tik((e.clientX - r.left) / r.width * MINI_W, (e.clientY - r.top) / r.height * MINI_H);
+  });
+  el.querySelector('#miniStop').onclick = () => miniEinde(true);
+  return cv;
+}
+
+function miniLoop(st, stap, bij, teken, hud, uit) {
+  Object.assign(Kast, { st, stap, teken, hud, uit });
+  const id = Kast.actief;
+  const lus = (nu) => {
+    if (Kast.actief !== id || Kast.st !== st) return;
+    requestAnimationFrame(lus);
+    if (document.hidden) { Kast.laatst = nu; return; }
+    let dt = Math.min(0.05, (nu - Kast.laatst) / 1000);
+    Kast.laatst = nu;
+    if (st.klaar) return;
+    while (dt > 0 && !st.klaar) {
+      const d = Math.min(dt, 1 / 120);
+      dt -= d;
+      for (const g of stap(st, d)) bij(g);
+    }
+    hud(); teken(nu);
+    if (st.klaar) setTimeout(() => miniEinde(false), 800);
+  };
+  hud(); requestAnimationFrame(lus);
+}
+const miniTel = (tekst) => { const el = $('miniTel'); if (el && el.textContent !== tekst) el.textContent = tekst; };
+const miniTip = (tekst) => { const el = $('miniTip'); if (el) el.innerHTML = '<b style="color:var(--goud)">' + esc(tekst) + '</b>'; };
+const miniToon = () => Kast.ctx.putImageData(new ImageData(Kast.buf.d, MINI_W, MINI_H), 0, 0);
+function miniAchter(B, donker) {
+  const bg = SPR['spel/bos_ver'];
+  if (bg) B.d.set(bg.buf.d); else B.rh(0, 0, MINI_W, MINI_H, [14, 22, 40]);
+  if (donker) B.rh(0, 0, MINI_W, MINI_H, [6, 8, 20], donker);
+}
+function miniStart(id) {
+  sluitVel(); UI.tab = 'spelen'; renderTab();
+  if (Zweef.actief) zweefEinde(true);
+  MINI[id].start($('tab-spelen'));
+}
+
+function miniEinde(gestopt) {
+  const id = Kast.actief;
+  if (!id) return;
+  const u = Kast.uit(gestopt), m = MINI[id], Z = S.spel[id], nieuw = u.score > Z.record;
+  Kast.actief = null; Kast.st = null;
+  Z.gespeeld++; if (nieuw) Z.record = u.score;
+  S.munten += u.munten; S.totaal.verdiendSpel += u.munten;
+  veranderd(); renderKop();
+  const html = '<div class="groot-beeld"><img class="px" src="' + m.plaatje() + '" alt=""></div>' +
+    '<p style="text-align:center;font:700 22px var(--kop);margin:8px 0">' + u.score + ' ' + (u.score === 1 ? m.eenheid[0] : m.eenheid[1]) + (nieuw && u.score ? ' · nieuw record!' : '') + '</p>' +
+    (u.reden ? '<p class="uitleg" style="text-align:center">' + esc(u.reden) + '</p>' : '') +
+    '<dl class="feiten">' + u.regels.map(([a, b]) => '<dt>' + esc(a) + '</dt><dd>' + esc(String(b)) + '</dd>').join('') + '<dt>Munten</dt><dd>' + u.munten + '</dd><dt>Record</dt><dd>' + Z.record + '</dd></dl>' +
+    '<div class="rij"><button class="knop2" data-mini="' + id + '">Nog een keer</button><button class="knop2" data-spelen="1">Klaar</button></div>';
+  openVel(m.naam, html);
+  renderSpelen();
+}
+function miniKaarten() {
+  return Object.keys(MINI).map((id) => { const m = MINI[id], Z = S.spel[id];
+    return '<button class="kaart spelkaart" data-mini="' + id + '"><img class="px" src="' + m.plaatje() + '" alt=""><div><h3>' + esc(m.naam) + '</h3><p>' + esc(m.tekst) + '</p>' +
+      '<div class="bezit">record: ' + Z.record + ' ' + m.eenheid[1] + ' · ' + Z.gespeeld + ' keer gespeeld</div></div><span class="loon">' + muntImg() + '</span></button>'; }).join('');
+}
+
+
+
+
+
+
+
+
+const UIL = { hapPerSec: 1.6, duur: [1.7, 0.72], tussen: [3.0, 1.3], uilKans: 0.6, valsBinnen: 2.2, schrik: 1.6, snelNa: 16, perMunt: 3 };
+const uilMeng = (p, f) => p[0] + (p[1] - p[0]) * Math.min(1, Math.max(0, f));
+function uilRnd(st) { st.zaad = (st.zaad * 16807) % 2147483647; return (st.zaad - 1) / 2147483646; }
+function uilNieuw(zaad) {
+  return { zaad: (zaad % 2147483646) + 1, t: 0, eet: 0, hapjes: 0, levens: 3, volgende: 2.4, sch: null, binnenTot: 0, gered: 0, vals: 0, voorbij: 0, klaar: false };
+}
+function uilStap(st, dt) {
+  const uit = [];
+  if (st.klaar) return uit;
+  st.t += dt;
+  if (st.t >= st.binnenTot) { st.eet += UIL.hapPerSec * dt; st.hapjes = Math.floor(st.eet); }
+  const s = st.sch;
+  if (s) {
+    s.t += dt;
+    if (s.t >= s.duur) {
+      if (s.soort === 'uil' && !s.gezien) {
+        st.levens--; st.binnenTot = st.t + UIL.schrik; uit.push('gepakt');
+        if (st.levens <= 0) { st.klaar = true; uit.push('klaar'); }
+      }
+      st.voorbij++; st.sch = null;
+      st.volgende = uilMeng(UIL.tussen, st.voorbij / UIL.snelNa) * (0.7 + 0.6 * uilRnd(st));
+    }
+  } else {
+    st.volgende -= dt;
+    if (st.volgende <= 0) {
+      const uil = uilRnd(st) < UIL.uilKans;
+      st.sch = { soort: uil ? 'uil' : uilRnd(st) < 0.5 ? 'mot' : 'blad', t: 0, duur: uilMeng(UIL.duur, st.voorbij / UIL.snelNa), gezien: false, kant: uilRnd(st) < 0.5 ? 1 : -1 };
+      uit.push('schaduw');
+    }
+  }
+  return uit;
+}
+
+function uilTik(st) {
+  if (st.klaar || st.t < st.binnenTot) return '';
+  const s = st.sch;
+  if (s && s.soort === 'uil' && !s.gezien) { s.gezien = true; st.gered++; st.binnenTot = st.t + (s.duur - s.t) + 0.3; return 'gered'; }
+  st.vals++; st.binnenTot = st.t + UIL.valsBinnen;
+  return 'vals';
+}
+const uilMunten = (st) => Math.floor(st.hapjes / UIL.perMunt);
+
+
+MINI.uil = {
+  naam: 'Uil!', eenheid: ['hapje', 'hapjes'], plaatje: () => sprUrl('spel/uil'),
+  tekst: 'De groep eet op een tak. Glijdt er een uil over, tik dan meteen: jip-jip, iedereen het nestkastje in! Maar niet bij een mot of een blad, dan zitten ze voor niets binnen.',
+  start(el) {
+    const st = uilNieuw(Date.now() & 0x7fffffff), kleuren = alle(S).map((id) => kleurVan(id)).slice(0, 4);
+    while (kleuren.length < 3) kleuren.push(['grijs', 'witgezicht', 'mosaic'][kleuren.length]);
+    let flits = 0;
+    miniKader(el, 'uil', 'Tik zodra je een uil ziet. Niet bij een mot of een blad!', () => {
+      const r = uilTik(st);
+      if (r === 'gered') { geluid('jip'); miniTip('Jip-jip! Iedereen zit veilig binnen.'); }
+      if (r === 'vals') { geluid('fout'); miniTip('Loos alarm: ze zitten voor niets binnen.'); }
+    });
+    miniLoop(st, uilStap, (g) => { if (g === 'gepakt') { geluid('fout'); tril(60); flits = performance.now(); miniTip('De uil! Ze schrikken zich een hoedje.'); } },
+      (nu) => {
+        const B = Kast.buf, binnen = st.t < st.binnenTot;
+        miniAchter(B, 0.25);
+        B.rh(0, 122, MINI_W, 7, [74, 50, 34]); B.rh(0, 122, MINI_W, 2, [104, 74, 50]);
+        tekenSprite(B, 'spullen/nestkast', 280, 124, { schaal: 1.1 });
+        tekenSprite(B, 'voer/meelwormen', 40, 123, { schaal: 0.7 });
+        kleuren.forEach((k, i) => {
+          if (binnen) return;
+          tekenSprite(B, 'dier/' + k + '_eet', 84 + i * 44, 123 - (Math.sin(nu / 130 + i * 2) > 0.6 ? 1 : 0), { schaal: 0.8, spiegel: i % 2 === 1 });
+        });
+        if (binnen) for (let i = 0; i < 2; i++) B.ell(275 + i * 9, 106, 1.6, 1.6, [255, 230, 120], 0.9);
+        const s = st.sch;
+        if (s) {
+          const u = s.t / s.duur, x = s.kant > 0 ? -40 + u * 400 : 360 - u * 400, y = 26 + Math.sin(u * Math.PI) * 34;
+          if (s.soort === 'uil') tekenSprite(B, 'spel/uil', x, y + 20, { schaal: 1.9, spiegel: s.kant < 0, tint: [0.35, 0.35, 0.5], alfa: 0.92 });
+          else if (s.soort === 'mot') tekenSprite(B, 'spel/mot', x, y + 8 + Math.sin(nu / 70) * 5, { schaal: 1.2, tint: [0.5, 0.5, 0.65], alfa: 0.9 });
+          else { const d = Math.sin(nu / 110) * 4; B.ell(x, y + d, 7, 3 + Math.abs(d) * 0.4, [70, 96, 60], 0.9); B.lijn(x - 6, y + d, x + 6, y + d, [40, 60, 36], 0.9); }
+        }
+        const fl = 1 - (nu - flits) / 380;
+        if (flits && fl > 0) B.rh(0, 0, MINI_W, MINI_H, [220, 40, 40], 0.3 * fl);
+        miniToon();
+      },
+      () => miniTel(st.hapjes + (st.hapjes === 1 ? ' hapje' : ' hapjes') + ' · ' + hartjes(st.levens) + ' · +' + uilMunten(st)),
+      () => ({ score: st.hapjes, munten: uilMunten(st), reden: st.levens <= 0 ? 'Drie keer was de uil je te snel af.' : 'Gestopt.',
+        regels: [['Hapjes gegeten', st.hapjes], ['Op tijd alarm', st.gered], ['Loos alarm', st.vals]] }));
+  },
+};
+
+
+
+
+
+
+
+const KI = { toon: 1.2, wissel: [0.56, 0.24], na: 1.3, snelNa: 14, maxKastjes: 5, maxWissels: 12 };
+function kistRnd(st) { st.zaad = (st.zaad * 16807) % 2147483647; return (st.zaad - 1) / 2147483646; }
+function kistRonde(st) {
+  const n = Math.min(KI.maxKastjes, 3 + Math.floor(st.ronde / 4)), aantal = Math.min(KI.maxWissels, 3 + st.ronde);
+  st.n = n; st.plek = []; for (let i = 0; i < n; i++) st.plek.push(i);
+  st.prijs = Math.floor(kistRnd(st) * n);
+  st.wissels = [];
+  for (let i = 0; i < aantal; i++) { const a = Math.floor(kistRnd(st) * n); let b = Math.floor(kistRnd(st) * (n - 1)); if (b >= a) b++; st.wissels.push([a, b]); }
+  st.wi = 0; st.fase = 'toon'; st.ft = 0; st.gekozen = -1;
+}
+function kistNieuw(zaad) {
+  const st = { zaad: (zaad % 2147483646) + 1, ronde: 0, goed: 0, munten: 0, levens: 3, klaar: false };
+  kistRonde(st);
+  return st;
+}
+const kistWisselDuur = (st) => KI.wissel[0] + (KI.wissel[1] - KI.wissel[0]) * Math.min(1, st.ronde / KI.snelNa);
+const kistOp = (st, plek) => st.plek.indexOf(plek);
+function kistStap(st, dt) {
+  const uit = [];
+  if (st.klaar) return uit;
+  st.ft += dt;
+  if (st.fase === 'toon' && st.ft >= KI.toon) { st.fase = 'schud'; st.ft = 0; }
+  else if (st.fase === 'schud' && st.ft >= kistWisselDuur(st)) {
+    const [a, b] = st.wissels[st.wi], ka = kistOp(st, a), kb = kistOp(st, b);
+    st.plek[ka] = b; st.plek[kb] = a;
+    st.wi++; st.ft = 0; uit.push('wissel');
+    if (st.wi >= st.wissels.length) { st.fase = 'kies'; uit.push('kies'); }
+  } else if (st.fase === 'uitslag' && st.ft >= KI.na) {
+    if (st.levens <= 0) { st.klaar = true; uit.push('klaar'); } else { st.ronde++; kistRonde(st); uit.push('ronde'); }
+  }
+  return uit;
+}
+function kistKies(st, plek) {
+  if (st.klaar || st.fase !== 'kies' || plek < 0 || plek >= st.n) return '';
+  st.gekozen = plek; st.fase = 'uitslag'; st.ft = 0;
+
+  if (kistOp(st, plek) === st.prijs) { st.goed++; st.munten += 1 + Math.min(4, Math.floor(st.ronde / 3)); return 'goed'; }
+  st.levens--;
+  return 'fout';
+}
+
+
+const kistX = (n, plek) => 160 + (plek - (n - 1) / 2) * 56;
+MINI.kist = {
+  naam: 'Schatkistjes', eenheid: ['keer goed', 'keer goed'], plaatje: () => sprUrl('spullen/nestkast'),
+  tekst: 'Onder één nestkastje liggen meelwormen. Kijk goed waar ze liggen, volg het kastje als ze van plek wisselen en wijs het aan. Elke ronde gaat het sneller.',
+  start(el) {
+    const st = kistNieuw(Date.now() & 0x7fffffff);
+    miniKader(el, 'kist', 'Kijk waar de meelwormen liggen en volg dat kastje.', (x, y) => {
+      if (st.fase !== 'kies' || y < 70) return;
+      let beste = -1;
+      for (let p = 0; p < st.n; p++) if (Math.abs(kistX(st.n, p) - x) < 28) beste = p;
+      const r = kistKies(st, beste);
+      if (r === 'goed') { geluid('munt'); miniTip('Goed gezien!'); }
+      if (r === 'fout') { geluid('fout'); tril(50); miniTip('Mis: ze lagen onder een ander kastje.'); }
+    });
+    miniLoop(st, kistStap, (g) => { if (g === 'wissel') geluid('klik'); if (g === 'kies') miniTip('Waar liggen de meelwormen? Tik op het kastje.'); if (g === 'ronde') miniTip('Ronde ' + (st.ronde + 1) + ': kijk goed!'); },
+      () => {
+        const B = Kast.buf;
+        miniAchter(B, 0.35);
+        B.rh(20, 140, 280, 8, [84, 58, 38]); B.rh(20, 140, 280, 2, [116, 84, 56]);
+        const s = SPR['spullen/nestkast'], schaal = s ? 40 / s.buf.w : 1;
+        const til = (plek) => (st.fase === 'toon' && kistOp(st, plek) === st.prijs ? Math.sin(Math.min(1, st.ft / KI.toon) * Math.PI) * 26
+          : st.fase === 'uitslag' && (plek === st.gekozen || kistOp(st, plek) === st.prijs) ? Math.min(1, st.ft / 0.25) * 26 : 0);
+
+        if (st.fase === 'toon' || st.fase === 'uitslag') tekenSprite(B, 'voer/meelwormen', kistX(st.n, st.plek[st.prijs]), 140, { schaal: 0.6 });
+        for (let k = 0; k < st.n; k++) {
+          let x = kistX(st.n, st.plek[k]), y = 140 - til(st.plek[k]);
+          if (st.fase === 'schud') {
+            const [a, b] = st.wissels[st.wi], u = Math.min(1, st.ft / kistWisselDuur(st)), e = u * u * (3 - 2 * u);
+            if (st.plek[k] === a || st.plek[k] === b) {
+              const naar = st.plek[k] === a ? b : a;
+              x = lerp(kistX(st.n, st.plek[k]), kistX(st.n, naar), e);
+              y -= Math.sin(e * Math.PI) * (st.plek[k] === a ? 20 : -5);
+            }
+          }
+          if (s) tekenSprite(B, 'spullen/nestkast', x, y, { schaal }); else B.rh(x - 18, y - 34, 36, 34, [120, 84, 50]);
+        }
+        miniToon();
+      },
+      () => miniTel('ronde ' + (st.ronde + 1) + ' · ' + st.goed + ' goed · ' + hartjes(st.levens) + ' · +' + st.munten),
+      () => ({ score: st.goed, munten: st.munten, reden: st.levens <= 0 ? 'Drie keer het verkeerde kastje.' : 'Gestopt.', regels: [['Goed aangewezen', st.goed], ['Gekomen tot ronde', st.ronde + 1]] }));
+  },
+};
+
+
+
+
+
+
+
+const GOM = { plek: [[124, 38], [196, 58], [142, 92], [202, 122], [120, 140]], knaag: 3, tussen: [2.3, 0.85], groei: [1.7, 0.9], wacht: [2.6, 1.25], bastWeg: 7, snelNa: 28, perMunt: 4 };
+const gomMeng = (p, f) => p[0] + (p[1] - p[0]) * Math.min(1, Math.max(0, f));
+function gomRnd(st) { st.zaad = (st.zaad * 16807) % 2147483647; return (st.zaad - 1) / 2147483646; }
+function gomNieuw(zaad) {
+  return { zaad: (zaad % 2147483646) + 1, t: 0, volgende: 0.8, plek: GOM.plek.map(() => ({ fase: 'rust', t: 0, knaag: 0 })), punten: 0, vol: 0, vroeg: 0, weg: 0, levens: 3, klaar: false };
+}
+function gomStap(st, dt) {
+  const uit = [], f = (st.vol + st.vroeg) / GOM.snelNa;
+  if (st.klaar) return uit;
+  st.t += dt;
+  for (const p of st.plek) {
+    if (p.fase === 'rust') continue;
+    p.t += dt;
+    if (p.fase === 'bast' && p.t >= GOM.bastWeg) p.fase = 'rust';
+    else if (p.fase === 'loopt' && p.t >= p.groei) { p.fase = 'vol'; p.t = 0; p.wacht = gomMeng(GOM.wacht, f); uit.push('vol'); }
+    else if (p.fase === 'vol' && p.t >= p.wacht) {
+      p.fase = 'rust'; st.weg++; st.levens--; uit.push('mieren');
+      if (st.levens <= 0) { st.klaar = true; uit.push('klaar'); }
+    }
+  }
+  st.volgende -= dt;
+  if (st.volgende <= 0) {
+    const vrij = st.plek.filter((p) => p.fase === 'rust');
+    if (vrij.length) { const p = vrij[Math.floor(gomRnd(st) * vrij.length)]; p.fase = 'bast'; p.t = 0; p.knaag = 0; uit.push('bast'); }
+    st.volgende = gomMeng(GOM.tussen, f) * (0.7 + 0.6 * gomRnd(st));
+  }
+  return uit;
+}
+function gomTik(st, i) {
+  const p = st.plek[i];
+  if (st.klaar || !p || p.fase === 'rust') return '';
+  if (p.fase === 'bast') { p.knaag++; if (p.knaag >= GOM.knaag) { p.fase = 'loopt'; p.t = 0; p.groei = gomMeng(GOM.groei, (st.vol + st.vroeg) / GOM.snelNa); return 'loopt'; } return 'knaag'; }
+  const vol = p.fase === 'vol';
+  p.fase = 'rust';
+  if (vol) { st.vol++; st.punten += 3; return 'lik'; }
+  st.vroeg++; st.punten += 1;
+  return 'vroeg';
+}
+const gomMunten = (st) => Math.floor(st.punten / GOM.perMunt);
+
+
+MINI.gom = {
+  naam: 'Gom tappen', eenheid: ['volle druppel', 'volle druppels'], plaatje: () => sprUrl('voer/gom'),
+  tekst: 'Knaag een gaatje in de bast (drie tikken) en wacht tot de druppel sap vol is. Dan likken! Te vroeg telt maar voor één, en te laat zijn de mieren je voor.',
+  start(el) {
+    const st = gomNieuw(Date.now() & 0x7fffffff), kleur = kleurVan(S.gekozen);
+    let flits = 0, bij = { i: 0, t: 0 };
+    miniKader(el, 'gom', 'Drie tikken om te knagen, dan wachten tot de druppel vol is, dan likken.', (x, y) => {
+      let beste = -1, d0 = 26;
+      GOM.plek.forEach(([px, py], i) => { const d = Math.hypot(px - x, py - y); if (d < d0) { d0 = d; beste = i; } });
+      const r = gomTik(st, beste);
+      if (r) bij = { i: beste, t: performance.now() };
+      if (r === 'knaag' || r === 'loopt') geluid('knabbel');
+      if (r === 'lik') { geluid('munt'); miniTip('Een volle druppel!'); }
+      if (r === 'vroeg') { geluid('klik'); miniTip('Te vroeg: dat was maar een likje.'); }
+    });
+    miniLoop(st, gomStap, (g) => { if (g === 'mieren') { geluid('fout'); tril(50); flits = performance.now(); miniTip('Te laat: de mieren hebben de druppel.'); } },
+      (nu) => {
+        const B = Kast.buf;
+        miniAchter(B, 0.3);
+
+        B.rh(84, 0, 152, MINI_H, [88, 62, 44]);
+        for (let y = 0; y < MINI_H; y += 3) for (let x = 84; x < 236; x += 4) { const h = hash2(x >> 2, y >> 2, 31); if (h > 0.62) B.rh(x, y, 3, 2, h > 0.86 ? [60, 42, 30] : [104, 76, 54]); }
+        B.rh(84, 0, 5, MINI_H, [58, 40, 30], 0.7); B.rh(231, 0, 5, MINI_H, [58, 40, 30], 0.7);
+        st.plek.forEach((p, i) => {
+          const [x, y] = GOM.plek[i];
+          if (p.fase === 'rust') return;
+          if (p.fase === 'bast') {
+            B.ell(x, y, 11, 8, [150, 116, 80], 0.9);
+            for (let k = 0; k < p.knaag; k++) B.rh(x - 5 + k * 4, y - 3, 2, 6, [70, 46, 30]);
+            if (Math.sin(nu / 160 + i) > 0.5) B.rh(x + 6, y - 6, 2, 2, [255, 240, 190]);
+          } else {
+            const u = p.fase === 'vol' ? 1 : Math.min(1, p.t / p.groei), r = 2.5 + u * 5.5, puls = p.fase === 'vol' ? 1 + Math.sin(nu / 90) * 0.12 : 1;
+            B.ell(x, y - 2, 6, 4, [60, 40, 28]);
+            B.ell(x, y + r * 0.8, r * 0.82 * puls, r * puls, p.fase === 'vol' ? [255, 190, 60] : [214, 150, 50], 0.96);
+            B.ell(x - r * 0.3, y + r * 0.4, r * 0.25, r * 0.3, [255, 240, 190], 0.85);
+
+            if (p.fase === 'vol') B.rh(x - 9, y + 16, 18 * (1 - p.t / p.wacht), 2, [255, 120, 90]);
+          }
+        });
+        if (nu - bij.t < 380) { const [x, y] = GOM.plek[bij.i]; tekenSprite(B, 'dier/' + kleur + '_klim', x - 22, y + 20, { schaal: 0.7 }); }
+        const fl = 1 - (nu - flits) / 380;
+        if (flits && fl > 0) B.rh(0, 0, MINI_W, MINI_H, [220, 40, 40], 0.3 * fl);
+        miniToon();
+      },
+      () => miniTel(st.vol + ' vol · ' + st.vroeg + ' te vroeg · ' + hartjes(st.levens) + ' · +' + gomMunten(st)),
+      () => ({ score: st.vol, munten: gomMunten(st), reden: st.levens <= 0 ? 'Drie druppels gingen naar de mieren.' : 'Gestopt.', regels: [['Volle druppels', st.vol], ['Te vroeg gelikt', st.vroeg], ['Naar de mieren', st.weg]] }));
+  },
+};
+
+
+
+
+
+
+const VL = { tussen: [1.05, 0.42], snel: [52, 118], wespKans: [0.1, 0.3], krekelKans: 0.25, straal: 22, snelNa: 80, perMunt: 4 };
+const vlMeng = (p, f) => p[0] + (p[1] - p[0]) * Math.min(1, Math.max(0, f));
+function vlRnd(st) { st.zaad = (st.zaad * 16807) % 2147483647; return (st.zaad - 1) / 2147483646; }
+function vlNieuw(zaad) {
+  return { zaad: (zaad % 2147483646) + 1, t: 0, volgende: 0.6, lijst: [], nr: 0, punten: 0, motten: 0, krekels: 0, levens: 3, klaar: false };
+}
+
+function vlPlek(q) {
+  const x = q.x0 + q.vx * q.t;
+  if (q.soort === 'krekel') return [x, q.y0 - Math.abs(Math.sin(q.t * q.w)) * q.a];
+  return [x, q.y0 + Math.sin(q.t * q.w + q.ph) * q.a];
+}
+function vlStap(st, dt) {
+  const uit = [], f = st.t / VL.snelNa;
+  if (st.klaar) return uit;
+  st.t += dt;
+  for (const q of st.lijst) q.t += dt;
+  st.lijst = st.lijst.filter((q) => { const x = q.x0 + q.vx * q.t; return x > -30 && x < 350; });
+  st.volgende -= dt;
+  if (st.volgende <= 0) {
+    const r = vlRnd(st), soort = r < vlMeng(VL.wespKans, f) ? 'wesp' : r < vlMeng(VL.wespKans, f) + VL.krekelKans ? 'krekel' : 'mot';
+    const kant = vlRnd(st) < 0.5 ? 1 : -1, v = vlMeng(VL.snel, f) * (0.75 + 0.5 * vlRnd(st)) * (soort === 'krekel' ? 1.25 : 1);
+    st.lijst.push({ nr: st.nr++, soort, t: 0, x0: kant > 0 ? -20 : 340, vx: kant * v, y0: soort === 'krekel' ? 150 : 34 + vlRnd(st) * 84,
+      a: soort === 'krekel' ? 46 + vlRnd(st) * 30 : 8 + vlRnd(st) * 16, w: soort === 'krekel' ? 2.6 + vlRnd(st) : 3 + vlRnd(st) * 4, ph: vlRnd(st) * 6.28 });
+    st.volgende = vlMeng(VL.tussen, f) * (0.7 + 0.6 * vlRnd(st));
+    uit.push('erbij');
+  }
+  return uit;
+}
+function vlTik(st, x, y) {
+  if (st.klaar) return '';
+  let beste = null, d0 = VL.straal;
+  for (const q of st.lijst) { const [qx, qy] = vlPlek(q), d = Math.hypot(qx - x, qy - y); if (d < d0) { d0 = d; beste = q; } }
+  if (!beste) return 'mis';
+  st.lijst = st.lijst.filter((q) => q !== beste);
+  if (beste.soort === 'wesp') { st.levens--; if (st.levens <= 0) st.klaar = true; return 'wesp'; }
+  if (beste.soort === 'krekel') { st.krekels++; st.punten += 2; return 'krekel'; }
+  st.motten++; st.punten += 1;
+  return 'mot';
+}
+const vlMunten = (st) => Math.floor(st.punten / VL.perMunt);
+
+
+MINI.vlinder = {
+  naam: 'Nachtvlinders', eenheid: ['insect', 'insecten'], plaatje: () => sprUrl('spel/mot'),
+  tekst: 'Bij de maanlamp fladderen motten en springen krekels. Tik ze aan en je suikereekhoorn hapt toe. Een wesp laat je met rust: die prikt!',
+  start(el) {
+    const st = vlNieuw(Date.now() & 0x7fffffff), kleur = kleurVan(S.gekozen);
+    let flits = 0, sprong = { x: 160, y: 150, t: 0 };
+    miniKader(el, 'vlinder', 'Tik op motten en krekels. Niet op de wesp!', (x, y) => {
+      const r = vlTik(st, x, y);
+      if (r === 'mot' || r === 'krekel') { geluid('knabbel'); sprong = { x, y, t: performance.now() }; }
+      if (r === 'wesp') { geluid('fout'); tril(60); flits = performance.now(); miniTip('Au! Een wesp prikt.'); }
+    });
+    miniLoop(st, vlStap, () => {},
+      (nu) => {
+        const B = Kast.buf;
+        miniAchter(B, 0.3);
+        B.rh(0, 158, MINI_W, 22, [30, 44, 32]); B.rh(0, 158, MINI_W, 2, [52, 74, 50]);
+        for (const q of st.lijst) {
+          const [x, y] = vlPlek(q);
+          if (q.soort === 'mot') tekenSprite(B, 'spel/mot', x, y + 9, { schaal: 0.9, spiegel: q.vx < 0 });
+          else if (q.soort === 'krekel') { B.ell(x, y, 6, 3, [110, 170, 70]); B.ell(x + (q.vx > 0 ? 5 : -5), y - 1, 2.4, 2.4, [90, 150, 60]); B.lijn(x - 4, y + 2, x - 8, y - 4, [80, 130, 50]); B.lijn(x + 4, y + 2, x + 8, y - 4, [80, 130, 50]); }
+          else {
+            const w = Math.sin(nu / 25) > 0 ? 3 : 1;
+            B.ell(x, y - 5, 5, w, [230, 240, 255], 0.75);
+            B.ell(x, y, 7, 4, [250, 205, 40]);
+            for (const d of [-3, 0, 3]) B.rh(Math.round(x + d), Math.round(y - 3), 2, 7, [30, 24, 20]);
+            B.ell(x + (q.vx > 0 ? 7 : -7), y, 2.5, 2.5, [30, 24, 20]);
+          }
+        }
+        const sp = (nu - sprong.t) / 320;
+        if (sp < 1) tekenSprite(B, 'dier/' + kleur + '_sprong', lerp(160, sprong.x, Math.sin(sp * Math.PI)), lerp(160, sprong.y + 14, Math.sin(sp * Math.PI)), { schaal: 0.75, spiegel: sprong.x < 160 });
+        else tekenSprite(B, 'dier/' + kleur + '_zit', 160, 160, { schaal: 0.75 });
+        const fl = 1 - (nu - flits) / 380;
+        if (flits && fl > 0) B.rh(0, 0, MINI_W, MINI_H, [220, 40, 40], 0.3 * fl);
+        miniToon();
+      },
+      () => miniTel(st.motten + ' motten · ' + st.krekels + ' krekels · ' + hartjes(st.levens) + ' · +' + vlMunten(st)),
+      () => ({ score: st.motten + st.krekels, munten: vlMunten(st), reden: st.levens <= 0 ? 'Drie keer geprikt door een wesp.' : 'Gestopt.', regels: [['Motten', st.motten], ['Krekels (tellen dubbel)', st.krekels]] }));
+  },
+};
+
+
+
+
+
+
 const UI = { tab: 'kooi', winkelCat: 'voer', vuil: true, velOpen: false, instellingen: { geluid: true, trillen: true }, infoDier: null };
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -2306,7 +2816,9 @@ function renderMeters() {
     '<span><img class="px" src="' + sprUrl('voer/nectar') + '" alt="">nectar <b>' + bak('nectar') + '</b></span>' +
     '<span><img class="px" src="' + sprUrl('voer/meelwormen') + '" alt="">insecten <b>' + bak('insect') + (k.bak.insect > 0 && k.gestoven ? ' +Ca' : '') + '</b></span>' +
     '<span><img class="px" src="' + sprUrl('voer/fruit') + '" alt="">fruit <b>' + bak('fruit') + '</b></span>' +
-    '<span><img class="px" src="' + sprUrl('iconen/schoon') + '" alt="">vuil <b>' + Math.round(k.vuil) + '</b></span>';
+    '<span><img class="px" src="' + sprUrl('iconen/schoon') + '" alt="">vuil <b>' + Math.round(k.vuil) + '</b></span>' +
+    '<span><img class="px" src="' + sprUrl('iconen/kooi') + '" alt="">speelgoed <b>' + frisNaam(frisheid(S, Date.now())) + '</b></span>' +
+    (koudeNacht(Date.now()) ? '<span><img class="px" src="' + sprUrl('iconen/maan') + '" alt="">' + (kruikLigt(S, Date.now()) ? 'kruik <b>ligt erin</b>' : '<b>koude nacht!</b>') + '</span>' : '');
 }
 function acties() {
   const p = S.dieren[S.gekozen], t = Date.now();
@@ -2320,7 +2832,7 @@ function acties() {
     { id: 'inrichten', naam: 'Inrichten', icoon: 'iconen/kooi' },
     { id: 'dokter', naam: 'Dierenarts', icoon: 'iconen/dokter', uit: !p.ziek },
     { id: 'licht', naam: isNacht(t) ? 'Nacht' : 'Maanlamp', icoon: isNacht(t) ? 'iconen/maan' : 'iconen/maan' },
-  ];
+  ].concat(koudeNacht(t) && !kruikLigt(S, t) ? [{ id: 'kruik', naam: 'Warme kruik', icoon: 'spullen/slaapzak_groen' }] : []);
 }
 function renderActies() {
   $('acties').innerHTML = acties().map((a) => '<button class="actie" data-actie="' + a.id + '"' + (a.uit ? ' aria-disabled="true"' : '') + '><img class="px" src="' + sprUrl(a.icoon) + '" alt="">' + (a.tel != null ? '<span class="aantal">' + a.tel + '</span>' : '') + a.naam + '</button>').join('');
@@ -2359,6 +2871,7 @@ function doeActie(actie) {
   else if (actie === 'schoon') { r = schoonmaken(S); if (r.ok) { geluid('water'); melding('Poep en gemorst voer eruit, vers zand en schone zakjes. Lekker fris.', 'iconen/schoon'); } }
   else if (actie === 'buidel') { r = inBuidel(S, id, t); if (r.ok) { geluid(r.uit ? 'klik' : 'blaf'); melding(r.uit ? p.naam + ' klimt terug het verblijf in.' : p.naam + ' kruipt in je buidelzakje, dicht bij jou.', 'iconen/buidel'); if (!r.uit) nieuwWeetje(S, t, 'buidelzakje'); } }
   else if (actie === 'inrichten') return inrichtVel();
+  else if (actie === 'kruik') { r = legKruik(S, t); if (r.ok) { geluid('beter'); melding('De warme kruik ligt in het nest. Vannacht kruipen ze er lekker tegenaan.', 'spullen/slaapzak_groen'); nieuwWeetje(S, t, 'torpor'); renderActies(); } }
   else if (actie === 'dokter') { r = dierenarts(S, id); if (r.ok) { geluid('beter'); melding(p.naam + ' is weer beter (' + r.prijs + ' munten).', 'iconen/dokter'); } }
   else if (actie === 'licht') { melding(isNacht(t) ? 'Het is nacht: de suikereekhoorns slapen. Na het opstaan gaat de maanlamp weer aan.' : 'De maanlamp is aan: voor de suikereekhoorns is het nu nacht, en dan zijn ze wakker.', 'iconen/maan'); nieuwWeetje(S, t, 'maanlamp'); return; }
   if (r && !r.ok && r.reden) { melding(r.reden); geluid('fout'); if (r.winkel) naarWinkel(r.winkel); }
@@ -2379,7 +2892,9 @@ function voerVel() {
 }
 function inrichtVel() {
   const nu = ingericht(S), los = SPULLEN.filter((s) => vrijeSpullen(S, s.id) > 0);
-  let html = '<p class="uitleg">Aan het dak hangt ' + plekkenVan(S.verblijf, 'hang') + ', op de vloer staat ' + plekkenVan(S.verblijf, 'staand') + ' en aan de wand ' + plekkenVan(S.verblijf, 'wand') + ' dingen. Nieuwe spullen koop je in de winkel.</p>';
+  const fr = frisheid(S, Date.now());
+  let html = '<div class="kaart"><img class="px" src="' + sprUrl('iconen/kooi') + '" alt=""><div><h3>Omhangen</h3><p>Het speelgoed hangt er nu ' + (fr > 1.15 ? 'net: alles is nieuw en spannend.' : fr > 0.85 ? 'een tijdje: ze zijn eraan gewend.' : 'al dagen hetzelfde: het is saai geworden.') + ' Hang het anders en ze gaan weer op ontdekking.</p></div><button class="knop2" data-omhangen="1">Omhangen</button></div>' +
+    '<p class="uitleg">Aan het dak hangt ' + plekkenVan(S.verblijf, 'hang') + ', op de vloer staat ' + plekkenVan(S.verblijf, 'staand') + ' en aan de wand ' + plekkenVan(S.verblijf, 'wand') + ' dingen. Nieuwe spullen koop je in de winkel.</p>';
   html += '<p class="label">In het verblijf</p><div class="lijst">' + nu.map((id, i) => '<div class="kaart"><img class="px" src="' + sprUrl('spullen/' + id) + '" alt=""><div><h3>' + esc(SPUL[id].naam) + '</h3><p>' + esc(SPUL[id].tekst) + '</p></div><button class="knop2" data-weg="' + i + '">Weghalen</button></div>').join('') + '</div>';
   if (los.length) html += '<p class="label">In de kast</p><div class="lijst">' + los.map((s) => '<div class="kaart"><img class="px" src="' + sprUrl('spullen/' + s.id) + '" alt=""><div><h3>' + esc(s.naam) + ' ×' + vrijeSpullen(S, s.id) + '</h3><p>' + esc(s.tekst) + '</p></div><button class="knop2" data-neer="' + s.id + '">Neerzetten</button></div>').join('') + '</div>';
   openVel('Inrichten', html);
@@ -2387,11 +2902,11 @@ function inrichtVel() {
 
 
 function renderSpelen() {
-  if (Zweef.actief) return;
+  if (Zweef.actief || Kast.actief) return;
   const el = $('tab-spelen'), p = S.dieren[S.gekozen], Z = S.spel.zweef;
   el.innerHTML = '<h2 style="font-size:22px">Spelen</h2><div class="lijst">' +
     '<button class="kaart spelkaart" data-spel="zweef"><img class="px" src="' + sprUrl('dier/' + kleurVan(S.gekozen) + '_zweef') + '" alt=""><div><h3>Zweeftocht</h3><p>' + esc(p ? p.naam : 'Je suikereekhoorn') + ' zweeft \'s nachts van boom naar boom. Tik om te springen, houd vast om ver te zweven, laat los om te duiken naar motten. Af en toe geeft een windvlaag een zetje.</p>' +
-    '<div class="bezit">record: ' + Z.record + ' bomen · ' + Z.gespeeld + ' keer gespeeld</div></div><span class="loon">' + muntImg() + '</span></button></div>';
+    '<div class="bezit">record: ' + Z.record + ' bomen · ' + Z.gespeeld + ' keer gespeeld</div></div><span class="loon">' + muntImg() + '</span></button>' + miniKaarten() + '</div>';
 }
 function zweefUitslag(u) {
   const Z = S.spel.zweef, nieuw = u.bomen > Z.record;
@@ -2410,7 +2925,7 @@ function zweefUitslag(u) {
 
 
 const CATS = [{ id: 'voer', naam: 'Voer' }, { id: 'spullen', naam: 'Spullen' }, { id: 'verblijf', naam: 'Verblijven' }];
-function naarWinkel(cat) { sluitVel(); if (Zweef.actief) zweefEinde(true); UI.tab = 'winkel'; UI.winkelCat = cat || 'voer'; renderTab(); }
+function naarWinkel(cat) { sluitVel(); if (Zweef.actief) zweefEinde(true); if (Kast.actief) miniEinde(true); UI.tab = 'winkel'; UI.winkelCat = cat || 'voer'; renderTab(); }
 function renderWinkel() {
   const el = $('tab-winkel');
   let html = '<div class="chips">' + CATS.map((c) => '<button class="chip" data-cat="' + c.id + '" aria-pressed="' + (UI.winkelCat === c.id) + '">' + c.naam + '</button>').join('') + '</div><div class="lijst">';
@@ -2454,7 +2969,7 @@ function dierVel(id) {
     (p.jong ? '<dt>Jong van</dt><dd>' + esc(S.dieren[p.jong.moeder] ? S.dieren[p.jong.moeder].naam : 'zijn moeder') + '</dd>' : '') + '</dl>';
   const jongen = jongenVan(S, id);
   if (jongen.length) html += '<p class="label">Jongen</p><div class="lijst">' + jongen.map((v) => '<button class="kaart" data-dier="' + v + '"><img class="px" src="' + kopUrl(v) + '" alt=""><div><h3>' + esc(S.dieren[v].naam) + ' ' + geslachtTeken(S.dieren[v]) + '</h3><p>' + waarTekst(S, v) + '</p></div><span></span></button>').join('') + '</div>';
-  html += '<div class="rij" style="margin-top:8px"><button class="knop2" data-verzorg="' + id + '">Verzorgen</button></div>';
+  html += '<div class="rij" style="margin-top:8px"><button class="knop2" data-verzorg="' + id + '">Verzorgen</button><button class="knop2" data-luister="' + id + '">Luisteren</button></div><p class="uitleg" id="luisterZin" style="min-height:1.2em"></p>';
   html += '<p class="label">Doorplaatsen</p><p class="uitleg">Naar een dierentuin met een nachtdierenhuis: die mogen suikereekhoorns houden. Nooit vrijlaten: dat mag niet en is gevaarlijk voor het dier en voor de natuur.</p><button class="knop2" data-door="' + id + '" data-stap="1">Naar een dierentuin (gift ' + getal(SPEL.dank + Math.round(p.band)) + ' munten)</button>';
   openVel(p.naam, html, (el) => {
     const inv = el.querySelector('#naamInvoer');
@@ -2502,7 +3017,13 @@ function klik(e) {
   if (e.target.id === 'kooi') {
     const r = kooiTik(e.target, e);
     if (!r) return;
-    if (r.dier) { S.gekozen = r.dier; veranderd(); geluid('klik'); hartjesKooi(r.dier, 1); return; }
+    if (r.dier) {
+      const p = S.dieren[r.dier], schuw = p && p.band < 20 && !p.slaapt;
+      S.gekozen = r.dier; veranderd();
+      if (schuw) { geluid('krab'); if (!(UI.krabNa > Date.now())) { UI.krabNa = Date.now() + 20000; melding('Krrr! ' + p.naam + ' is nog schuw. In het buidelzakje went hij aan je.', 'iconen/buidel'); } }
+      else { geluid('klik'); hartjesKooi(r.dier, p && p.band >= 80 ? 2 : 1); }
+      return;
+    }
     if (r.ding) { const s = SPUL[r.ding]; if (s.doet === 'eten') return voerVel(); if (s.doet === 'drinken') return doeActie('water'); melding(s.naam + ': ' + s.tekst, 'spullen/' + r.ding); return; }
     return;
   }
@@ -2514,13 +3035,15 @@ function klik(e) {
   if (ouderKlik(ds)) return;
   if (t.getAttribute('aria-disabled') === 'true' && (ds.koopvoer || ds.koopspul || ds.koopverblijf || ds.koopcalcium)) { melding('Nog niet genoeg munten. Spelen en blije suikereekhoorns leveren munten op.', 'iconen/munt'); return; }
   if (t.getAttribute('aria-disabled') === 'true' && ds.actie === 'dokter') { melding(S.dieren[S.gekozen].naam + ' is niet ziek.'); return; }
-  if (ds.tab) { UI.tab = ds.tab; sluitVel(); if (ds.tab !== 'spelen' && Zweef.actief) zweefEinde(true); renderAlles(); renderTab(); geluid('klik'); return; }
+  if (ds.tab) { UI.tab = ds.tab; sluitVel(); if (ds.tab !== 'spelen' && Zweef.actief) zweefEinde(true); if (ds.tab !== 'spelen' && Kast.actief) miniEinde(true); renderAlles(); renderTab(); geluid('klik'); return; }
   if (ds.actie) return doeActie(ds.actie);
   if (ds.kies) { S.gekozen = ds.kies; veranderd(); return; }
   if (ds.voer) { const r = voeren(S, ds.voer); if (!r.ok) { geluid('fout'); melding(r.reden); if (r.winkel) naarWinkel(r.winkel); return; } geluid('knabbel'); melding(VOER_VAN[ds.voer].naam + ' in het bakje.' + (r.gestoven ? ' Met een snufje calcium.' : ''), 'voer/' + ds.voer); veranderd(); voerVel(); return; }
   if (ds.koopvoer) { const r = koopVoer(S, ds.koopvoer); if (!r.ok) return melding(r.reden); geluid('munt'); melding(VOER_VAN[ds.koopvoer].naam + ': ' + VOER_VAN[ds.koopvoer].pak + ' porties erbij.', 'voer/' + ds.koopvoer); veranderd(); if (UI.velOpen) voerVel(); else renderWinkel(); return; }
   if (ds.koopcalcium) { const r = koopCalcium(S); if (!r.ok) return melding(r.reden); geluid('munt'); melding('Calciumpoeder in huis: voortaan gaat er een snufje over de insecten.', 'voer/calcium'); nieuwWeetje(S, Date.now(), 'calcium'); veranderd(); if (UI.velOpen) voerVel(); else renderWinkel(); return; }
   if (ds.koopspul) { const r = koopSpul(S, ds.koopspul); if (!r.ok) return melding(r.reden); geluid('munt'); melding(SPUL[ds.koopspul].naam + (r.neer ? ' staat in het verblijf.' : ' ligt in de kast: er is geen plek meer. Kijk bij Inrichten.'), 'spullen/' + ds.koopspul); veranderd(); renderWinkel(); return; }
+  if (ds.omhangen) { const r = hangOm(S, Date.now()); if (!r.ok) { geluid('fout'); melding(r.reden); if (r.winkel) naarWinkel(r.winkel); return; } geluid(r.blij ? 'beter' : 'klik'); if (r.blij) nieuwWeetje(S, Date.now(), 'omhangen'); veranderd(); inrichtVel(); melding(r.blij ? 'Alles hangt anders. Ze gaan meteen op ontdekking!' : 'Nog een keer omgehangen.'); return; }
+  if (ds.luister) { const r = luister(S, ds.luister, Date.now()); if (r.geluid) geluid(r.geluid); if (r.geluid === 'krab' || r.geluid === 'blaf') nieuwWeetje(S, Date.now(), 'blaffen'); const el = $('luisterZin'); if (el) el.textContent = r.zin; return; }
   if (ds.weg) { const r = haalWeg(S, +ds.weg); if (!r.ok) { geluid('fout'); return melding(r.reden); } geluid('klik'); veranderd(); inrichtVel(); return; }
   if (ds.neer) { const r = zetNeer(S, ds.neer); if (!r.ok) { geluid('fout'); return melding(r.reden); } geluid('klik'); veranderd(); inrichtVel(); return; }
   if (ds.cat) { UI.winkelCat = ds.cat; renderWinkel(); return; }
@@ -2545,6 +3068,7 @@ function klik(e) {
     nieuwWeetje(S, Date.now(), 'maanlamp'); sluitVel(); veranderd(); renderTab(); renderAlles(); return;
   }
   if (ds.spel) { sluitVel(); UI.tab = 'spelen'; renderTab(); startZweef($('tab-spelen'), kleurVan(S.gekozen), { record: S.spel.zweef.record }); return; }
+  if (ds.mini) return miniStart(ds.mini);
   if (ds.spelen) { sluitVel(); UI.tab = 'spelen'; renderTab(); return; }
   if (ds.modus) { S.modus = ds.modus; begrens(S); veranderd(); instellingenVel(); melding('Speelstand: ' + modus(S).naam); return; }
   if (ds.schakel) { UI.instellingen[ds.schakel] = !UI.instellingen[ds.schakel]; bewaarInstellingen(); instellingenVel(); return; }
@@ -2595,6 +3119,8 @@ function geluid(soort) {
       case 'wind': windGeluid(); break;
       case 'klik': toon(760, 0.03, 'square', 0.03); break;
       case 'blaf': for (let i = 0; i < 3; i++) stem(1500, 1900, 1300, 0.07, 0, 0, 2600, 0.05, i * 0.13, 'square'); break;
+      case 'krab': for (let i = 0; i < 9; i++) ruis(0.035, 0.07, 420 + (i % 3) * 90, i * 0.055, 6); break;
+      case 'jip': toon(1900, 0.06, 'square', 0.05, 0, 2300); toon(1900, 0.06, 'square', 0.05, 0.13, 2300); break;
       case 'knabbel': for (let i = 0; i < 4; i++) ruis(0.025, 0.05, 3200, i * 0.07, 2); break;
       case 'water': ruis(0.35, 0.05, 900, 0, 0.6); toon(520, 0.12, 'sine', 0.03, 0.05, 780); break;
       case 'munt': toon(988, 0.07, 'square', 0.05); toon(1319, 0.16, 'square', 0.05, 0.07); break;
@@ -2686,6 +3212,7 @@ function toonDagBonus() {
 window.terugKnop = () => {
   if (!$('vel').hidden) { sluitVel(); return true; }
   if (Zweef.actief) { zweefEinde(true); return true; }
+  if (Kast.actief) { miniEinde(true); return true; }
   if (UI.tab !== 'kooi') { UI.tab = 'kooi'; renderTab(); renderAlles(); return true; }
   return false;
 };
