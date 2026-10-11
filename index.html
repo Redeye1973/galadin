@@ -103,6 +103,17 @@ html[data-scherm="speel"], html[data-scherm="speel"] body { overflow: hidden; }
 #laden { position: absolute; inset: 0; margin: 0; display: grid; place-items: center; padding: 16px; text-align: center; color: var(--inkt2); }
 
 </style>
+<style>
+#telblok { width: min(100%, 640px); margin: 18px auto 0; padding: 14px 16px; border: 1px solid var(--lijn); border-radius: 16px; background: var(--vlak); }
+#telblok p { margin: 0 0 8px; }
+.telkop { font-weight: 700; color: var(--goud-licht); }
+.telvraag { color: var(--inkt2); }
+.telharten { display: flex; flex-wrap: wrap; gap: 8px; }
+.telhart { padding: 8px 12px; border-radius: 999px; border: 1px solid var(--lijn); background: var(--vlak2); color: inherit; font: inherit; font-size: 14px; cursor: pointer; }
+.telhart[aria-pressed="true"] { border-color: var(--goud); color: var(--goud-licht); cursor: default; }
+.telklein { font-size: 12px; color: var(--inkt2); margin: 10px 0 0 !important; }
+.tegel .tk { grid-column: 2; font-size: 12px; color: var(--goud-licht); }
+</style>
 </head>
 <body>
 <div id="poort" hidden>
@@ -522,5 +533,89 @@ html[data-scherm="speel"], html[data-scherm="speel"] body { overflow: hidden; }
 
 </script>
 
+<script>
+(() => {
+  const DIENST = 'https://abacus.jasoncameron.dev', RUIMTE = 'galadin-nl';
+  const $ = (id) => document.getElementById(id);
+  const vandaag = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
+  const lees = (sleutel) => { try { return JSON.parse(localStorage.getItem(sleutel) || 'null'); } catch (e) { return null; } };
+  const schrijf = (sleutel, v) => { try { localStorage.setItem(sleutel, JSON.stringify(v)); } catch (e) { /* privévenster: dan telt het vaker */ } };
+  const getal = (n) => Math.floor(n).toLocaleString('nl-NL');
+  async function vraag(wat, sleutel) {
+    const stop = new AbortController(), klok = setTimeout(() => stop.abort(), 7000);
+    try {
+      const r = await fetch(DIENST + '/' + wat + '/' + RUIMTE + '/' + sleutel, { signal: stop.signal, keepalive: wat === 'hit', cache: 'no-store' });
+      if (r.status === 404) return 0;       // deze teller is nog nooit opgehoogd
+      if (!r.ok) return null;
+      const v = (await r.json()).value;
+      return typeof v === 'number' ? v : null;
+    } catch (e) { return null; } finally { clearTimeout(klok); }
+  }
+  let dag = lees('galadin_teller');
+  if (!dag || dag.dag !== vandaag()) dag = { dag: vandaag(), bezoek: false, spel: {} };
+  const harten = lees('galadin_hart') || {};
+  const stand = { bezoek: null, spel: {}, hart: {} };
+
+  const slugs = () => [...document.querySelectorAll('#tegels .tegel')].map((b) => b.dataset.slug);
+  const naamVan = (slug) => { const b = document.querySelector('#tegels .tegel[data-slug="' + slug + '"] .tn'); return b ? b.textContent : slug; };
+  function toon() {
+    for (const b of document.querySelectorAll('#tegels .tegel')) {
+      const n = stand.spel[b.dataset.slug];
+      let el = b.querySelector('.tk');
+      if (n == null) { if (el) el.remove(); continue; }
+      if (!el) { el = document.createElement('span'); el.className = 'tk'; b.appendChild(el); }
+      el.textContent = getal(n) + ' keer gespeeld';
+    }
+    const blok = $('telblok');
+    if (!blok) return;
+    const kop = blok.querySelector('.telkop'), rij = blok.querySelector('.telharten');
+    kop.textContent = stand.bezoek == null ? '' : 'Deze site is ' + getal(stand.bezoek) + ' keer bezocht.';
+    rij.innerHTML = '';
+    for (const slug of slugs()) {
+      const k = document.createElement('button');
+      k.type = 'button'; k.className = 'telhart'; k.dataset.hart = slug; k.setAttribute('aria-pressed', String(!!harten[slug]));
+      k.textContent = '♥ ' + naamVan(slug) + (stand.hart[slug] == null ? '' : ' · ' + getal(stand.hart[slug]));
+      rij.appendChild(k);
+    }
+    blok.hidden = false;
+  }
+  async function telSpel(slug) {
+    if (!slug || dag.spel[slug]) return;
+    dag.spel[slug] = true; schrijf('galadin_teller', dag);
+    const n = await vraag('hit', 'spel-' + slug);
+    if (n != null) { stand.spel[slug] = n; toon(); }
+  }
+  async function begin() {
+    const tegels = $('tegels');
+    if (!tegels) return;
+    const blok = document.createElement('section');
+    blok.id = 'telblok'; blok.hidden = true;
+    blok.innerHTML = '<p class="telkop"></p><p class="telvraag">Welk spel vind je leuk? Tik op het hartje.</p><div class="telharten"></div>' +
+      '<p class="telklein">Geteld wordt hoe vaak, niet door wie. Meer daarover bij Privacy.</p>';
+    tegels.insertAdjacentElement('afterend', blok);
+    blok.addEventListener('click', async (e) => {
+      const k = e.target.closest('[data-hart]');
+      if (!k || harten[k.dataset.hart]) return;
+      const slug = k.dataset.hart;
+      harten[slug] = true; schrijf('galadin_hart', harten);
+      const n = await vraag('hit', 'hart-' + slug);
+      if (n != null) stand.hart[slug] = n; else stand.hart[slug] = (stand.hart[slug] || 0) + 1;
+      toon();
+    });
+    tegels.addEventListener('click', (e) => { const b = e.target.closest('.tegel'); if (b) telSpel(b.dataset.slug); }, true);
+    const viaAdres = () => { const s = decodeURIComponent(location.hash.replace(/^#/, '')); if (slugs().includes(s)) telSpel(s); else toon(); };
+    window.addEventListener('hashchange', viaAdres);
+    const eerste = !dag.bezoek;
+    if (eerste) { dag.bezoek = true; schrijf('galadin_teller', dag); }
+    stand.bezoek = await vraag(eerste ? 'hit' : 'get', 'bezoek');
+    toon();
+    await Promise.all(slugs().map(async (slug) => { stand.spel[slug] = await vraag('get', 'spel-' + slug); }));
+    toon();
+    viaAdres();
+    setTimeout(async () => { await Promise.all(slugs().map(async (slug) => { stand.hart[slug] = await vraag('get', 'hart-' + slug); })); toon(); }, 11000);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', begin); else begin();
+})();
+</script>
 </body>
 </html>
