@@ -13,14 +13,35 @@
 </head>
 <body>
 <h1>Privacy</h1>
-<p><strong>Kort: deze website en de spellen verzamelen niets.</strong></p>
+<p><strong>Kort: de spellen verzamelen niets. De website telt alleen hoe vaak er iets geopend wordt, niet door wie.</strong></p>
 
 <h2>De website</h2>
-<p>galadin.nl is een website van Galadin, een kleine spelstudio uit Nederland. De website heeft geen cookies, geen
-statistieken en geen advertenties. Je hoeft je nergens aan te melden.</p>
+<p>galadin.nl is een website van Galadin, een kleine spelstudio uit Nederland. De website heeft geen cookies en geen
+advertenties. Je hoeft je nergens aan te melden.</p>
 <p>De website wordt gehost door GitHub Pages. Zoals elke webserver kan GitHub bij het opvragen van een pagina
 technische gegevens verwerken, zoals je IP-adres. Daar hebben wij geen toegang toe. Zie het
 <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">privacybeleid van GitHub</a>.</p>
+
+<h2>De teller op de voorpagina</h2>
+<p>Op de voorpagina staat hoe vaak de site is bezocht, hoe vaak elk spel is geopend en hoeveel hartjes elk spel heeft
+gekregen. Daarvoor roept de voorpagina een externe teldienst aan, <strong>Abacus</strong> (een gratis dienst van Jason
+Cameron, https://abacus.jasoncameron.dev). Dat werkt zo:</p>
+<ul>
+  <li>Bij het openen van de pagina, of van een spel, of bij het geven van een hartje, vraagt je browser aan die dienst
+  om een teller met één op te hogen. Het verzoek bevat alleen de naam van de teller (bijvoorbeeld "spel-le-frawg").
+  Geen naam, geen e-mailadres, geen cookie.</li>
+  <li>Zoals bij elk verzoek over internet ziet die dienst daarbij je IP-adres. Wij zien dat niet; wij krijgen alleen het
+  getal. De dienst publiceert geen privacyverklaring; wat zij met het IP-adres doet (bijvoorbeeld alleen om te
+  begrenzen hoe vaak per seconde je mag vragen) kunnen wij niet nagaan. Een teller die een half jaar niet wordt
+  gebruikt, verloopt.</li>
+  <li>Om niet dubbel te tellen bewaart je browser op je eigen toestel twee kleine gegevens (galadin_teller: de datum en
+  welke spellen je vandaag opende; galadin_hart: bij welke spellen je een hartje gaf). Die gaan nergens heen.</li>
+  <li>We tellen bezoeken, niet mensen: één keer per browser per dag voor de site en per spel, en één hartje per browser
+  per spel.</li>
+  <li>De spellen zelf en de apps roepen die dienst niet aan; zij sturen niets naar ons of naar anderen.</li>
+</ul>
+<p>Wil je niet meegeteld worden? Dan kun je in de instellingen van je browser de opslag van galadin.nl wissen of
+verzoeken van abacus.jasoncameron.dev blokkeren; de site en de spellen werken dan gewoon.</p>
 
 <h2>De spellen</h2>
 <p>De spellen draaien helemaal in je browser. Ze sturen niets naar ons of naar anderen. Je voortgang (je dieren, munten
@@ -32,7 +53,7 @@ Je verstuurt hem zelf; hij gaat niet langs ons.</p>
 <p>Op een iPhone of iPad bewaart Safari de voortgang alleen blijvend als je het spel op het beginscherm hebt gezet.</p>
 
 <h2>Kinderen</h2>
-<p>De spellen zijn geschikt voor kinderen. Omdat er niets verzameld wordt, wordt er ook niets van kinderen verzameld.</p>
+<p>De spellen zijn geschikt voor kinderen. Omdat de spellen niets verzamelen, wordt er ook niets van kinderen verzameld. De teller op de voorpagina telt alleen aantallen, zoals hierboven beschreven.</p>
 
 <h2>Testers voor Google Play</h2>
 <p>Wil je een spel testen voor Google Play, dan stuur je ons een e-mail. Je e-mailadres gebruiken we alleen om je toe
@@ -46,6 +67,6 @@ zodra je dat vraagt of zodra de test voorbij is. Google verwerkt je adres daarbi
 <h2>Contact</h2>
 <p>Vragen? Mail naar <a href="mailto:gaidaxgames@gmail.com">gaidaxgames@gmail.com</a>.</p>
 
-<p><small>Laatst bijgewerkt: [datum]</small></p>
+<p><small>Laatst bijgewerkt: 11 oktober 2026</small></p>
 </body>
 </html>
