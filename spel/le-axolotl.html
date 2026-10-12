@@ -175,6 +175,9 @@ nav.onder button[aria-selected="true"] { color: var(--goud); }
 .groot-beeld.geheim img { filter: brightness(0) opacity(.6); }
 
 
+.credits { margin: 16px 2px 0; font-size: 11.5px; line-height: 1.45; color: var(--inkt2); }
+
+
 #studio { --gw: min(96vw, 66vh); position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: rgb(8,11,53) linear-gradient(to bottom, rgb(4,5,31) 0%, rgb(6,7,44) calc(50% + var(--gw) * -0.5195), rgb(7,8,46) calc(50% + var(--gw) * -0.4330), rgb(7,9,49) calc(50% + var(--gw) * -0.3463), rgb(8,10,50) calc(50% + var(--gw) * -0.2598), rgb(8,11,52) calc(50% + var(--gw) * -0.1732), rgb(8,11,53) calc(50% + var(--gw) * -0.0866), rgb(8,11,53) calc(50% + var(--gw) * 0.0000), rgb(8,11,52) calc(50% + var(--gw) * 0.0866), rgb(8,10,50) calc(50% + var(--gw) * 0.1732), rgb(7,9,49) calc(50% + var(--gw) * 0.2598), rgb(7,8,47) calc(50% + var(--gw) * 0.3463), rgb(6,7,44) calc(50% + var(--gw) * 0.4330), rgb(5,6,42) calc(50% + var(--gw) * 0.5195), rgb(4,5,31) 100%); transition: opacity .45s ease; }
 #studio.weg { opacity: 0; pointer-events: none; }
 #studio img { display: block; width: var(--gw); height: auto; animation: studioIn .5s ease both; }
@@ -3057,6 +3060,7 @@ function renderBoek() {
     ? '<div class="kaart"><img class="px" src="' + sprUrl(k.icoon) + '" alt=""><div><h3>' + esc(k.naam) + '</h3><p>' + esc(k.tekst) + '</p></div><span></span></div>'
     : '<div class="kaart" style="opacity:.5"><img class="px" src="' + sprUrl('iconen/boek') + '" alt=""><div><h3>?</h3><p>Speel een minispel om deze kaart te vinden.</p></div><span></span></div>').join('') + '</div>';
   html += '<dl class="feiten"><dt>Aangegroeid</dt><dd>' + (S.totaal.aangegroeid || 0) + ' keer</dd><dt>Ververst</dt><dd>' + S.totaal.ververst + ' keer</dd><dt>Uit een eitje</dt><dd>' + S.kweek.uitgekomen + ' larven' + (S.kweek.blauw ? ', waarvan ' + S.kweek.blauw + ' blauw' : '') + '</dd><dt>Wormenjacht</dt><dd>record ' + S.spel.wormen.record + ', samen ' + getal(S.spel.wormen.gehapt) + ' gehapt</dd><dt>Xochimilco</dt><dd>record ' + S.spel.xochi.record + ', samen ' + getal(S.spel.xochi.gegeten) + ' hapjes</dd><dt>Verdiend</dt><dd>' + getal(S.totaal.verdiendDieren + S.totaal.verdiendSpel) + ' munten</dd></dl>';
+  html += '<p class="credits">Gemaakt door Galadin Games, met AI-hulp bij beeld en code. Credits en bronnen: galadin.nl/credits</p>';
   el.innerHTML = html;
 }
 function kijkVel(id) {
