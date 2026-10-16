@@ -274,6 +274,32 @@ img { display: block; }
 .turboknop.klaar { background: linear-gradient(180deg, #ffe07a, #c98e00); color: #3a2800; box-shadow: 0 4px 0 #5a4000, 0 0 22px rgba(255,201,60,.55); }
 .stuurknop:active, .remknop:active, .turboknop:active { transform: translateY(3px); box-shadow: none; filter: brightness(1.2); }
 @media (pointer: fine) and (min-width: 700px) { .knoppen { display: none; } .racekolom { min-height: 0; } .racescherm { padding-top: 8px; } }
+
+@media (orientation: landscape) and (pointer: coarse) {
+  .racekolom { display: grid; width: 100% !important; grid-template-columns: 1fr auto 1fr; grid-template-rows: 1fr 1fr auto; align-items: stretch; }
+  .kast { grid-column: 2; grid-row: 1 / 3; align-self: end; }
+  .dash { grid-column: 2; grid-row: 3; }
+  .knoppen { display: contents; }
+  #knopLinks, #knopRechts { grid-row: 1; margin: 8px 8px 4px; }
+  #knopRem, #knopTurbo { grid-row: 2 / 4; margin: 4px 8px calc(8px + env(safe-area-inset-bottom, 0px)); }
+  #knopLinks, #knopRem { grid-column: 1; } #knopRechts, #knopTurbo { grid-column: 3; }
+  
+  .dash { grid-template-columns: auto auto minmax(0, 1fr) auto; padding: 4px 8px; gap: 8px; min-width: 0; }
+  .dash .snelblok { min-width: 0; } .dash .snelblok b { font-size: 26px; min-width: 44px; }
+  .dash .turboblok { width: 84px; }
+  
+  .dash .turboblok span { font-size: 9px; letter-spacing: .05em; overflow: hidden; }
+  .dash .meters { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+  .dash .meter { grid-template-columns: 1fr; justify-items: center; row-gap: 3px; }
+  .dash .meter img, .dash .meter > span:first-child { grid-row: auto; width: 22px; height: 22px; }
+  .dash .meter > span:not(:first-child) { display: none; }
+  .dash .meter .balk { width: 100%; }
+}
+
+body.pad .knoppen { display: none !important; }
+body.pad .racekolom { min-height: 0; }
+
+body.pad button:focus, body.pad [data-race]:focus, body.pad .padfocus { outline: 3px solid var(--goud); outline-offset: 2px; }
 @media (max-width: 560px) {
   .dash { grid-template-columns: auto 1fr auto; row-gap: 8px; }
   .meters { grid-column: 1 / -1; grid-row: 2; grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -284,6 +310,49 @@ img { display: block; }
   .motorkaart { padding: 8px; }
   .schaderij { grid-template-columns: 32px 108px 1fr; } .schaderij small { grid-column: 2 / -1; }
   .cijfers b { font-size: 16px; } .cijfers .steen { width: 32px; height: 32px; }
+}
+
+
+
+.instellingen { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin: 10px 0; }
+.schakel { display: grid; gap: 2px; text-align: left; padding: 9px 12px; border-radius: 12px; background: #161b23; border: 1px solid #2a3240; color: var(--inkt); }
+.schakel b { font: 900 13px var(--kop); letter-spacing: .06em; } .schakel small { color: var(--inkt2); font-size: 12px; }
+.schakel[aria-pressed="true"] { border-color: var(--paars2); box-shadow: inset 0 0 0 1px var(--paars2); } .schakel[aria-pressed="true"] b { color: var(--goud); }
+
+.bekers { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.beker { display: grid; justify-items: center; text-align: center; gap: 4px; padding: 10px 8px; border-radius: 12px; background: #141920; border: 1px solid #232b36; opacity: .55; filter: grayscale(1); }
+.beker.ja { opacity: 1; filter: none; border-color: var(--goud); background: linear-gradient(180deg, rgba(255,201,60,.10), #141920); }
+.beker b { font: 900 12.5px var(--kop); letter-spacing: .04em; } .beker small { color: var(--inkt2); font-size: 11.5px; line-height: 1.3; }
+.beker .kelk { width: 40px; height: 40px; border-radius: 50% 50% 40% 40%; background: radial-gradient(circle at 35% 30%, #ffe48a, #c98e00 70%); box-shadow: 0 3px 0 #5a4000; }
+.chips i.vos { color: #ff9a3c; }
+
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 40; max-width: 92vw; padding: 10px 16px; border-radius: 12px; background: rgba(17,21,27,.96); border: 2px solid var(--goud); color: var(--inkt); font-size: 14px; }
+.toast[hidden] { display: none; }
+
+@media (pointer: fine) and (min-width: 700px) { .meters { grid-template-columns: repeat(7, minmax(0, 1fr)); } .meter { grid-template-columns: 26px 1fr; } .meter img, .meter > span:first-child { width: 26px; height: 26px; } }
+
+
+.duelkaart { margin: 12px 0; padding: 12px; border-radius: 14px; background: #12161d; border: 1px solid #262e3a; display: grid; gap: 8px; }
+.duelkaart h3 { margin: 0; font: 900 18px var(--kop); letter-spacing: .06em; }
+.duelkaart.uitslag { border-color: var(--goud); } .duelkaart.uitslag h3 { color: var(--goud); }
+.duelkaart .kiezer { display: flex; flex-wrap: wrap; gap: 6px; } .duelkaart .kiezer .knop { flex: 0 1 auto; padding: 8px 10px; font-size: 12px; }
+.duelraces { max-height: 220px; overflow-y: auto; }
+.duelscherm { position: fixed; inset: 0; background: #05070a; display: flex; align-items: center; justify-content: center; }
+.duelscherm[hidden] { display: none; }
+.duelvak { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 960px; }
+.duelvak canvas { width: 100%; height: auto; aspect-ratio: 16 / 9; display: block; image-rendering: pixelated; touch-action: none; }
+@media (orientation: landscape) { .duelvak { flex-direction: row; max-width: none; padding: 0 6px; } .duelvak canvas { width: 50%; } }
+.duelstop { position: fixed; top: 10px; right: 10px; z-index: 5; }
+
+
+@media (orientation: landscape) and (max-height: 520px) {
+  #scherm-hoofd { width: min(100%, 980px); display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: 14px; row-gap: 10px; align-content: start; }
+  #scherm-hoofd > .titelkaart { grid-column: 1; grid-row: 1 / span 8; align-self: start; }
+  #scherm-hoofd > :not(.titelkaart) { grid-column: 2; }
+  #scherm-hoofd .titelkaart img { width: 100%; height: calc(100vh - 92px); height: calc(100dvh - 92px); object-fit: cover; }
+  #scherm-hoofd .woordmerk { padding: 24px 12px 10px; }
+  #scherm-hoofd .woordmerk b { font-size: clamp(22px, 4.6vw, 36px); } #scherm-hoofd .woordmerk em { font-size: clamp(13px, 2.4vw, 18px); }
+  #scherm-hoofd .hoofdknoppen .hoofdknop { flex: 1 1 100%; }
 }
 
 
@@ -312,8 +381,10 @@ img { display: block; }
     <div class="hoofdknoppen">
       <button class="hoofdknop" data-scherm="races">RACES</button>
       <button class="hoofdknop tweede" data-scherm="garage">GARAGE</button>
+      <button class="hoofdknop tweede" data-scherm="duel">MET Z'N TWEEËN</button>
     </div>
     <div id="hoofdStand" class="chips"></div>
+    <div id="instellingen" class="instellingen"></div>
     <p class="uitleg"><b>Pc</b> pijl omhoog gas · pijl omlaag rem · links/rechts sturen · spatie turbo, alleen op topsnelheid.<br><b>Telefoon</b> tik links of rechts om te sturen, gas gaat vanzelf; REM en TURBO onderin.<br>Geen klok: je rijdt de race uit. Elke uitgereden race geeft het volle racegeld; een podium opent de volgende.<br>Je motor slijt onderweg: elke val, elke turbo en elke kilometer grind telt.<br>En jij ook: wat een val kost, hangt af van wat je aanhebt. Kleed je op de schuiver, niet op het ritje.</p>
     <p class="versie" id="versie"></p>
     <button id="opnieuw" class="opnieuw">Opnieuw beginnen</button>
@@ -325,16 +396,22 @@ img { display: block; }
 
   <section id="scherm-garage" class="scherm" hidden>
     <div id="garageAlles" class="alles"></div>
-    <div class="tabs"><button data-tab="motor" aria-selected="true">Motor</button><button data-tab="stal" aria-selected="false">Stal</button><button data-tab="uitrusting" aria-selected="false">Uitrusting</button><button data-tab="onderzoek" aria-selected="false">Onderzoek</button><button data-tab="monteurs" aria-selected="false">Monteurs</button><button data-tab="sponsor" aria-selected="false">Sponsor</button><button data-tab="verslag" aria-selected="false">Verslag</button></div>
+    <div class="tabs"><button data-tab="motor" aria-selected="true">Motor</button><button data-tab="stal" aria-selected="false">Stal</button><button data-tab="uitrusting" aria-selected="false">Uitrusting</button><button data-tab="onderzoek" aria-selected="false">Onderzoek</button><button data-tab="monteurs" aria-selected="false">Monteurs</button><button data-tab="sponsor" aria-selected="false">Sponsor</button><button data-tab="prijzen" aria-selected="false">Prijzen</button><button data-tab="verslag" aria-selected="false">Verslag</button></div>
     <div id="garageMotor" class="paneel"></div>
     <div id="garageStal" class="paneel" hidden></div>
     <div id="garageUitrusting" class="paneel" hidden></div>
     <div id="garageOnderzoek" class="paneel" hidden></div>
     <div id="garageMonteurs" class="paneel" hidden></div>
     <div id="garageSponsor" class="paneel" hidden></div>
+    <div id="garagePrijzen" class="paneel" hidden></div>
     <div id="garageVerslag" class="paneel" hidden></div>
   </section>
 
+  <section id="scherm-duel" class="scherm" hidden><div id="duelPaneel"></div></section>
+  <section id="scherm-duelrace" class="duelscherm" hidden>
+    <div class="duelvak"><canvas id="doek1" aria-label="De weg van speler 1"></canvas><canvas id="doek2" aria-label="De weg van speler 2"></canvas></div>
+    <button class="rond duelstop" data-duelstop="1" aria-label="Duel stoppen">✕</button>
+  </section>
   <section id="scherm-race" class="racescherm" hidden>
     <div id="raceKolom" class="racekolom">
       <div class="kast"><canvas id="doek" aria-label="De weg"></canvas><div id="pitPaneel" class="pitpaneel" hidden></div></div>
@@ -835,6 +912,14 @@ const PIT = { vanafKm: 9, op: 0.45, lengte: 80, box: 46, limiet: 60, breed: [1.1
 
 
 
+const RIVAAL = { naam: 'De Vos', tempo: 0.94, start: 420, bonus: 1000 };
+const rivaalRijdtMee = (race) => race.nr % 4 === 0;
+const tochtNr = (race) => Math.ceil(race.nr / 4);
+
+
+
+
+
 
 
 const DECOR_ZELDEN = { loods: 240, molen: 500, vuurtoren: 500, waterval: 500, tankstation: 500, stofduivel: 240, viaductpijler: 160, reclamezuil: 120, chalet: 120, bord: 140, dijkhuis: 70, rotswand: 60, canyonrots: 36 };
@@ -1152,12 +1237,72 @@ function nieuwSeizoen(G) {
   G.seizoen = (G.seizoen || 1) + 1; G.seizoenKlaar = false;
   return { ok: true, seizoen: G.seizoen };
 }
+
+
+
+const OPDRACHTEN = [
+  { id: 'podium_val', tekst: 'Eindig op het podium zonder te vallen', test: (u) => u.gehaald && u.positie <= 3 && !u.vallen },
+  { id: 'winnen', tekst: 'Win de race', test: (u) => u.gehaald && u.positie === 1 },
+  { id: 'geen_turbo', tekst: 'Haal de finish zonder turbo', test: (u) => u.gehaald && !u.turboSeconden },
+  { id: 'inhalen', tekst: 'Haal tien rijders in', test: (u) => u.gehaald && (u.ingehaald || 0) >= 10, wanneer: (r) => r.tegen >= 12 },
+  { id: 'berm', tekst: 'Blijf uit de berm (hooguit 2 seconden)', test: (u) => u.gehaald && (u.bermTijd || 0) <= 2 },
+  { id: 'top5', tekst: 'Eindig bij de eerste vijf', test: (u) => u.gehaald && u.positie <= 5 },
+  { id: 'heel', tekst: 'Kom binnen met minder dan 10% blessure', test: (u) => u.gehaald && (u.blessure || 0) < 10 },
+];
+const OPDRACHT_VAN = Object.fromEntries(OPDRACHTEN.map((o) => [o.id, o]));
+function sponsorOpdracht(G, race) {
+  if (!G.sponsor || !SPONSOR_VAN[G.sponsor]) return null;
+  const kan = OPDRACHTEN.filter((o) => !o.wanneer || o.wanneer(race));
+  return kan[((G.races || 0) * 7 + race.nr * 3) % kan.length];
+}
+const opdrachtBonus = (G) => Math.round(SPONSOR_VAN[G.sponsor].bedrag[1] * 0.5 / 10) * 10;
+
+
+
+const tochtPodium = (G, tocht) => RACES.filter((r) => r.tocht === tocht).every((r) => G.uitslagen[r.id] && G.uitslagen[r.id].positie <= 3);
+const BEKERS = [
+  { id: 'finish', naam: 'De eerste finish', uitleg: 'Haal voor het eerst de finish', test: (G) => Object.keys(G.uitslagen).length >= 1 },
+  { id: 'podium', naam: 'Op het podium', uitleg: 'Eindig bij de eerste drie', test: (G) => Object.values(G.uitslagen).some((u) => u.positie <= 3) },
+  { id: 'winst', naam: 'Winnaar', uitleg: 'Win een race', test: (G) => Object.values(G.uitslagen).some((u) => u.positie === 1) },
+  { id: 'noordzee', naam: 'Baas van de Noordzee', uitleg: 'Podium in alle races van de Noordzeetocht', test: (G) => tochtPodium(G, 'noordzee') },
+  { id: 'alpen', naam: 'Koning van de Alpen', uitleg: 'Podium in alle races van de Alpentocht', test: (G) => tochtPodium(G, 'alpen') },
+  { id: 'nachtstad', naam: 'Heer van de Nachtstad', uitleg: 'Podium in alle races van de Nachtstad', test: (G) => tochtPodium(G, 'nachtstad') },
+  { id: 'woestijn', naam: 'Meester van de Woestijn', uitleg: 'Podium in alle races van de Woestijnrally', test: (G) => tochtPodium(G, 'woestijn') },
+  { id: 'tropen', naam: 'Held van de Tropen', uitleg: 'Podium in alle races van de Tropentocht', test: (G) => tochtPodium(G, 'tropen') },
+  { id: 'alles', naam: 'Twintig keer podium', uitleg: 'Podium in alle twintig races', test: (G) => RACES.every((r) => G.uitslagen[r.id] && G.uitslagen[r.id].positie <= 3) },
+  { id: 'seizoen', naam: 'Seizoenkampioen', uitleg: 'Win een seizoen', test: (G) => (G.seizoen || 1) > 1 || !!G.seizoenKlaar },
+  { id: 'vos', naam: 'De Vos verslagen', uitleg: 'Finish vóór de rivaal', test: (G) => Object.keys(G.rivaal || {}).length >= 1 },
+  { id: 'vos5', naam: 'Vossenjacht', uitleg: 'Versla De Vos in alle vijf de tochten', test: (G) => Object.keys(G.rivaal || {}).length >= 5 },
+  { id: 'spook', naam: 'Sneller dan jezelf', uitleg: 'Verbeter je eigen beste tijd met de spookrijder erbij', test: (G, x) => !!(x && x.u && x.u.spookVerslagen) },
+  { id: 'opdracht', naam: 'Afspraak is afspraak', uitleg: 'Haal een opdracht van je sponsor', test: (G) => (G.opdrachten || 0) >= 1 },
+  { id: 'opdracht10', naam: 'Lieveling van de sponsor', uitleg: 'Haal tien opdrachten van je sponsor', test: (G) => (G.opdrachten || 0) >= 10 },
+  { id: 'regen', naam: 'Regenmeester', uitleg: 'Podium na een bui, met andere banden uit de pit', test: (G, x) => !!(x && x.u && x.u.gehaald && x.u.bui && x.u.pitBanden && x.u.positie <= 3) },
+  { id: 'schram', naam: 'Zonder schram', uitleg: 'Podium in een race van 10 km of meer zonder te vallen', test: (G, x) => !!(x && x.u && x.u.gehaald && !x.u.vallen && x.u.positie <= 3 && x.race.km >= 10) },
+  { id: 'twintig', naam: 'Natuurlijke twintig', uitleg: 'Gooi een 20 bij een val', test: (G, x) => !!(x && x.u && (x.u.worpen || []).includes(20)) },
+  { id: 'stil', naam: 'Stille winnaar', uitleg: 'Win een race op een elektrische motor', test: (G, x) => !!(x && x.u && x.u.gehaald && x.u.positie === 1 && (MOTOR_VAN[x.V.motor].elektrisch || (G.onderzoek && G.onderzoek.gemonteerd.motorblok === 'elektro'))) },
+  { id: 'superbike', naam: 'Superbike', uitleg: 'Koop een superbike', test: (G) => !!(G.stal.zwaluw || G.stal.vonk) },
+  { id: 'stal', naam: 'Volle stal', uitleg: 'Alle motoren in de stal', test: (G) => MOTOREN.every((m) => G.stal[m.id]) },
+  { id: 'pak', naam: 'Dress for the slide', uitleg: 'Alle uitrusting op niveau 5', test: (G) => UITRUSTING.every((u) => G.uitrusting[u.id].niveau >= GARAGE.maxNiveau) },
+  { id: 'ploeg', naam: 'Volle werkplaats', uitleg: 'Drie monteurs in dienst', test: (G) => G.monteurs.length >= GARAGE.maxMonteurs },
+  { id: 'uitvinder', naam: 'Uitvinder', uitleg: 'Tien onderzoeken klaar', test: (G) => G.onderzoek.gereed.length >= 10 },
+  { id: 'alles_uitgevonden', naam: 'Alles uitgevonden', uitleg: 'Al het onderzoek klaar', test: (G) => G.onderzoek.gereed.length >= ONDERZOEK.length },
+  { id: 'spaarpot', naam: 'Spaarpot', uitleg: '100.000 op de bank', test: (G) => G.geld >= 100000 },
+];
+const BEKER_VAN = Object.fromEntries(BEKERS.map((b) => [b.id, b]));
+
+function bekersNa(G, x) {
+  G.bekers = G.bekers || {};
+  const nieuw = BEKERS.filter((b) => !G.bekers[b.id] && b.test(G, x)).map((b) => b.id);
+  for (const id of nieuw) G.bekers[id] = (G.races || 0) || 1;
+  return nieuw;
+}
+
 const getalKort = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 const delenNieuw = () => Object.fromEntries(ONDERDELEN.map((o) => [o.id, { niveau: 1, slijtage: 0 }]));
 const uitrustingNieuw = () => Object.fromEntries(UITRUSTING.map((u) => [u.id, { niveau: 1, slijtage: 0 }]));
 function garageNieuw() {
   const delen = delenNieuw();
-  return { geld: GARAGE.startGeld, motor: GARAGE.startMotor, stal: { [GARAGE.startMotor]: delen }, delen, uitrusting: uitrustingNieuw(), monteurs: [], uitslagen: {}, vrij: 1, races: 0, verslag: null, sponsor: null, aanbod: null, sponsorTotaal: 0, sponsorSinds: 0, onderzoek: onderzoekNieuw(), seizoen: 1, seizoenKlaar: false };
+  return { geld: GARAGE.startGeld, motor: GARAGE.startMotor, stal: { [GARAGE.startMotor]: delen }, delen, uitrusting: uitrustingNieuw(), monteurs: [], uitslagen: {}, vrij: 1, races: 0, verslag: null, sponsor: null, aanbod: null, sponsorTotaal: 0, sponsorSinds: 0, onderzoek: onderzoekNieuw(), seizoen: 1, seizoenKlaar: false, bekers: {}, rivaal: {}, opdrachten: 0 };
 }
 
 
@@ -1174,6 +1319,10 @@ function garageHeel(G) {
   if (!G.aanbod || !SPONSOR_VAN[G.aanbod]) G.aanbod = null;
   G.sponsorTotaal = G.sponsorTotaal || 0; G.sponsorSinds = G.sponsorSinds || 0;
   G.seizoen = Math.max(1, G.seizoen | 0); G.seizoenKlaar = !!G.seizoenKlaar;
+  if (!G.bekers || typeof G.bekers !== 'object') G.bekers = {};
+  for (const id of Object.keys(G.bekers)) if (!BEKER_VAN[id]) delete G.bekers[id];
+  if (!G.rivaal || typeof G.rivaal !== 'object') G.rivaal = {};
+  G.opdrachten = G.opdrachten | 0;
   if (!G.onderzoek || typeof G.onderzoek !== 'object') G.onderzoek = onderzoekNieuw();
   const Z = G.onderzoek; Z.gereed = (Z.gereed || []).filter((id) => ONDERZOEK_VAN[id]); Z.gemonteerd = Z.gemonteerd || {};
   for (const plek of Object.keys(Z.gemonteerd)) if (!Z.gereed.includes(Z.gemonteerd[plek])) Z.gemonteerd[plek] = null;
@@ -1392,7 +1541,19 @@ function naRace(G, race, uitslag) {
       else V.onderzoek = { id: o.id, stand: 'bezig', races: Z.bezig.races };
     }
   }
+
+  const opd = sponsorOpdracht(G, race);
+  if (opd) {
+    const gehaald = !!opd.test(uitslag), bonus = gehaald ? opdrachtBonus(G) : 0;
+    V.opdracht = { id: opd.id, tekst: opd.tekst, gehaald, bonus };
+    if (gehaald) { G.geld += bonus; G.opdrachten = (G.opdrachten || 0) + 1; G.sponsorTotaal = (G.sponsorTotaal || 0) + bonus; }
+  }
+  if (uitslag.rivaal) {
+    V.rivaal = { uitslag: uitslag.rivaal, bonus: uitslag.rivaal === 'verslagen' ? RIVAAL.bonus * tochtNr(race) : 0 };
+    if (V.rivaal.bonus) { G.geld += V.rivaal.bonus; G.rivaal = G.rivaal || {}; G.rivaal[race.id] = (G.rivaal[race.id] || 0) + 1; }
+  }
   G.races++;
+  V.bekers = bekersNa(G, { u: uitslag, V, race });
   G.verslag = V;
   return V;
 }
@@ -1422,6 +1583,19 @@ const RIJ = {
   blessureStuur: 0.3,
   pakSlijt: { pak: 1, handschoenen: 0.8, helm: 0.6, laarzen: 0.6 },
 };
+
+
+
+const RIJHULP = { bocht: 0.7, berm: 0.55, terug: 0.9, rand: 0.8 };
+const SPOOR_PER_S = 4;
+
+function spookPlek(spook, t) {
+  if (!spook || !spook.spoor || !spook.spoor.length) return null;
+  const f = t * SPOOR_PER_S, i = Math.floor(f), a = spook.spoor[i], b = spook.spoor[i + 1];
+  if (!a || !b) { const z = spook.spoor[spook.spoor.length - 1]; return { pos: z[0], x: z[1] }; }
+  const u = f - i;
+  return { pos: a[0] + (b[0] - a[0]) * u, x: a[1] + (b[1] - a[1]) * u };
+}
 const SCHADE_DELEN = ['motorblok', 'banden', 'remmen', 'vering', 'kuip', 'turbo'];
 
 
@@ -1514,6 +1688,7 @@ function raceNieuw(race, motor, zaad) {
     val: 0, vallen: 0, berm: false, wegdek: 'asfalt', tunnel: false, checkpoint: 0, checkpoints: Math.floor(race.km / ROUTE.checkpointKm),
     tegen: [], positie: race.tegen + 1, ingehaald: 0, tijd: 0, uitslag: null, gebeurd: [], kapot: {}, pit: null, tank: null, bui: null,
     bandenOpties: motor.bandenOpties || null, banden: motor.bandenNu || 'standaard',
+    hulp: !!motor.hulp, spook: motor.spook || null, spoor: [], bermTijd: 0, rivaal: null,
   };
   st.stats = motorNu(st);
   st.rijder = rijderNu(st);
@@ -1522,6 +1697,11 @@ function raceNieuw(race, motor, zaad) {
   for (let i = 0; i < race.tegen; i++) {
     const rang = i / Math.max(1, race.tegen - 1);
     st.tegen.push({ nr: i + 1, pos: 60 + rang * 900 + rnd(st) * 40, x: (rnd(st) - 0.5) * 1.4, snel: 0, doel: basis.max * (0.62 + rang * 0.33) * (0.97 + rnd(st) * 0.06) * tempo, wiebel: rnd(st) * 6.28 });
+  }
+
+  if (rivaalRijdtMee(race)) {
+    st.rivaal = { nr: race.tegen + 1, pos: RIVAAL.start, x: 0.3, snel: 0, doel: basis.max * RIVAAL.tempo * tempo, wiebel: 1.7, rivaal: true };
+    st.tegen.push(st.rivaal); st.positie = st.tegen.length + 1;
   }
 
   const p0 = segs.findIndex((s) => s.pitBegin);
@@ -1573,6 +1753,7 @@ function raceStap(st, dt, invoer) {
   if (leeg) topNu = Math.min(topNu, PIT.leegSnel);
   if (inStraat || leeg) inv = Object.assign({}, inv, { turbo: false });
   st.berm = Math.abs(st.x) > seg.breedte && !(seg.pit !== undefined && st.x > 0 && st.x < PIT.breed[1]);
+  if (st.berm && st.snel > 20) st.bermTijd += dt;
 
   if (P && (P.stand === 'box' || P.stand === 'werk')) {
     if (P.stand === 'box' && inv.pit) { P.klus = pitKlus(st, inv.pit); P.werk = P.klus.tijd; P.stand = 'werk'; st.gebeurd.push({ soort: 'pitwerk', klus: P.klus }); }
@@ -1594,15 +1775,18 @@ function raceStap(st, dt, invoer) {
   if (st.turbo > 0) { st.turbo -= dt; st.turboGebruikt += dt; slijt(st, 'motorblok', RIJ.slijt.turbo.motorblok * dt); slijt(st, 'turbo', RIJ.slijt.turbo.turbo * dt); }
 
   const v = st.snel / Math.max(1, S.max);
-  const stuur = st.val > 0 ? 0 : (inv.links ? -1 : 0) + (inv.rechts ? 1 : 0);
+
+  const stuur = st.val > 0 ? 0 : clamp((inv.links ? -1 : 0) + (inv.rechts ? 1 : 0) + (inv.stuur || 0), -1, 1);
   st.stuurX += (stuur - st.stuurX) * Math.min(1, dt * 10);
   st.x += st.stuurX * RIJ.stuur * R.stuur * (st.basis.stuur || 1) * (1 - RIJ.blessureStuur * st.blessure / 100) * dt * (0.35 + 0.65 * Math.sqrt(v));
-  st.x -= bocht * RIJ.middelpunt * v * v * dt * (1.15 - S.grip * dek.grip) * (st.turbo > 0 ? 1.4 : 1);
+  st.x -= bocht * RIJ.middelpunt * v * v * dt * (1.15 - S.grip * dek.grip) * (st.turbo > 0 ? 1.4 : 1) * (st.hulp ? RIJHULP.bocht : 1);
+
+  if (st.hulp && !stuur && Math.abs(st.x) > RIJHULP.rand * seg.breedte && seg.pit === undefined && !inStraat) st.x -= Math.sign(st.x) * RIJHULP.terug * dt;
   if (W.wind) st.x += Math.sin(st.t * 0.9) * W.wind * 0.35 * dt * (0.5 + v);
   st.lean = clamp(st.stuurX * 0.7 + bocht * v * 0.5, -1, 1);
 
   if (st.berm) {
-    if (st.snel > RIJ.bermMax) st.snel = Math.max(RIJ.bermMax, st.snel - RIJ.bermRem * dt * (1.3 - S.vering * 0.6));
+    if (st.snel > RIJ.bermMax) st.snel = Math.max(RIJ.bermMax, st.snel - RIJ.bermRem * dt * (1.3 - S.vering * 0.6) * (st.hulp ? RIJHULP.berm : 1));
     st.x += Math.sin(st.t * 23) * 0.4 * dt * (1 - S.vering * 0.5);
     slijt(st, 'vering', RIJ.slijt.berm * dt);
     for (const d of seg.decor) if (!d.zacht && ['checkpoint', 'finish', 'tunnelmond'].indexOf(d.soort) < 0 && Math.sign(st.x) === d.kant && Math.abs(st.x) > d.afstand - 0.25 && st.val <= 0 && st.snel > 20) valt(st, d.soort);
@@ -1613,6 +1797,8 @@ function raceStap(st, dt, invoer) {
 
   const m = st.snel / 3.6 * dt, km = m / 1000;
   st.pos += m;
+
+  if (st.fase === 'race') { const n = Math.floor(st.tijd * SPOOR_PER_S); while (st.spoor.length <= n) st.spoor.push([Math.round(st.pos), Math.round(st.x * 100) / 100]); }
 
   if (st.tank !== null) {
     const was = st.tank;
@@ -1650,7 +1836,10 @@ function raceStap(st, dt, invoer) {
   if (cp > st.checkpoint && cp <= st.checkpoints && st.pos < st.lengte) { st.checkpoint = cp; st.gebeurd.push({ soort: 'checkpoint', nr: cp, tijd: st.tijd }); }
   const uitslag = (gehaald) => ({ gehaald, positie: st.positie, tijd: st.tijd, vallen: st.vallen, turboSeconden: st.turboGebruikt, km: (gehaald ? st.lengte : st.pos) / 1000, slijtage: Object.assign({}, st.schade), kapot: Object.keys(st.kapot),
     blessure: st.blessure, uitrusting: Object.assign({}, st.pak), opgave: !gehaald && st.opgave, worpen: st.worpen.slice(),
-    pitstop: st.pit && st.pit.gedaan ? Math.round(st.pit.verloren * 10) / 10 : null, pitBanden: !!(st.pit && st.pit.klus && st.pit.klus.banden), bui: !!(st.bui && st.bui.nat) });
+    pitstop: st.pit && st.pit.gedaan ? Math.round(st.pit.verloren * 10) / 10 : null, pitBanden: !!(st.pit && st.pit.klus && st.pit.klus.banden), bui: !!(st.bui && st.bui.nat),
+    ingehaald: st.ingehaald, bermTijd: Math.round(st.bermTijd * 10) / 10,
+    rivaal: st.rivaal ? (gehaald && st.rivaal.pos < st.lengte ? 'verslagen' : 'verloren') : null,
+    spoor: gehaald ? st.spoor.slice() : null, spookVerslagen: !!(gehaald && st.spook && st.tijd < st.spook.tijd) });
   if (st.pos >= st.lengte) { st.fase = 'klaar'; st.uitslag = uitslag(true); st.gebeurd.push({ soort: 'finish', positie: st.positie, tijd: st.tijd }); }
   else if (st.opgave) { st.fase = 'klaar'; st.uitslag = uitslag(false); st.gebeurd.push({ soort: 'opgave' }); }
 }
@@ -1697,7 +1886,7 @@ function raceRobot(st) {
 const WEG = { W: 640, H: 360, breedte: 2000, segLen: 200, cameraHoogte: 1000, diepte: 1.6, zicht: 260, mist: 0.35, meterPerUnit: 1 / 40,
   tunnelHoog: 1780, tunnelWand: 1.16, portaalHoog: 2230, leuningHoog: 260 };
 const FONT = '"Roboto Condensed", "sans-serif-condensed", "Arial Narrow", "Bahnschrift", sans-serif';
-const UI = { instellingen: { geluid: true, autoGas: true }, scherm: 'hoofd', st: null, race: null, cv: null, ctx: null, toetsen: { links: false, rechts: false, gas: false, rem: false, turbo: false }, vingers: {},
+const UI = { instellingen: { geluid: true, autoGas: true, rijhulp: false, spook: true }, scherm: 'hoofd', st: null, race: null, cv: null, ctx: null, toetsen: { links: false, rechts: false, gas: false, rem: false, turbo: false }, vingers: {},
   beelden: {}, bericht: '', berichtTot: 0, tab: 'motor', achtergrondX: 0, demo: false, deeltjes: [], schud: 0, dash: {}, vignet: null };
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1756,18 +1945,25 @@ function naarScherm(naam) {
   if (!UI.geladen) { UI.geladen = true; for (const k of Object.keys(SPRITE_BRON)) beeld(k); }
   if (UI.scherm === 'race' && naam !== 'race') motorStop();
   UI.scherm = naam;
-  for (const s of ['hoofd', 'races', 'garage', 'race', 'uitslag']) $('scherm-' + s).hidden = s !== naam;
-  $('kop').hidden = naam === 'race';
+  for (const s of ['hoofd', 'races', 'garage', 'race', 'uitslag', 'duel', 'duelrace']) $('scherm-' + s).hidden = s !== naam;
+  $('kop').hidden = naam === 'race' || naam === 'duelrace';
   $('terug').style.visibility = naam === 'hoofd' ? 'hidden' : 'visible';
-  $('kopTitel').textContent = { hoofd: 'GALADIN GAMES', races: 'RACES', garage: 'GARAGE', uitslag: 'UITSLAG' }[naam] || '';
+  $('kopTitel').textContent = { hoofd: 'GALADIN GAMES', races: 'RACES', garage: 'GARAGE', uitslag: 'UITSLAG', duel: 'MET Z\'N TWEEËN' }[naam] || '';
   $('geldTel').textContent = getal(G.geld);
   if (naam === 'hoofd') renderHoofd();
   if (naam === 'races') renderRaces();
   if (naam === 'garage') renderGarage();
+  if (naam === 'duel') renderDuel();
   window.scrollTo(0, 0);
   bewaarNu();
 }
+
+const INSTELLING_TEKST = { rijhulp: ['Rijhulp', 'stuurt een beetje mee en maakt de berm milder'], spook: ['Spookrijder', 'je beste rit rijdt doorzichtig mee'] };
+function renderInstellingen() {
+  $('instellingen').innerHTML = Object.keys(INSTELLING_TEKST).map((k) => '<button class="schakel" data-inst="' + k + '" aria-pressed="' + !!UI.instellingen[k] + '"><b>' + INSTELLING_TEKST[k][0] + (UI.instellingen[k] ? ' AAN' : ' UIT') + '</b><small>' + INSTELLING_TEKST[k][1] + '</small></button>').join('');
+}
 function renderHoofd() {
+  renderInstellingen();
   const titel = sprUrl('titel');
   if (titel) { $('titelBeeld').src = titel; $('titelBeeld').hidden = false; }
   const gehaald = Object.keys(G.uitslagen).length, podium = Object.values(G.uitslagen).filter((u) => u.positie <= 3).length;
@@ -1787,7 +1983,7 @@ function renderRaces() {
     return '<section class="tocht' + (races[0].nr > G.vrij ? ' dicht' : '') + '"><header class="tochtkop" style="' + stijl + '"><div><b>' + esc(t.naam) + '</b><small>' + TOCHT_SFEER[t.id] + '</small></div><span class="telling">' + podiums + '/' + races.length + ' podium</span></header><div class="lijst">' +
       races.map((r) => {
         const open = r.nr <= G.vrij, u = G.uitslagen[r.id], medaille = u ? ['goud', 'zilver', 'brons'][u.positie - 1] || 'gehaald' : '';
-        return '<button class="racekaart' + (open ? '' : ' dicht') + '" data-race="' + r.id + '"' + (open ? '' : ' aria-disabled="true"') + '><span class="nr ' + medaille + '">' + (open ? r.nr : '🔒') + '</span><span class="tekst"><b>' + esc(r.naam) + '</b><span class="chips"><i>' + r.km + ' km</i><i>' + r.tegen + ' rijders</i><i class="weer ' + r.weer + '">' + WEER_NAAM[r.weer] + '</i>' + (r.km >= PIT.vanafKm ? '<i>pitstop</i>' : '') + '</span>' +
+        return '<button class="racekaart' + (open ? '' : ' dicht') + '" data-race="' + r.id + '"' + (open ? '' : ' aria-disabled="true"') + '><span class="nr ' + medaille + '">' + (open ? r.nr : '🔒') + '</span><span class="tekst"><b>' + esc(r.naam) + '</b><span class="chips"><i>' + r.km + ' km</i><i>' + r.tegen + ' rijders</i><i class="weer ' + r.weer + '">' + WEER_NAAM[r.weer] + '</i>' + (r.km >= PIT.vanafKm ? '<i>pitstop</i>' : '') + (rivaalRijdtMee(r) ? '<i class="vos">' + RIVAAL.naam + '</i>' : '') + '</span>' +
           (u ? '<em>beste: ' + u.positie + 'e in ' + tijdTekst(u.tijd) + '</em>' : open ? '<em class="nieuw">nog niet gereden</em>' : '<em>podium in race ' + (r.nr - 1) + ' opent deze</em>') + '</span><span class="prijs"><b>' + getal(racegeldVan(G, r)) + '</b><small>racegeld</small></span></button>';
       }).join('') + '</div></section>';
   }).join('');
@@ -1797,7 +1993,8 @@ const statBalk = (naam, deel, tekst) => '<div class="stat"><span>' + naam + '</s
 
 const uitrustingBeeld = (id, niveau) => sprUrl('uitrusting/' + id + '_' + niveau) || sprUrl('uitrusting/' + id);
 
-const motorPad = (naam, motor) => { const eigen = 'motor_' + (motor || G.motor) + '/' + naam; return sprUrl(eigen) ? eigen : 'motor/' + naam; };
+
+const motorPad = (naam, motor) => { const eigen = 'motor_' + (motor || UI.motorBeeld || G.motor) + '/' + naam; return sprUrl(eigen) ? eigen : 'motor/' + naam; };
 
 
 
@@ -1871,7 +2068,15 @@ function onderzoekPaneel() {
   }).join('') + '</div>';
   return h;
 }
-const GARAGE_TABS = ['motor', 'stal', 'uitrusting', 'onderzoek', 'monteurs', 'sponsor', 'verslag'];
+const GARAGE_TABS = ['motor', 'stal', 'uitrusting', 'onderzoek', 'monteurs', 'sponsor', 'prijzen', 'verslag'];
+
+function prijzenPaneel() {
+  const heb = BEKERS.filter((b) => G.bekers && G.bekers[b.id]).length;
+  return '<p class="intro">In de kast: <b>' + heb + ' van ' + BEKERS.length + '</b> bekers.</p><div class="bekers">' + BEKERS.map((b) => {
+    const ja = !!(G.bekers && G.bekers[b.id]), im = sprUrl('bekers/' + b.id) || sprUrl('bekers/beker');
+    return '<div class="beker' + (ja ? ' ja' : '') + '">' + (im ? '<img class="pix" src="' + im + '" alt="" width="48" height="48">' : '<span class="kelk"></span>') + '<b>' + esc(b.naam) + '</b><small>' + esc(b.uitleg) + '</small></div>';
+  }).join('') + '</div>';
+}
 const komma = (x, n) => x.toFixed(n === undefined ? 1 : n).replace('.', ',');
 function renderGarage() {
   if (GARAGE_TABS.indexOf(UI.tab) < 0) UI.tab = 'motor';
@@ -1918,6 +2123,7 @@ function renderGarage() {
     }).join('') + '</div>';
   $('garageSponsor').innerHTML = sponsorPaneel();
   $('garageOnderzoek').innerHTML = onderzoekPaneel();
+  $('garagePrijzen').innerHTML = prijzenPaneel();
 
   const V = G.verslag;
   $('garageVerslag').innerHTML = V ? '<div class="uitslagkaart"><h2>' + esc(RACE_VAN[V.race] ? RACE_VAN[V.race].naam : V.race) + '</h2><p>' + (V.gehaald ? V.positie + 'e plaats, racegeld ' + getal(V.prijs) : V.opgave ? 'uitgevallen na een val' : 'niet uitgereden') + ' · loon ' + getal(V.loon) + (V.dokter ? ' · dokter ' + getal(V.dokter) : '') + (V.sponsor ? ' · sponsor +' + getal(V.sponsor) : '') +
@@ -1930,20 +2136,55 @@ function zegt(tekst, ms, steen) { UI.bericht = tekst; UI.berichtSteen = steen ||
 const steenPad = (worp) => (sprUrl('dobbel/d20_' + worp) ? 'dobbel/d20_' + worp : sprUrl('dobbel/d20') ? 'dobbel/d20' : '');
 
 
-function startRace(race, demo) {
+
+
+const spookSleutel = (id) => 'bochtenjager_spook_' + id;
+function spookLees(id) { try { const s = JSON.parse(localStorage.getItem(spookSleutel(id)) || 'null'); return s && s.spoor && s.tijd > 0 ? s : null; } catch (e) { return null; } }
+function spookBewaar(id, u, motor) {
+  const oud = spookLees(id);
+  if (!u.gehaald || !u.spoor || (oud && oud.tijd <= u.tijd)) return false;
+  try { localStorage.setItem(spookSleutel(id), JSON.stringify({ tijd: u.tijd, spoor: u.spoor, motor })); return true; } catch (e) { return false; }
+}
+
+function startRace(race, demo, zaad) {
   UI.race = race; UI.demo = !!demo; if (!demo) UI.robot = false;
-  UI.st = raceNieuw(race, raceMotor(G), (Date.now() % 2147483646) | 0);
+  const motor = raceMotor(G);
+  motor.hulp = !!UI.instellingen.rijhulp;
+  motor.spook = UI.instellingen.spook ? spookLees(race.id) : null;
+  if (UI.blauwDuel) motor.spook = null;
+  UI.st = raceNieuw(race, motor, zaad || (Date.now() % 2147483646) | 0);
+  const opd = demo || UI.blauwDuel ? null : sponsorOpdracht(G, race);
+  UI.opdracht = opd ? opd.tekst : '';
   UI.pitTank = true; UI.pitBand = null; UI.pitGa = null; $('pitPaneel').hidden = true;
-  UI.achtergrondX = 0; UI.deeltjes = []; UI.schud = 0; UI.bericht = '';
+  UI.achtergrondX = 0; UI.deeltjes = []; UI.rook = []; UI.schud = 0; UI.bericht = '';
   dashMaak();
   naarScherm('race');
   maatDoek();
   motorStart();
 }
+
+function extraMeldingen(V, u, nieuwSpook) {
+  let h = '';
+  if (V.opdracht) h += V.opdracht.gehaald ? '<p class="nieuw">Opdracht gehaald: <b>' + esc(V.opdracht.tekst) + '</b> · +' + getal(V.opdracht.bonus) + ' van je sponsor</p>' : '<p class="tip">Opdracht niet gehaald: ' + esc(V.opdracht.tekst) + '.</p>';
+  if (V.rivaal) h += V.rivaal.uitslag === 'verslagen' ? '<p class="nieuw">Je versloeg <b>' + RIVAAL.naam + '</b> · +' + getal(V.rivaal.bonus) + '</p>' : '<p class="tip">' + RIVAAL.naam + ' was je te snel af. Volgende keer beter.</p>';
+  if (u.spookVerslagen) h += '<p class="nieuw">Sneller dan je spookrijder!</p>';
+  else if (nieuwSpook) h += '<p class="tip">Je beste rit op deze route rijdt voortaan als spookrijder mee.</p>';
+  if (V.bekers && V.bekers.length) h += '<p class="nieuw">' + (V.bekers.length === 1 ? 'Nieuwe beker' : 'Nieuwe bekers') + ': <b>' + V.bekers.map((id) => esc(BEKER_VAN[id].naam)).join(', ') + '</b> (garage, Prijzen)</p>';
+  return h;
+}
 function raceKlaar() {
   const st = UI.st, u = st.uitslag, race = UI.race;
+
+  if (UI.blauwDuel) {
+    motorStop(); UI.blauwDuel = false;
+    Blauw.zelfKlaar = u.gehaald ? u.tijd : Infinity;
+    blauwStuur('F' + (u.gehaald ? Math.round(u.tijd * 10) : 360000));
+    blauwUitslag(); UI.st = null; naarScherm('uitslag');
+    return;
+  }
   motorStop();
   const V = UI.demo ? null : naRace(G, race, u);
+  const nieuwSpook = !UI.demo && spookBewaar(race.id, u, G.motor);
   const podium = u.gehaald && u.positie <= 3, podiumBeeld = sprUrl('podium');
 
   const TREDEN = [[320, 118], [274, 135], [365, 144]], anderen = ['tegenstander', 'tegenstander2', 'tegenstander3'];
@@ -1957,7 +2198,7 @@ function raceKlaar() {
     (u.opgave ? '<p class="kapot">Uitgevallen: <b>te gehavend om door te rijden</b>. Betere uitrusting vangt de klap op.</p>' : gehavend >= 40 ? '<p class="tip">Je kwam ' + gehavend + '% gehavend binnen. Kijk eens bij de uitrusting in de garage.</p>' : '') +
     (u.kapot && u.kapot.length ? '<p class="kapot">Kapot gegaan tijdens de race: <b>' + u.kapot.map((k) => ONDERDEEL_VAN[k].naam.toLowerCase()).join(', ') + '</b></p>' : '') +
     (u.bui ? '<p class="tip">Onderweg begon het te regenen.' + (u.pitBanden ? '' : ' In de pit kun je andere banden laten zetten.') + '</p>' : '') +
-    (V ? (V.nieuw ? '<p class="nieuw">Nieuwe race open: <b>' + esc(V.nieuw.naam) + '</b></p>' : '') + (V.seizoenKlaar ? seizoenBlok() : '') + (V.aanbod ? aanbodKaart(V.aanbod) : '') + onderzoekMelding(V) + schadeLijst(V) + (Object.keys(V.hersteld).length ? '' : '<p class="tip">Geen monteurs in dienst: niets hersteld. Huur er een in de garage.</p>') : '<p class="tip">Demo: niets bewaard.</p>') + '</div>';
+    (V ? (V.nieuw ? '<p class="nieuw">Nieuwe race open: <b>' + esc(V.nieuw.naam) + '</b></p>' : '') + (V.seizoenKlaar ? seizoenBlok() : '') + extraMeldingen(V, u, nieuwSpook) + (V.aanbod ? aanbodKaart(V.aanbod) : '') + onderzoekMelding(V) + schadeLijst(V) + (Object.keys(V.hersteld).length ? '' : '<p class="tip">Geen monteurs in dienst: niets hersteld. Huur er een in de garage.</p>') : '<p class="tip">Demo: niets bewaard.</p>') + '</div>';
   UI.st = null;
   naarScherm('uitslag');
 }
@@ -1965,12 +2206,16 @@ function raceKlaar() {
 
 function maatDoek() {
   const cv = UI.cv, dash = $('dash'), knoppen = $('knoppen');
-  const rest = (dash ? dash.offsetHeight : 0) + (knoppen && getComputedStyle(knoppen).display !== 'none' ? 104 : 0);
-  let b = Math.min(window.innerWidth, 960);
+
+
+  const liggend = window.matchMedia('(orientation: landscape) and (pointer: coarse)').matches, pad = document.body.classList.contains('pad');
+  const rest = (dash ? dash.offsetHeight : 0) + (!liggend && knoppen && getComputedStyle(knoppen).display !== 'none' ? 104 : 0);
+  let b = Math.min(window.innerWidth - (liggend && !pad ? 2 * Math.max(96, Math.round(window.innerWidth * 0.12)) : 0), 960);
   const maxH = window.innerHeight - rest - 4;
   if (maxH > 140 && b * WEG.H / WEG.W > maxH) b = Math.floor(maxH * WEG.W / WEG.H);
   cv.style.width = b + 'px'; cv.style.height = Math.round(b * WEG.H / WEG.W) + 'px';
   $('raceKolom').style.width = b + 'px';
+  if (dash) dash.style.width = liggend ? b + 'px' : '';
 }
 
 
@@ -2111,7 +2356,18 @@ function tekenWeg(nu, dt) {
     const k = Math.floor(T.pos / ROUTE.segLen) - basis;
     if (k < 0 || k >= punten.length) continue;
     const P = punten[k], f = T.pos / ROUTE.segLen - Math.floor(T.pos / ROUTE.segLen);
-    zetOp(k, { soort: 'tegen', nr: T.nr, x: lerp(P.p1.x, P.p2.x, f) + lerp(P.p1.w, P.p2.w, f) * T.x, y: lerp(P.p1.y, P.p2.y, f), s: lerp(P.p1.s, P.p2.s, f), k });
+    zetOp(k, { soort: 'tegen', nr: T.nr, rivaal: !!T.rivaal, x: lerp(P.p1.x, P.p2.x, f) + lerp(P.p1.w, P.p2.w, f) * T.x, y: lerp(P.p1.y, P.p2.y, f), s: lerp(P.p1.s, P.p2.s, f), k });
+  }
+
+  const anderen = [];
+  if (st.spook && st.fase !== 'aftellen') { const q = spookPlek(st.spook, st.tijd); if (q) anderen.push({ soort: 'spook', pos: q.pos, x: q.x, motor: st.spook.motor }); }
+  if (st.ander) anderen.push({ soort: 'ander', pos: st.ander.pos, x: st.ander.x, motor: st.ander.motor, naam: st.ander.naam });
+  for (const A of anderen) {
+    if (A.pos < st.pos + 2) continue;
+    const k = Math.floor(A.pos / ROUTE.segLen) - basis;
+    if (k < 0 || k >= punten.length) continue;
+    const P = punten[k], f = A.pos / ROUTE.segLen - Math.floor(A.pos / ROUTE.segLen);
+    zetOp(k, Object.assign({}, A, { x: lerp(P.p1.x, P.p2.x, f) + lerp(P.p1.w, P.p2.w, f) * A.x, y: lerp(P.p1.y, P.p2.y, f), s: lerp(P.p1.s, P.p2.s, f), k }));
   }
   const TH = WEG.tunnelHoog;
   UI.spriteTint = tocht.id === 'nachtstad' ? '' : weer.nacht ? 'nacht' : weerNaam === 'avond' ? 'avond' : '';
@@ -2254,6 +2510,7 @@ function tekenWeg(nu, dt) {
   c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(mx + 6, H - 16, 40, 10, 0, 0, 6.29); c.fill();
   tekenDeeltjes(c, st, dt, mx, tocht);
   tekenMotor(c, mx, my, st.lean, st.val > 0, st.turbo > 0, nu);
+  tekenRook(c, dt);
 
 
   if (st.turbo > 0 || st.snel > st.stats.max * 0.92) { c.strokeStyle = 'rgba(255,255,255,' + (st.turbo > 0 ? 0.32 : 0.1) + ')'; c.lineWidth = 1; c.beginPath(); for (let s = 0; s < (st.turbo > 0 ? 28 : 10); s++) { const a = -0.12 + ((s * 0.61 + nu * 0.0012) % 1) * 3.38, r0 = 130 + (s * 37 + nu * 0.6) % 200, r1 = r0 + 40 + (s % 5) * 20; c.moveTo(W / 2 + Math.cos(a) * r0, hor + Math.sin(a) * r0 * 0.6); c.lineTo(W / 2 + Math.cos(a) * r1, hor + Math.sin(a) * r1 * 0.6); } c.stroke(); }
@@ -2307,11 +2564,29 @@ const DECOR_MAAT = { pitbord: [600, 1000], pitbox: [2000, 1300], boom: [900, 150
   dijklantaarn: [380, 1500], vangrail: [1000, 300], basalt: [640, 320], hectometerpaal: [160, 420], uitkijktoren: [1080, 2000], sluis: [2180, 1400], meeuwenpaal: [240, 720], schaap: [450, 380], weidehek: [740, 420], helmgras: [420, 360],
   duin: [1500, 900], duindoorn: [540, 420], container: [1260, 700], container_rood: [1260, 700], container_blauw: [1260, 700], bolder: [180, 220], loods: [2280, 1400], havenkraan: [1800, 3000], zandzakken: [660, 330], golf: [970, 900],
   rotskust: [960, 600], bootje: [840, 420], lavasteen: [730, 520], lavaspleet: [800, 300], zoutschots: [700, 220], mijlpaal: [210, 480], autowrak: [1200, 600], canyonwand: [3150, 4200] };
+
+function bordje(c, naam, x, y, kleur) {
+  c.font = '900 9px ' + FONT; const w = c.measureText(naam).width + 8;
+  c.fillStyle = 'rgba(8,10,14,.75)'; c.fillRect(Math.round(x - w / 2), Math.round(y - 11), Math.round(w), 12);
+  c.fillStyle = kleur; c.fillRect(Math.round(x - w / 2), Math.round(y - 11), 2, 12);
+  tekst(c, naam, x + 1, y - 2, 9, kleur, 'center');
+}
 function tekenWegSprite(c, sp) {
   const schaal = sp.s * WEG.W / 2;
   c.globalAlpha = clamp((WEG.zicht - sp.k) / (WEG.zicht * 0.18), 0, 1);
+  if (sp.soort === 'spook' || sp.soort === 'ander') {
+
+    const im = beeld(motorPad('motor_recht', MOTOR_VAN[sp.motor] ? sp.motor : G.motor)), w = 360 * schaal, h = 360 * schaal;
+    if (w < 2 || !klaar(im)) return;
+    const a = c.globalAlpha; c.globalAlpha = a * (sp.soort === 'spook' ? 0.42 : 1);
+    c.drawImage(inLicht(im, UI.spriteTint), Math.round(sp.x - w / 2), Math.round(sp.y - h), Math.round(w), Math.round(h));
+    c.globalAlpha = a;
+    if (sp.soort === 'ander' && h > 14) bordje(c, sp.naam || 'SPELER 2', sp.x, sp.y - h - 4, '#8bd3ff');
+    return;
+  }
   if (sp.soort === 'tegen') {
-    const im = beeld('tegenstander' + (sp.nr % 3 === 0 ? '' : sp.nr % 3 === 1 ? '2' : '3')) || beeld('tegenstander'), w = 360 * schaal, h = 360 * schaal;
+    const im = (sp.rivaal && beeld('rivaal')) || beeld('tegenstander' + (sp.nr % 3 === 0 ? '' : sp.nr % 3 === 1 ? '2' : '3')) || beeld('tegenstander'), w = 360 * schaal, h = 360 * schaal;
+    if (sp.rivaal && h > 14) bordje(c, RIVAAL.naam.toUpperCase(), sp.x, sp.y - h - 4, '#ff9a3c');
     if (w < 2 || !klaar(im)) return;
     c.fillStyle = 'rgba(0,0,0,.3)'; c.beginPath(); c.ellipse(sp.x + w * 0.08, sp.y, w * 0.45, h * 0.1, 0, 0, 6.29); c.fill();
     c.drawImage(inLicht(im, UI.spriteTint), Math.round(sp.x - w / 2), Math.round(sp.y - h), Math.round(w), Math.round(h));
@@ -2339,12 +2614,34 @@ function tekenDeeltjes(c, st, dt, mx, tocht) {
     else if (st.wegdek === 'ijs' && Math.random() < 0.5) erbij(1, '#ffffff', 100, 70, 0.3, 2);
   }
   if (st.val > st.valDuur - 0.3) erbij(3, Math.random() < 0.5 ? '#ffd34d' : '#ff8a3a', 260, 160, 0.4, 2);
+
+  const blok = st.schade.motorblok;
+  UI.rook = UI.rook || [];
+  if (blok > 55 && st.fase !== 'klaar' && UI.rook.length < 60 && Math.random() < (blok - 50) / 50 * dt * 30) {
+
+    const zwart = blok > 85, g = zwart ? 95 + Math.random() * 30 : 165 + Math.random() * 50;
+
+    UI.rook.push({ x: mx + (Math.random() - 0.5) * 18, y: H - 78, vx: (Math.random() - 0.5) * 30, vy: -40 - Math.random() * 30, t: 1.1, leven: 1.1, kleur: 'rgb(' + g + ',' + g + ',' + g + ')', maat: 3 });
+  }
   for (let k = D.length - 1; k >= 0; k--) {
     const p = D[k];
     p.t -= dt;
     if (p.t <= 0) { D.splice(k, 1); continue; }
     p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 420 * dt;
     c.globalAlpha = Math.min(1, p.t / p.leven * 1.5); c.fillStyle = p.kleur; c.fillRect(Math.round(p.x), Math.round(p.y), p.maat, p.maat);
+  }
+  c.globalAlpha = 1;
+}
+
+function tekenRook(c, dt) {
+  const R = UI.rook || [];
+  for (let k = R.length - 1; k >= 0; k--) {
+    const p = R[k];
+    p.t -= dt;
+    if (p.t <= 0) { R.splice(k, 1); continue; }
+    p.x += p.vx * dt; p.y += p.vy * dt; p.vy -= 10 * dt;
+    const u = 1 - p.t / p.leven, m = 3 + u * 9;
+    c.globalAlpha = 0.85 * (1 - u * 0.8); c.fillStyle = p.kleur; c.fillRect(Math.round(p.x - m / 2), Math.round(p.y - m / 2), Math.round(m), Math.round(m));
   }
   c.globalAlpha = 1;
 }
@@ -2390,6 +2687,7 @@ function tekenHud(c, nu) {
   tekst(c, (st.pos / 1000).toFixed(1) + ' / ' + race.km + ' km', W / 2, 54, 12, '#ffffff', 'center', 700);
 
   const inPit = st.pit && ['straat', 'box', 'werk', 'uit'].includes(st.pit.stand);
+  if (UI.inDuel) { tekst(c, Math.round(st.snel) + ' KM/U', 14, H - 34, 20, '#ffffff', 'left'); if (st.turbo > 0) tekst(c, st.basis.elektrisch ? 'BOOST' : 'TURBO', W - 14, H - 34, 14, '#8bd3ff', 'right'); }
   if (st.wegdek !== 'asfalt' && st.fase === 'race' && !inPit) tekst(c, WEGDEK[st.wegdek].naam.toUpperCase(), 14, H - 14, 13, { nat: '#9fd0ff', ijs: '#dff3ff', grind: '#e0c9a0', modder: '#c9a37a' }[st.wegdek] || '#fff');
   if (st.tunnel && st.fase === 'race') tekst(c, 'TUNNEL', W - 14, H - 14, 13, '#fff4c2', 'right');
   const P = st.pit;
@@ -2398,6 +2696,11 @@ function tekenHud(c, nu) {
     if (P.stand === 'straat' || P.stand === 'uit') tekst(c, 'PITSTRAAT · ' + PIT.limiet + ' KM/U', W / 2, H - 16, 15, '#ffd34d', 'center');
     if (P.stand === 'werk') { tekst(c, 'PITSTOP', W / 2, H / 2 - 20, 40, '#ffd34d', 'center'); tekst(c, komma(Math.max(0, P.werk)) + ' s', W / 2, H / 2 + 22, 28, '#ffffff', 'center'); }
   }
+  if (st.fase === 'aftellen') {
+    if (UI.opdracht) tekst(c, 'OPDRACHT: ' + UI.opdracht.toUpperCase(), W / 2, H / 2 + 62, 12, '#9fe8b0', 'center', 700);
+    if (st.rivaal) tekst(c, RIVAAL.naam.toUpperCase() + ' RIJDT MEE', W / 2, H / 2 + 80, 12, '#ff9a3c', 'center', 700);
+  }
+  if (st.rivaal && st.fase === 'race') { const d = Math.round((st.rivaal.pos - st.pos) / 10) * 10; tekst(c, RIVAAL.naam.toUpperCase() + (d > 0 ? ' +' + d + ' M' : d < 0 ? ' ' + d + ' M' : ''), W - 14, 72, 11, '#ff9a3c', 'right', 700); }
   if (st.fase === 'aftellen') { tekst(c, 'KLAAR VOOR DE START', W / 2, H / 2 - 56, 14, '#ffffff', 'center', 700); tekst(c, String(Math.ceil(st.aftel)), W / 2, H / 2 + 28, 96, '#ffd34d', 'center'); }
   if (st.fase === 'klaar') tekst(c, st.uitslag && st.uitslag.gehaald ? 'FINISH' : 'UITGEVALLEN', W / 2, H / 2 + 16, 64, st.uitslag && st.uitslag.gehaald ? '#ffd34d' : '#ff5a40', 'center');
   if (UI.bericht && nu < UI.berichtTot && st.fase !== 'klaar') {
@@ -2414,6 +2717,7 @@ function tekenHud(c, nu) {
 
 function gebeurd(g) {
   const st = UI.st;
+  if (typeof padGebeurd === 'function') padGebeurd(g);
   switch (g.soort) {
     case 'start': geluid('start'); zegt('GAS!', 800); break;
     case 'turbo': geluid('turbo'); break;
@@ -2431,7 +2735,7 @@ function gebeurd(g) {
     case 'reserve': geluid('fout'); zegt((st && st.basis.elektrisch ? 'ACCU' : 'BENZINE') + ' OP RESERVE' + (st && st.pit && !st.pit.gedaan && st.pos < st.pit.box ? ' · PIT RECHTS' : ''), 2600); break;
     case 'leeg': geluid('uitgevallen'); zegt((st && st.basis.elektrisch ? 'ACCU' : 'TANK') + ' LEEG · NOG MAAR ' + PIT.leegSnel + ' KM/U', 3200); break;
     case 'pitin': geluid('klik'); zegt('PITSTRAAT · ' + PIT.limiet + ' KM/U', 1500); break;
-    case 'pitbox': geluid('sleutel'); pitPaneelToon(); break;
+    case 'pitbox': geluid('sleutel'); if (!UI.inDuel) pitPaneelToon(); break;
     case 'pitwerk': geluid('sleutel'); $('pitPaneel').hidden = true; break;
     case 'pituit': geluid('start'); zegt('KLAAR · GAS!', 1200); break;
     case 'kapot': geluid('bots'); zegt({ motorblok: 'MOTORBLOK OVERVERHIT · GEEN TURBO MEER', banden: 'BANDEN VERSLETEN · NAUWELIJKS GRIP', remmen: 'REMMEN KAPOT', vering: 'VERING KAPOT', kuip: 'KUIP AAN FLARDEN', turbo: 'TURBO KAPOT' }[g.deel] || g.deel.toUpperCase() + ' KAPOT', 3000); tril(80); break;
@@ -2448,6 +2752,13 @@ function pitPaneelToon() {
     '<div class="pitrij"><button class="knop' + (UI.pitBand ? ' grijs' : '') + '" data-pitband="">BANDEN HOUDEN<small>' + Math.round(100 - st.schade.banden) + '% · ' + esc(naam(st.banden)) + '</small></button>' + opties.map((id) => '<button class="knop' + (UI.pitBand === id ? '' : ' grijs') + '" data-pitband="' + id + '">' + esc(naam(id)).toUpperCase() + '<small>vers · ' + PIT.banden + ' s</small></button>').join('') + '</div>' +
     '<button id="pitGa" class="knop groot">VERTREK<small>' + klus.tijd + ' s in de box</small></button></div>';
   $('pitPaneel').hidden = false;
+}
+
+
+function bekerMelding(ids) {
+  if (!ids || !ids.length) return;
+  const el = $('toast'); el.innerHTML = (ids.length === 1 ? 'Nieuwe beker: ' : 'Nieuwe bekers: ') + '<b>' + ids.map((id) => esc(BEKER_VAN[id].naam)).join(', ') + '</b>'; el.hidden = false;
+  geluid('podium'); clearTimeout(UI.toastKlok); UI.toastKlok = setTimeout(() => { el.hidden = true; }, 3200);
 }
 
 
@@ -2495,9 +2806,21 @@ function toetsen() {
     if (ds.scherm) { geluid('klik'); naarScherm(ds.scherm); return; }
     if (t.id === 'terug') { geluid('klik'); naarScherm('hoofd'); return; }
     if (t.id === 'stopRace') { geluid('klik'); stop(); return; }
-    if (ds.race) { if (t.getAttribute('aria-disabled') === 'true') { geluid('fout'); return; } startRace(RACE_VAN[ds.race], false); return; }
+    if (ds.race) { if (t.getAttribute('aria-disabled') === 'true') { geluid('fout'); return; } UI.blauwDuel = false; startRace(RACE_VAN[ds.race], false); return; }
+
+    if (ds.duelrace) { Duel.raceId = ds.duelrace; geluid('klik'); renderDuel(); return; }
+    if (ds.duelmotor) { Duel.motor2 = ds.duelmotor; geluid('klik'); renderDuel(); return; }
+    if (ds.duelhulp) { Duel.hulp[+ds.duelhulp] = !Duel.hulp[+ds.duelhulp]; geluid('klik'); renderDuel(); return; }
+    if (ds.duelstart) { audioStart(); duelStart(); return; }
+    if (ds.duelstop) { duelStop(); return; }
+    if (ds.blauw === 'aan') { Blauw.stand = 'toestemming'; renderDuel(); window.BlauwApp.toestemming(); return; }
+    if (ds.blauw === 'wacht') { Blauw.stand = 'wacht'; renderDuel(); window.BlauwApp.wacht(); return; }
+    if (ds.blauw === 'stop') { blauwStop(); renderDuel(); return; }
+    if (ds.blauwverbind) { Blauw.stand = 'verbinden'; renderDuel(); window.BlauwApp.verbind(+ds.blauwverbind); return; }
+    if (ds.blauwrace) { Duel.raceId = ds.blauwrace; geluid('klik'); renderDuel(); return; }
+    if (ds.blauwstart) { const race = RACE_VAN[Duel.raceId] || RACES[0], zaad = (Date.now() % 2147483646) | 0; Blauw.rol = 'gastheer'; blauwStuur('S' + race.nr + ',' + zaad); audioStart(); blauwRace(race, zaad); return; }
     if (ds.tab) { UI.tab = ds.tab; renderGarage(); return; }
-    if (ds.koop) { const r = koop(G, ds.koop); geluid(r.ok ? 'koop' : 'fout'); renderGarage(); $('geldTel').textContent = getal(G.geld); bewaarNu(); return; }
+    if (ds.koop) { const r = koop(G, ds.koop); geluid(r.ok ? 'koop' : 'fout'); bekerMelding(bekersNa(G, null)); renderGarage(); $('geldTel').textContent = getal(G.geld); bewaarNu(); return; }
     if (t.id === 'herstelAlles') { const r = herstelAlles(G); geluid(r.ok ? 'sleutel' : 'fout'); renderGarage(); $('geldTel').textContent = getal(G.geld); bewaarNu(); return; }
     if (ds.onderzoeker) { UI.onderzoeker = ds.onderzoeker; geluid('klik'); renderGarage(); return; }
     if (ds.start) { const r = startOnderzoek(G, ds.start, UI.onderzoeker); geluid(r.ok ? 'sleutel' : 'fout'); renderGarage(); bewaarNu(); return; }
@@ -2506,13 +2829,14 @@ function toetsen() {
     if (ds.teken) { const r = tekenSponsor(G); geluid(r.ok ? 'koop' : 'fout'); bewaarNu(); if (UI.scherm === 'garage') renderGarage(); else { const el = t.closest('.aanbodblok'); if (el) el.outerHTML = '<p class="nieuw">Contract getekend met <b>' + esc(SPONSOR_VAN[ds.teken].naam) + '</b>.</p>'; } renderHoofd(); return; }
     if (ds.afslaan) { slaAf(G); geluid('klik'); bewaarNu(); if (UI.scherm === 'garage') renderGarage(); else { const el = t.closest('.aanbodblok'); if (el) el.remove(); } return; }
     if (ds.herstel) { const r = herstelBetaald(G, ds.herstel); geluid(r.ok ? 'sleutel' : 'fout'); renderGarage(); $('geldTel').textContent = getal(G.geld); bewaarNu(); return; }
-    if (ds.motor) { const r = G.stal[ds.motor] ? kiesMotor(G, ds.motor) : koopMotor(G, ds.motor); geluid(r.ok ? (r.prijs ? 'koop' : 'sleutel') : 'fout'); renderGarage(); $('geldTel').textContent = getal(G.geld); bewaarNu(); return; }
-    if (ds.huur) { const r = huur(G, ds.huur); geluid(r.ok ? 'sleutel' : 'fout'); renderGarage(); bewaarNu(); return; }
+    if (ds.motor) { const r = G.stal[ds.motor] ? kiesMotor(G, ds.motor) : koopMotor(G, ds.motor); bekerMelding(bekersNa(G, null)); geluid(r.ok ? (r.prijs ? 'koop' : 'sleutel') : 'fout'); renderGarage(); $('geldTel').textContent = getal(G.geld); bewaarNu(); return; }
+    if (ds.huur) { const r = huur(G, ds.huur); bekerMelding(bekersNa(G, null)); geluid(r.ok ? 'sleutel' : 'fout'); renderGarage(); bewaarNu(); return; }
     if (ds.ontsla) { ontsla(G, ds.ontsla); geluid('klik'); renderGarage(); bewaarNu(); return; }
     if (ds.pittank) { UI.pitTank = !UI.pitTank; geluid('klik'); pitPaneelToon(); return; }
     if (ds.pitband !== undefined) { UI.pitBand = ds.pitband || null; geluid('klik'); pitPaneelToon(); return; }
     if (t.id === 'pitGa') { UI.pitGa = { tank: UI.pitTank, banden: UI.pitBand }; return; }
     if (ds.seizoen) { const r = nieuwSeizoen(G); geluid(r.ok ? 'podium' : 'fout'); bewaarNu(); if (UI.scherm === 'races') renderRaces(); else { const el = t.closest('.seizoenblok'); if (el) el.outerHTML = '<p class="nieuw">Seizoen <b>' + G.seizoen + '</b> begonnen.</p>'; } renderHoofd(); return; }
+    if (ds.inst) { UI.instellingen[ds.inst] = !UI.instellingen[ds.inst]; bewaarInstellingen(); geluid('klik'); renderInstellingen(); return; }
     if (t.id === 'nogEens') { startRace(UI.race, UI.demo); return; }
     if (t.id === 'geluidKnop') { UI.instellingen.geluid = !UI.instellingen.geluid; bewaarInstellingen(); t.textContent = UI.instellingen.geluid ? '🔊' : '🔇'; if (UI.instellingen.geluid) geluid('klik'); return; }
     if (t.id === 'opnieuw') { if (!confirm('Alles op nul: geld, motoren, onderdelen, uitrusting, monteurs en uitslagen?')) return; G = garageNieuw(); bewaarNu(); naarScherm('hoofd'); }
@@ -2529,9 +2853,11 @@ function lus(nu) {
   lusVorige = nu;
   const st = UI.st, T = UI.toetsen;
 
-  const aanraking = Object.keys(UI.vingers).length > 0 || window.matchMedia('(pointer: coarse)').matches;
-  const inv = UI.robot && st.fase === 'race' ? raceRobot(st) : { links: T.links, rechts: T.rechts, gas: T.gas || (aanraking && UI.instellingen.autoGas && !T.rem), rem: T.rem, turbo: T.turbo };
+
+  const P = UI.pad, aanraking = !P && (Object.keys(UI.vingers).length > 0 || window.matchMedia('(pointer: coarse)').matches);
+  const inv = UI.robot && st.fase === 'race' ? raceRobot(st) : { links: T.links, rechts: T.rechts, gas: T.gas || (aanraking && UI.instellingen.autoGas && !T.rem) || !!(P && P.gas), rem: T.rem || !!(P && P.rem), turbo: T.turbo || !!(P && P.turbo), stuur: P ? P.stuur : 0 };
   if (UI.pitGa && st.pit && st.pit.stand === 'box') { inv.pit = UI.pitGa; UI.pitGa = null; }
+  if (UI.blauwDuel) blauwBeeld(st, nu);
   raceStap(st, dt, inv);
   if (st.fase === 'aftellen' && Math.ceil(st.aftel) !== aftelToon) { aftelToon = Math.ceil(st.aftel); geluid('aftel'); }
   for (const g of st.gebeurd) gebeurd(g);
@@ -2665,6 +2991,381 @@ async function start() {
 }
 start();
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+const PAD = { dood: 0.18, trekker: 0.12, nav: 0.55, herhaal: 260, eerste: 420 };
+
+
+const Pad = { dev: {}, volgorde: [], vorig: {}, actief: false, uitgelegd: false, navRichting: null, navVolgende: 0 };
+
+
+const PAD_ANDROID = { 96: 'a', 97: 'b', 99: 'x', 100: 'y', 102: 'lb', 103: 'rb', 108: 'start', 109: 'select', 4: 'b', 23: 'a', 19: 'op', 20: 'neer', 21: 'links', 22: 'rechts' };
+
+const PAD_STANDAARD = ['a', 'b', 'x', 'y', 'lb', 'rb', null, null, 'select', 'start', null, null, 'op', 'neer', 'links', 'rechts'];
+function padNat(dev) {
+  const k = String(dev | 0);
+  if (!Pad.dev[k]) { Pad.dev[k] = { knop: {}, x: 0, y: 0, hx: 0, hy: 0, lt: 0, rt: 0 }; Pad.volgorde.push(k); }
+  return Pad.dev[k];
+}
+window.padKnop = (code, neer, dev) => { const n = PAD_ANDROID[code]; if (n) padNat(dev).knop[n] = !!neer; };
+window.padAs = (x, y, hx, hy, lt, rt, dev) => { Object.assign(padNat(dev), { x: +x || 0, y: +y || 0, hx: +hx || 0, hy: +hy || 0, lt: +lt || 0, rt: +rt || 0 }); };
+
+
+
+function padVanApi(g) {
+  const s = { knop: {}, x: g.axes[0] || 0, y: g.axes[1] || 0, hx: 0, hy: 0, lt: 0, rt: 0 };
+  PAD_STANDAARD.forEach((n, i) => { if (n && g.buttons[i] && g.buttons[i].pressed) s.knop[n] = true; });
+  if (g.buttons[6]) s.lt = g.buttons[6].value || (g.buttons[6].pressed ? 1 : 0);
+  if (g.buttons[7]) s.rt = g.buttons[7].value || (g.buttons[7].pressed ? 1 : 0);
+  return s;
+}
+function padLees(slot) {
+  const s = { knop: {}, x: 0, y: 0, lt: 0, rt: 0 };
+  let pads = [];
+  try { pads = navigator.getGamepads ? Array.from(navigator.getGamepads()).filter((g) => g && g.connected) : []; } catch (e) { pads = []; }
+  const nat = Pad.volgorde.map((k) => Pad.dev[k]), api = pads.map(padVanApi);
+  const bronnen = slot === undefined ? nat.concat(api) : [nat[slot], api[slot]].filter(Boolean);
+  for (const N of bronnen) {
+    for (const k of Object.keys(N.knop)) if (N.knop[k]) s.knop[k] = true;
+    if (N.hx < -0.5) s.knop.links = true; if (N.hx > 0.5) s.knop.rechts = true;
+    if (N.hy < -0.5) s.knop.op = true; if (N.hy > 0.5) s.knop.neer = true;
+    if (Math.abs(N.x) > Math.abs(s.x)) s.x = N.x;
+    if (Math.abs(N.y) > Math.abs(s.y)) s.y = N.y;
+    s.lt = Math.max(s.lt, N.lt); s.rt = Math.max(s.rt, N.rt);
+  }
+  s.iets = Object.values(s.knop).some(Boolean) || Math.abs(s.x) > PAD.nav || Math.abs(s.y) > PAD.nav || s.lt > PAD.trekker || s.rt > PAD.trekker;
+  return s;
+}
+
+const padStick = (v) => (Math.abs(v) < PAD.dood ? 0 : Math.sign(v) * (Math.abs(v) - PAD.dood) / (1 - PAD.dood));
+
+
+function padZetActief(aan) {
+  if (Pad.actief === aan) return;
+  Pad.actief = aan;
+  document.body.classList.toggle('pad', aan);
+  if (UI.scherm === 'race' && UI.cv) maatDoek();
+  if (aan && !Pad.uitgelegd && UI.scherm === 'race') { Pad.uitgelegd = true; zegt('CONTROLLER: RT GAS · LT REM · X TURBO', 3200); }
+}
+document.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') padZetActief(false); }, true);
+
+
+function padKnoppen() {
+  return Array.from(document.querySelectorAll('button, [data-race]')).filter((b) => {
+    if (b.disabled || b.closest('[hidden]')) return false;
+    const r = b.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 && getComputedStyle(b).visibility !== 'hidden';
+  });
+}
+
+
+function padRicht(b) {
+  document.querySelectorAll('.padfocus').forEach((x) => x.classList.remove('padfocus'));
+  b.classList.add('padfocus'); b.focus(); b.scrollIntoView({ block: 'nearest' });
+}
+function padStap(richting) {
+  const alle = padKnoppen(), nu = document.activeElement;
+  if (!alle.length) return;
+
+  if (!nu || !alle.includes(nu)) { padRicht(alle.find((b) => !b.closest('#kop')) || alle[0]); return; }
+  const a = nu.getBoundingClientRect(), ax = a.left + a.width / 2, ay = a.top + a.height / 2;
+  const [dx, dy] = { links: [-1, 0], rechts: [1, 0], op: [0, -1], neer: [0, 1] }[richting];
+  let beste = null, score = Infinity;
+  for (const b of alle) {
+    if (b === nu) continue;
+    const r = b.getBoundingClientRect(), bx = r.left + r.width / 2, by = r.top + r.height / 2;
+    const hoofd = (bx - ax) * dx + (by - ay) * dy, zij = Math.abs((bx - ax) * dy) + Math.abs((by - ay) * dx);
+    if (hoofd <= 4) continue;
+    const s = hoofd + zij * 2;
+    if (s < score) { score = s; beste = b; }
+  }
+  if (beste) { padRicht(beste); geluid('tik'); }
+}
+
+
+
+
+function padTril(ms, sterk, zwak) {
+  if (!Pad.actief) return;
+  try {
+    for (const g of Array.from(navigator.getGamepads ? navigator.getGamepads() : [])) {
+      if (g && g.vibrationActuator && g.vibrationActuator.playEffect) g.vibrationActuator.playEffect('dual-rumble', { duration: ms, strongMagnitude: sterk, weakMagnitude: zwak }).catch(() => {});
+    }
+  } catch (e) {  }
+  try { if (window.PadApp && window.PadApp.tril) window.PadApp.tril(ms | 0, Math.round(Math.max(sterk, zwak) * 255)); } catch (e) {  }
+}
+function padGebeurd(g) {
+  if (g.soort === 'val') padTril(450, 1, 0.6);
+  else if (g.soort === 'bots') padTril(160, 0.6, 0.4);
+  else if (g.soort === 'kapot') padTril(320, 0.8, 0.3);
+  else if (g.soort === 'turbo') padTril(260, 0, 0.6);
+  else if (g.soort === 'finish') padTril(220, 0.3, 0.5);
+  else if (g.soort === 'leeg') padTril(200, 0.5, 0);
+}
+
+
+function padBeeld(nu) {
+  const s = padLees(), was = Pad.vorig, druk = (n) => s.knop[n] && !was[n];
+  if (s.iets) audioStart();
+
+  if (UI.scherm === 'duelrace') { if (druk('select') && typeof duelStop === 'function') duelStop(); Pad.vorig = s.knop; return; }
+  if (s.iets) padZetActief(true);
+  if (UI.scherm === 'race' && UI.st) {
+    const st = UI.st;
+    if (st.berm && st.snel > 40 && st.val <= 0 && nu >= (Pad.bermKlok || 0)) { padTril(120, 0.15, 0.35); Pad.bermKlok = nu + 220; }
+    if (st.pit && st.pit.stand === 'box') {
+
+      const opties = [null].concat(Object.keys(st.bandenOpties || { standaard: 1 })), i = opties.indexOf(UI.pitBand);
+      if (druk('y')) { UI.pitTank = !UI.pitTank; pitPaneelToon(); }
+      if (druk('lb') || druk('links')) { UI.pitBand = opties[(i - 1 + opties.length) % opties.length]; pitPaneelToon(); }
+      if (druk('rb') || druk('rechts')) { UI.pitBand = opties[(i + 1) % opties.length]; pitPaneelToon(); }
+      if (druk('a') || druk('start')) UI.pitGa = { tank: UI.pitTank, banden: UI.pitBand };
+      UI.pad = null;
+    } else {
+      const stuur = padStick(s.x) + (s.knop.links ? -1 : 0) + (s.knop.rechts ? 1 : 0);
+      UI.pad = Pad.actief ? { stuur: clamp(stuur, -1, 1), gas: s.rt > PAD.trekker || !!s.knop.a, rem: s.lt > PAD.trekker || !!s.knop.b, turbo: !!(s.knop.x || s.knop.rb) } : null;
+    }
+    if (druk('select')) { UI.st = null; UI.pad = null; naarScherm('races'); }
+  } else {
+    UI.pad = null;
+
+    const r = s.knop.links || s.x < -PAD.nav ? 'links' : s.knop.rechts || s.x > PAD.nav ? 'rechts' : s.knop.op || s.y < -PAD.nav ? 'op' : s.knop.neer || s.y > PAD.nav ? 'neer' : null;
+    if (r && (r !== Pad.navRichting || nu >= Pad.navVolgende)) { padStap(r); Pad.navVolgende = nu + (r !== Pad.navRichting ? PAD.eerste : PAD.herhaal); }
+    Pad.navRichting = r;
+    if (druk('a')) { const f = document.activeElement; if (f && f.tagName === 'BUTTON' && padKnoppen().includes(f)) f.click(); else padStap('neer'); }
+    if (druk('b')) { if (!(window.terugKnop && window.terugKnop())) geluid('fout'); }
+    if (druk('start') && UI.scherm === 'uitslag' && $('nogEens')) $('nogEens').click();
+  }
+  Pad.vorig = s.knop;
+}
+(function padLus(nu) { requestAnimationFrame(padLus); if (!document.hidden) padBeeld(nu); })(0);
+
+
+
+window.terugKnop = () => {
+  if (UI.scherm === 'duelrace') { duelStop(); return true; }
+  if (UI.scherm === 'duel') { naarScherm('hoofd'); return true; }
+  if (UI.scherm === 'race') { if (UI.st && UI.st.pit && UI.st.pit.stand === 'box') return true; UI.st = null; naarScherm('races'); return true; }
+  if (UI.scherm === 'uitslag') { naarScherm('races'); return true; }
+  if (UI.scherm !== 'hoofd') { naarScherm('hoofd'); return true; }
+  return false;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const Duel = { spelers: [], race: null, raceId: null, actief: false, toets: [{}, {}], vinger: [{}, {}], aanraak: [false, false], hulp: [false, false], motor2: null, uitslag: null, laatst: 0 };
+const DUEL_VELDEN = ['st', 'ctx', 'cv', 'achtergrondX', 'deeltjes', 'rook', 'schud', 'bericht', 'berichtSteen', 'berichtTot', 'tafereel', 'motorBeeld', 'opdracht', 'inDuel'];
+function metSpeler(sp, f) {
+  const oud = {};
+  for (const k of DUEL_VELDEN) { oud[k] = UI[k]; UI[k] = sp.ui[k]; }
+  try { f(); } finally { for (const k of DUEL_VELDEN) { sp.ui[k] = UI[k]; UI[k] = oud[k]; } }
+}
+
+function duelMotor(id, hulp) {
+  const K = garageHeel(JSON.parse(JSON.stringify(G)));
+  if (K.stal[id]) { K.motor = id; K.delen = K.stal[id]; }
+  const m = raceMotor(K);
+  m.hulp = !!hulp; m.spook = null;
+  return m;
+}
+
+
+const duelKnop = (data, tekst, aan) => '<button class="knop' + (aan ? '' : ' grijs') + '" ' + data + '>' + tekst + '</button>';
+function renderDuel() {
+  if (!Duel.raceId || !RACE_VAN[Duel.raceId] || RACE_VAN[Duel.raceId].nr > G.vrij) Duel.raceId = RACES[0].id;
+  if (!Duel.motor2 || !G.stal[Duel.motor2]) Duel.motor2 = G.motor;
+  const open = RACES.filter((r) => r.nr <= G.vrij);
+  const races = (data) => '<div class="kiezer duelraces">' + open.map((r) => duelKnop(data + '="' + r.id + '"', r.nr + ' · ' + esc(r.naam) + '<small>' + r.km + ' km</small>', Duel.raceId === r.id)).join('') + '</div>';
+  let h = '';
+  if (Duel.uitslag) h += Duel.uitslag;
+  h += '<section class="duelkaart"><h3>Op één scherm</h3><p class="intro">Twee spelers, het scherm in tweeën. <b>Speler 1</b>: W A S D en X voor de turbo, of de eerste controller. <b>Speler 2</b>: de pijltjes en Enter voor de turbo, of de tweede controller. Op een tablet tikt elke speler op zijn eigen helft van de weg. Een duel telt niet mee voor geld of uitslagen.</p>' +
+    '<p class="label">Race</p>' + races('data-duelrace') +
+    '<p class="label">Motor van speler 2</p><div class="kiezer">' + Object.keys(G.stal).map((id) => duelKnop('data-duelmotor="' + id + '"', esc(MOTOR_VAN[id].naam), Duel.motor2 === id)).join('') + '</div>' +
+    '<p class="label">Rijhulp</p><div class="kiezer">' + [0, 1].map((i) => duelKnop('data-duelhulp="' + i + '"', 'Speler ' + (i + 1) + ': ' + (Duel.hulp[i] ? 'AAN' : 'UIT'), Duel.hulp[i])).join('') + '</div>' +
+    '<button class="knop groot" data-duelstart="1">START</button></section>';
+  if (blauwKan()) h += '<section class="duelkaart"><h3>Twee telefoons</h3>' + blauwPaneel(races) + '</section>';
+  $('duelPaneel').innerHTML = h;
+}
+
+
+function duelStart() {
+  const race = RACE_VAN[Duel.raceId] || RACES[0], zaad = (Date.now() % 2147483646) | 0;
+  Duel.race = race; UI.race = race; Duel.uitslag = null;
+  const ids = [G.motor, G.stal[Duel.motor2] ? Duel.motor2 : G.motor];
+  Duel.spelers = ids.map((id, i) => {
+    const cv = $('doek' + (i + 1)); cv.width = WEG.W; cv.height = WEG.H;
+    const st = raceNieuw(race, duelMotor(id, Duel.hulp[i]), zaad);
+    return { id, naam: 'SPELER ' + (i + 1), st, klaarOp: 0, ui: { st, ctx: cv.getContext('2d'), cv, achtergrondX: 0, deeltjes: [], rook: [], schud: 0, bericht: '', berichtSteen: 0, berichtTot: 0, tafereel: null, motorBeeld: id, opdracht: '', inDuel: true } };
+  });
+  Duel.toets = [{}, {}]; Duel.vinger = [{}, {}]; Duel.aanraak = [false, false];
+  Duel.actief = true; Duel.laatst = performance.now();
+  naarScherm('duelrace');
+  motorStart();
+}
+function duelInvoer(i, st) {
+  const T = Duel.toets[i], P = padLees(i), V = Duel.vinger[i];
+  const stuur = padStick(P.x) + (P.knop.links ? -1 : 0) + (P.knop.rechts ? 1 : 0);
+  const inv = {
+    links: !!(T.links || V.links), rechts: !!(T.rechts || V.rechts), stuur: clamp(stuur, -1, 1),
+    gas: !!(T.gas || P.rt > PAD.trekker || P.knop.a || (Duel.aanraak[i] && !T.rem)),
+    rem: !!(T.rem || P.lt > PAD.trekker || P.knop.b), turbo: !!(T.turbo || P.knop.x || P.knop.rb),
+  };
+
+  if (st.pit && st.pit.stand === 'box') inv.pit = { tank: true, banden: st.bui && st.bui.nat && st.bandenOpties && st.bandenOpties.regen ? 'regen' : null };
+  return inv;
+}
+function duelLus(nu) {
+  requestAnimationFrame(duelLus);
+  if (!Duel.actief || UI.scherm !== 'duelrace' || document.hidden) { Duel.laatst = nu; return; }
+  const dt = Math.min(0.05, (nu - Duel.laatst) / 1000 || 0.016);
+  Duel.laatst = nu;
+  const [A, B] = Duel.spelers;
+  A.st.ander = { pos: B.st.pos, x: B.st.x, motor: B.id, naam: B.naam };
+  B.st.ander = { pos: A.st.pos, x: A.st.x, motor: A.id, naam: A.naam };
+  Duel.spelers.forEach((sp, i) => {
+    raceStap(sp.st, dt, duelInvoer(i, sp.st));
+    metSpeler(sp, () => { for (const g of sp.st.gebeurd) gebeurd(g); sp.st.gebeurd = []; tekenWeg(nu, dt); });
+    if (sp.st.fase === 'klaar' && !sp.klaarOp) sp.klaarOp = nu;
+  });
+  motorZet(A.st.snel, A.st.stats.max, A.st.turbo > 0, A.st.fase === 'race');
+  if (Duel.spelers.every((sp) => sp.klaarOp) && nu - Math.max(A.klaarOp, B.klaarOp) > 1500) duelKlaar();
+}
+requestAnimationFrame(duelLus);
+
+function duelKlaar() {
+  Duel.actief = false; motorStop();
+  const r = Duel.spelers.map((sp) => ({ naam: sp.naam, motor: MOTOR_VAN[sp.id].naam, u: sp.st.uitslag }));
+  const tijd = (x) => (x.u && x.u.gehaald ? x.u.tijd : Infinity), w = tijd(r[0]) === tijd(r[1]) ? -1 : tijd(r[0]) < tijd(r[1]) ? 0 : 1;
+  geluid('podium');
+  Duel.uitslag = '<div class="duelkaart uitslag"><h3>' + (w < 0 ? 'Gelijkspel!' : 'Speler ' + (w + 1) + ' wint!') + '</h3><p class="intro">' + esc(Duel.race.naam) + '</p><div class="cijfers">' +
+    r.map((x) => '<div><small>' + x.naam + ' · ' + esc(x.motor) + '</small><b>' + (x.u && x.u.gehaald ? tijdTekst(x.u.tijd) + ' · ' + x.u.positie + 'e' : 'uitgevallen') + '</b></div>').join('') + '</div><button class="knop" data-duelstart="1">NOG EEN KEER</button></div>';
+  naarScherm('duel');
+}
+function duelStop() {
+  if (Duel.actief) { Duel.actief = false; motorStop(); }
+  if (UI.blauwDuel) blauwStop();
+  naarScherm('duel');
+}
+
+
+const DUEL_TOETS = [{ w: 'gas', s: 'rem', a: 'links', d: 'rechts', x: 'turbo' }, { ArrowUp: 'gas', ArrowDown: 'rem', ArrowLeft: 'links', ArrowRight: 'rechts', Enter: 'turbo' }];
+function duelToets(e, aan) {
+  if (UI.scherm !== 'duelrace') return;
+  if (aan && e.key === 'Escape') { duelStop(); return; }
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  for (let i = 0; i < 2; i++) if (DUEL_TOETS[i][k]) { e.preventDefault(); Duel.toets[i][DUEL_TOETS[i][k]] = aan; }
+}
+document.addEventListener('keydown', (e) => { if (!e.repeat) duelToets(e, true); });
+document.addEventListener('keyup', (e) => duelToets(e, false));
+function duelAanraking() {
+  [0, 1].forEach((i) => {
+    const cv = $('doek' + (i + 1)), vingers = {};
+    cv.addEventListener('pointerdown', (e) => {
+      e.preventDefault(); audioStart();
+      const r = cv.getBoundingClientRect(), kant = (e.clientX - r.left) / r.width < 0.5 ? 'links' : 'rechts';
+      vingers[e.pointerId] = kant; Duel.vinger[i][kant] = true; Duel.aanraak[i] = true;
+      try { cv.setPointerCapture(e.pointerId); } catch (x) {  }
+    });
+    const los = (e) => { const kant = vingers[e.pointerId]; if (!kant) return; delete vingers[e.pointerId]; if (!Object.values(vingers).includes(kant)) Duel.vinger[i][kant] = false; };
+    cv.addEventListener('pointerup', los); cv.addEventListener('pointercancel', los); cv.addEventListener('lostpointercapture', los);
+  });
+}
+document.addEventListener('DOMContentLoaded', duelAanraking);
+if (document.readyState !== 'loading') duelAanraking();
+
+
+const Blauw = { stand: 'uit', rol: null, apparaten: [], laatst: 0, ander: null, anderKlaar: null, verstuurd: 0, zelfKlaar: null, raceId: null };
+const BLAUW_BERICHT = /^[SPFQ][0-9,-]{0,40}$/;
+const blauwKan = () => !!(window.BlauwApp && window.BlauwApp.kan && window.BlauwApp.kan());
+function blauwStuur(m) { try { if (BLAUW_BERICHT.test(m)) window.BlauwApp.stuur(m); } catch (e) {  } }
+function blauwPaneel(races) {
+  const S = Blauw.stand;
+  if (S === 'uit' || S === 'geweigerd' || S === 'weg') {
+    return (S === 'geweigerd' ? '<p class="kapot">Zonder toestemming kan het niet. De rest van het spel werkt gewoon.</p>' : S === 'weg' ? '<p class="tip">De verbinding is verbroken.</p>' : '') +
+      '<p class="intro">Elke speler op een eigen telefoon, in dezelfde race. Koppel de twee telefoons eerst via Bluetooth in de Android-instellingen.</p>' +
+      '<p class="tip">Voor spelen met twee telefoons vraagt Android om toestemming voor <b>Apparaten in de buurt</b>. Er gaan geen gegevens naar internet of naar ons: alleen de stand van de race gaat van telefoon naar telefoon.</p>' +
+      '<button class="knop" data-blauw="aan">TWEE TELEFOONS VERBINDEN</button>';
+  }
+  if (S === 'toestemming') return '<p class="intro">Android vraagt om toestemming voor Apparaten in de buurt…</p>';
+  if (S === 'kies') {
+    return '<p class="intro">Eén telefoon wacht, de andere verbindt. Welke rol heeft deze telefoon?</p><button class="knop" data-blauw="wacht">DEZE TELEFOON WACHT</button>' +
+      '<p class="label">Of verbind met een gekoppelde telefoon</p><div class="kiezer">' + (Blauw.apparaten.length ? Blauw.apparaten.map((n, i) => duelKnop('data-blauwverbind="' + i + '"', esc(n), false)).join('') : '<p class="tip">Geen gekoppelde telefoons gevonden. Staat Bluetooth aan, en zijn de telefoons gekoppeld?</p>') + '</div>';
+  }
+  if (S === 'wacht') return '<p class="intro">Deze telefoon wacht. Kies op de andere telefoon deze telefoon om te verbinden.</p><button class="knop grijs" data-blauw="stop">STOPPEN</button>';
+  if (S === 'verbinden') return '<p class="intro">Verbinden…</p>';
+  if (S === 'verbonden') {
+    if (Blauw.rol === 'gastheer') return '<p class="nieuw">Verbonden. Kies een race en start: de andere telefoon start mee.</p>' + races('data-blauwrace') + '<button class="knop groot" data-blauwstart="1">START</button><button class="knop grijs" data-blauw="stop">VERBREKEN</button>';
+    return '<p class="nieuw">Verbonden. De andere speler kiest de race en start.</p><button class="knop grijs" data-blauw="stop">VERBREKEN</button>';
+  }
+  return '';
+}
+window.blauwToestemming = (ok) => {
+  Blauw.stand = ok ? 'kies' : 'geweigerd';
+  if (ok) { try { Blauw.apparaten = JSON.parse(window.BlauwApp.gekoppeld() || '[]').filter((n) => typeof n === 'string').slice(0, 20); } catch (e) { Blauw.apparaten = []; } }
+  if (UI.scherm === 'duel') renderDuel();
+};
+window.blauwVerbonden = (rol) => { Blauw.stand = 'verbonden'; Blauw.rol = rol === 'gastheer' ? 'gastheer' : 'gast'; Blauw.laatst = performance.now(); geluid('koop'); if (UI.scherm === 'duel') renderDuel(); };
+window.blauwWeg = () => {
+  if (Blauw.stand === 'uit') return;
+  Blauw.stand = 'weg'; Blauw.ander = null;
+  if (UI.scherm === 'race' && UI.blauwDuel && UI.st) { UI.st.ander = null; zegt('VERBINDING VERBROKEN', 2500); }
+  if (UI.scherm === 'duel') renderDuel();
+};
+
+window.blauwBericht = (m) => {
+  if (typeof m !== 'string' || !BLAUW_BERICHT.test(m)) return;
+  Blauw.laatst = performance.now();
+  const d = m.slice(1).split(',').map((x) => parseInt(x, 10));
+  if (m[0] === 'S' && Blauw.rol === 'gast') { const race = RACES[d[0] - 1]; if (race && Number.isFinite(d[1])) blauwRace(race, d[1]); }
+  else if (m[0] === 'P' && d.length === 4 && d.every(Number.isFinite)) Blauw.ander = { pos: clamp(d[0], 0, 100000), x: clamp(d[1] / 100, -3, 3), snel: clamp(d[2], 0, 500), motor: (MOTOREN[d[3]] || MOTOREN[0]).id, naam: 'SPELER 2' };
+
+  else if (m[0] === 'F' && Number.isFinite(d[0])) { const s = clamp(d[0], 0, 360000) / 10; Blauw.anderKlaar = s >= 36000 ? Infinity : s; if (UI.scherm === 'uitslag' && Blauw.zelfKlaar !== null) blauwUitslag(); }
+  else if (m[0] === 'Q') window.blauwWeg();
+};
+function blauwRace(race, zaad) {
+  UI.blauwDuel = true; Blauw.ander = null; Blauw.anderKlaar = null; Blauw.zelfKlaar = null; Blauw.raceId = race.id;
+  startRace(race, false, zaad);
+}
+
+function blauwBeeld(st, nu) {
+  if (nu - Blauw.verstuurd >= 100) { Blauw.verstuurd = nu; blauwStuur('P' + Math.round(st.pos) + ',' + Math.round(st.x * 100) + ',' + Math.round(st.snel) + ',' + Math.max(0, MOTOREN.findIndex((m) => m.id === G.motor))); }
+  st.ander = Blauw.ander && nu - Blauw.laatst < 4000 ? Blauw.ander : null;
+}
+function blauwStop() { UI.blauwDuel = false; blauwStuur('Q'); try { window.BlauwApp.sluit(); } catch (e) {  } Blauw.stand = 'uit'; }
+
+function blauwUitslag() {
+  const z = Blauw.zelfKlaar, a = Blauw.anderKlaar, race = RACE_VAN[Blauw.raceId];
+  const kop = z === Infinity && a === null ? 'Uitgevallen' : a === null ? 'Wachten op de ander…' : z < a ? 'Je wint het duel!' : z > a ? 'De ander wint het duel' : 'Gelijkspel!';
+  $('uitslag').innerHTML = '<div class="uitslagkaart"><div class="duelkaart uitslag"><h3>' + kop + '</h3><p class="intro">' + esc(race ? race.naam : '') + ' · twee telefoons</p><div class="cijfers">' +
+    '<div><small>jij</small><b>' + (z === Infinity ? 'uitgevallen' : tijdTekst(z)) + '</b></div><div><small>de ander</small><b>' + (a === null ? 'nog onderweg' : a === Infinity ? 'uitgevallen' : tijdTekst(a)) + '</b></div></div>' +
+    '<p class="tip">Een duel telt niet mee voor geld of uitslagen.</p><button class="knop" data-scherm="duel">TERUG NAAR HET DUEL</button></div></div>';
+}
+
 </script>
+  <div id="toast" class="toast" hidden></div>
 </body>
 </html>
