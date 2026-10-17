@@ -9,65 +9,268 @@
   h1 { font-size: 1.6rem; }
   h2 { font-size: 1.1rem; margin-top: 1.5rem; }
   a { color: #1a5fb4; }
+  [data-l][hidden] { display: none; }
+  .taal { text-align: right; font-size: .9rem; }
+  :root { --tk-bg: #ffffff; --tk-fg: #222; --tk-rand: #bbb; --tk-accent: #1a5fb4; }
+  @media (prefers-color-scheme: dark) { :root { --tk-bg: #1e2127; --tk-fg: #e6e6e6; --tk-rand: #3a3f48; --tk-accent: #7fb4ff; } }
+  .tk { position: relative; display: inline-block; font: inherit; }
+  .tk-knop { display: inline-flex; align-items: center; gap: .5rem; background: var(--tk-bg, #1b1e25); color: var(--tk-fg, #e8e8e8); border: 1px solid var(--tk-rand, #2d323d); border-radius: .5rem; padding: .3rem .6rem; font: inherit; cursor: pointer; }
+  .tk-knop:hover { border-color: var(--tk-accent, #fca311); }
+  .tk-vlag { width: 24px; height: 16px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(128,128,128,.45); object-fit: cover; flex: none; }
+  .tk-lijst { position: absolute; z-index: 1000; top: calc(100% + 4px); left: 50%; transform: translateX(-50%); min-width: 13rem; max-height: min(60vh, 22rem); overflow: auto; margin: 0; padding: .25rem; list-style: none; text-align: left; background: var(--tk-bg, #1b1e25); color: var(--tk-fg, #e8e8e8); border: 1px solid var(--tk-rand, #2d323d); border-radius: .6rem; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+  .tk-lijst[hidden] { display: none; }
+  .tk-optie { display: flex; align-items: center; gap: .6rem; padding: .35rem .5rem; border-radius: .4rem; cursor: pointer; }
+  .tk-optie:hover, .tk-optie.tk-focus { background: rgba(252,163,17,.2); }
+  .tk-optie[aria-selected="true"] { font-weight: 700; }
+  @media (prefers-color-scheme: dark) { body { background: #14161a; color: #e6e6e6; } a { color: #7fb4ff; } }
 </style>
 </head>
 <body>
+<p class="taal" id="taalhost"></p>
+<div data-l="nl">
 <h1>Privacy</h1>
 <p><strong>Kort: de spellen verzamelen niets. De website telt alleen hoe vaak er iets geopend wordt, niet door wie.</strong></p>
-
 <h2>De website</h2>
-<p>galadin.nl is een website van Galadin, een kleine spelstudio uit Nederland. De website heeft geen cookies en geen
-advertenties. Je hoeft je nergens aan te melden.</p>
-<p>De website wordt gehost door GitHub Pages. Zoals elke webserver kan GitHub bij het opvragen van een pagina
-technische gegevens verwerken, zoals je IP-adres. Daar hebben wij geen toegang toe. Zie het
-<a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">privacybeleid van GitHub</a>.</p>
-
+<p>galadin.nl is een website van Galadin, een kleine spelstudio uit Nederland. De website heeft geen cookies en geen advertenties. Je hoeft je nergens aan te melden.</p>
+<p>De website wordt gehost door GitHub Pages. Zoals elke webserver kan GitHub bij het opvragen van een pagina technische gegevens verwerken, zoals je IP-adres. Daar hebben wij geen toegang toe. Zie het <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">privacybeleid van GitHub</a>.</p>
 <h2>De teller op de voorpagina</h2>
-<p>Op de voorpagina staat hoe vaak de site is bezocht, hoe vaak elk spel is geopend en hoeveel hartjes elk spel heeft
-gekregen. Daarvoor roept de voorpagina een externe teldienst aan, <strong>Abacus</strong> (een gratis dienst van Jason
-Cameron, https://abacus.jasoncameron.dev). Dat werkt zo:</p>
-<ul>
-  <li>Bij het openen van de pagina, of van een spel, of bij het geven van een hartje, vraagt je browser aan die dienst
-  om een teller met één op te hogen. Het verzoek bevat alleen de naam van de teller (bijvoorbeeld "spel-le-frawg").
-  Geen naam, geen e-mailadres, geen cookie.</li>
-  <li>Zoals bij elk verzoek over internet ziet die dienst daarbij je IP-adres. Wij zien dat niet; wij krijgen alleen het
-  getal. De dienst publiceert geen privacyverklaring; wat zij met het IP-adres doet (bijvoorbeeld alleen om te
-  begrenzen hoe vaak per seconde je mag vragen) kunnen wij niet nagaan. Een teller die een half jaar niet wordt
-  gebruikt, verloopt.</li>
-  <li>Om niet dubbel te tellen bewaart je browser op je eigen toestel twee kleine gegevens (galadin_teller: de datum en
-  welke spellen je vandaag opende; galadin_hart: bij welke spellen je een hartje gaf). Die gaan nergens heen.</li>
-  <li>We tellen bezoeken, niet mensen: één keer per browser per dag voor de site en per spel, en één hartje per browser
-  per spel.</li>
-  <li>De spellen zelf en de apps roepen die dienst niet aan; zij sturen niets naar ons of naar anderen.</li>
-</ul>
-<p>Wil je niet meegeteld worden? Dan kun je in de instellingen van je browser de opslag van galadin.nl wissen of
-verzoeken van abacus.jasoncameron.dev blokkeren; de site en de spellen werken dan gewoon.</p>
-
+<p>Op de voorpagina staat hoe vaak de site is bezocht, hoe vaak elk spel is geopend en hoeveel hartjes elk spel heeft gekregen. Daarvoor roept de voorpagina een externe teldienst aan, <strong>Abacus</strong> (een gratis dienst van Jason Cameron, https://abacus.jasoncameron.dev). Dat werkt zo:</p>
+<ul><li>Bij het openen van de pagina, of van een spel, of bij het geven van een hartje, vraagt je browser aan die dienst om een teller met één op te hogen. Het verzoek bevat alleen de naam van de teller (bijvoorbeeld "spel-le-frawg"). Geen naam, geen e-mailadres, geen cookie.</li><li>Zoals bij elk verzoek over internet ziet die dienst daarbij je IP-adres. Wij zien dat niet; wij krijgen alleen het getal. De dienst publiceert geen privacyverklaring; wat zij met het IP-adres doet (bijvoorbeeld alleen om te begrenzen hoe vaak per seconde je mag vragen) kunnen wij niet nagaan. Een teller die een half jaar niet wordt gebruikt, verloopt.</li><li>Om niet dubbel te tellen bewaart je browser op je eigen toestel twee kleine gegevens (galadin_teller: de datum en welke spellen je vandaag opende; galadin_hart: bij welke spellen je een hartje gaf). Die gaan nergens heen.</li><li>We tellen bezoeken, niet mensen: één keer per browser per dag voor de site en per spel, en één hartje per browser per spel.</li><li>De spellen zelf en de apps roepen die dienst niet aan; zij sturen niets naar ons of naar anderen.</li></ul>
+<p>Wil je niet meegeteld worden? Dan kun je in de instellingen van je browser de opslag van galadin.nl wissen of verzoeken van abacus.jasoncameron.dev blokkeren; de site en de spellen werken dan gewoon.</p>
 <h2>De spellen</h2>
-<p>De spellen draaien helemaal in je browser. Ze sturen niets naar ons of naar anderen. Je voortgang (je dieren, munten
-en instellingen) wordt bewaard in de opslag van je eigen browser, op je eigen toestel. Wis je de gegevens van deze
-website in je browser, dan is die voortgang weg. Ook je taalkeuze (de taal van de keuzelijst met vlaggen) wordt op dit toestel bewaard, in dezelfde opslag (sleutel galadin_taal). Ze gaat nergens heen en wordt niet gebruikt om je te volgen.</p>
-<p>Wil je je spel meenemen naar een ander toestel, dan maak je in het oudermenu een code ("Spel meenemen") en plak je die
-op het andere toestel ("Spel ophalen"). Die code bevat alleen de spelgegevens en instellingen, geen naam of e-mailadres.
-Je verstuurt hem zelf; hij gaat niet langs ons.</p>
+<p>De spellen draaien helemaal in je browser. Ze sturen niets naar ons of naar anderen. Je voortgang (je dieren, munten en instellingen) wordt bewaard in de opslag van je eigen browser, op je eigen toestel. Wis je de gegevens van deze website in je browser, dan is die voortgang weg. Ook je taalkeuze (de taal van de keuzelijst met vlaggen) wordt op dit toestel bewaard, in dezelfde opslag (sleutel galadin_taal). Ze gaat nergens heen en wordt niet gebruikt om je te volgen.</p>
+<p>Wil je je spel meenemen naar een ander toestel, dan maak je in het oudermenu een code ("Spel meenemen") en plak je die op het andere toestel ("Spel ophalen"). Die code bevat alleen de spelgegevens en instellingen, geen naam of e-mailadres. Je verstuurt hem zelf; hij gaat niet langs ons.</p>
 <p>Op een iPhone of iPad bewaart Safari de voortgang alleen blijvend als je het spel op het beginscherm hebt gezet.</p>
-
 <h2>Kinderen</h2>
 <p>De spellen zijn geschikt voor kinderen. Omdat de spellen niets verzamelen, wordt er ook niets van kinderen verzameld. De teller op de voorpagina telt alleen aantallen, zoals hierboven beschreven.</p>
-
 <h2>Testers voor Google Play</h2>
-<p>Wil je een spel testen voor Google Play, dan kun je lid worden van onze Google-groep voor dat spel
-(bijvoorbeeld "Le Frawg testers") of ons een e-mail sturen. Je e-mailadres gebruiken we alleen om je toe te voegen aan
-de testlijst van Google Play voor dat spel. De ledenlijst van de groep is alleen voor ons zichtbaar, niet voor andere
-leden. We geven je adres aan niemand anders en we halen je van de lijst zodra je dat vraagt of zodra de test voorbij is.
-Google verwerkt je adres daarbij volgens het <a href="https://policies.google.com/privacy">privacybeleid van Google</a>.</p>
-
+<p>Wil je een spel testen voor Google Play, dan kun je lid worden van onze Google-groep voor dat spel (bijvoorbeeld "Le Frawg testers") of ons een e-mail sturen. Je e-mailadres gebruiken we alleen om je toe te voegen aan de testlijst van Google Play voor dat spel. De ledenlijst van de groep is alleen voor ons zichtbaar, niet voor andere leden. We geven je adres aan niemand anders en we halen je van de lijst zodra je dat vraagt of zodra de test voorbij is. Google verwerkt je adres daarbij volgens het <a href="https://policies.google.com/privacy">privacybeleid van Google</a>.</p>
 <h2>Gegevens inzien of verwijderen</h2>
 <p>Behalve het e-mailadres van testers hebben wij geen gegevens van je. Wat op je eigen toestel staat, verwijder je via de instellingen van je browser. Wil je van de testlijst af, mail dan.</p>
-
 <h2>Contact</h2>
 <p>Vragen? Mail naar <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><small>Laatst bijgewerkt: 17 oktober 2026</small></p>
+</div>
+<div data-l="en" hidden>
+<h1>Privacy</h1>
+<p><strong>In short: the games collect nothing. The website only counts how often something is opened, not by whom.</strong></p>
+<h2>The website</h2>
+<p>galadin.nl is a website of Galadin, a small game studio from the Netherlands. The website has no cookies and no ads. You do not need to sign up anywhere.</p>
+<p>The website is hosted by GitHub Pages. Like any web server, GitHub may process technical data such as your IP address when a page is requested. We have no access to that. See <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a>.</p>
+<h2>The counter on the front page</h2>
+<p>The front page shows how often the site has been visited, how often each game has been opened and how many hearts each game has received. For that, the front page calls an external counting service, <strong>Abacus</strong> (a free service by Jason Cameron, https://abacus.jasoncameron.dev). It works like this:</p>
+<ul><li>When the page or a game is opened, or when a heart is given, your browser asks that service to increase a counter by one. The request contains only the name of the counter (for example "spel-le-frawg"). No name, no email address, no cookie.</li><li>As with any request over the internet, that service sees your IP address. We do not see it; we only get the number. The service does not publish a privacy statement; what it does with the IP address (for example only to limit how often per second you may ask) we cannot verify. A counter that is not used for half a year expires.</li><li>To avoid counting twice, your browser stores two small pieces of data on your own device (galadin_teller: the date and which games you opened today; galadin_hart: which games you gave a heart). They go nowhere.</li><li>We count visits, not people: once per browser per day for the site and per game, and one heart per browser per game.</li><li>The games themselves and the apps do not call that service; they send nothing to us or to anyone else.</li></ul>
+<p>Do you not want to be counted? Then you can clear the storage of galadin.nl in your browser settings or block requests to abacus.jasoncameron.dev; the site and the games then work as usual.</p>
+<h2>The games</h2>
+<p>The games run entirely in your browser. They send nothing to us or to anyone else. Your progress (your animals, coins and settings) is stored in your own browser's storage, on your own device. Clear this website's data in your browser and that progress is gone. Your language choice (the language of the list with flags) is also stored on this device, in the same storage (key galadin_taal). It goes nowhere and is not used to track you.</p>
+<p>If you want to take your game to another device, you make a code in the parent menu ("Take game along") and paste it on the other device ("Fetch game"). That code contains only the game data and settings, no name or email address. You send it yourself; it does not pass through us.</p>
+<p>On an iPhone or iPad, Safari only keeps your progress permanently if you have put the game on the home screen.</p>
+<h2>Children</h2>
+<p>The games are suitable for children. Because the games collect nothing, nothing is collected from children either. The counter on the front page only counts numbers, as described above.</p>
+<h2>Testers for Google Play</h2>
+<p>If you want to test a game for Google Play, you can join our Google group for that game (for example "Le Frawg testers") or send us an email. We use your email address only to add you to the Google Play test list for that game. The member list of the group is visible only to us, not to other members. We give your address to nobody else and we remove you from the list as soon as you ask or as soon as the test is over. Google processes your address in doing so under <a href="https://policies.google.com/privacy">Google's privacy policy</a>.</p>
+<h2>Viewing or deleting data</h2>
+<p>Apart from the email address of testers, we hold no data about you. What is on your own device, you remove through your browser's settings. Do you want off the test list? Then email us.</p>
+<h2>Contact</h2>
+<p>Questions? Email <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><small>Last updated: 17 October 2026</small></p>
+</div>
+<div data-l="de" hidden>
+<h1>Datenschutz</h1>
+<p><strong>Kurz: Die Spiele sammeln nichts. Die Website zählt nur, wie oft etwas geöffnet wird, nicht von wem.</strong></p>
+<h2>Die Website</h2>
+<p>galadin.nl ist eine Website von Galadin, einem kleinen Spielestudio aus den Niederlanden. Die Website hat keine Cookies und keine Werbung. Du musst dich nirgends anmelden.</p>
+<p>Die Website wird von GitHub Pages gehostet. Wie jeder Webserver kann GitHub beim Abruf einer Seite technische Daten wie deine IP-Adresse verarbeiten. Darauf haben wir keinen Zugriff. Siehe die <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">Datenschutzerklärung von GitHub</a>.</p>
+<h2>Der Zähler auf der Startseite</h2>
+<p>Auf der Startseite steht, wie oft die Seite besucht wurde, wie oft jedes Spiel geöffnet wurde und wie viele Herzen jedes Spiel bekommen hat. Dafür ruft die Startseite einen externen Zähldienst auf, <strong>Abacus</strong> (ein kostenloser Dienst von Jason Cameron, https://abacus.jasoncameron.dev). Das funktioniert so:</p>
+<ul><li>Beim Öffnen der Seite oder eines Spiels oder beim Vergeben eines Herzens fragt dein Browser diesen Dienst, einen Zähler um eins zu erhöhen. Die Anfrage enthält nur den Namen des Zählers (zum Beispiel "spel-le-frawg"). Kein Name, keine E-Mail-Adresse, kein Cookie.</li><li>Wie bei jeder Anfrage über das Internet sieht dieser Dienst dabei deine IP-Adresse. Wir sehen sie nicht; wir bekommen nur die Zahl. Der Dienst veröffentlicht keine Datenschutzerklärung; was er mit der IP-Adresse macht (zum Beispiel nur, um zu begrenzen, wie oft pro Sekunde du fragen darfst), können wir nicht nachprüfen. Ein Zähler, der ein halbes Jahr nicht benutzt wird, verfällt.</li><li>Um nicht doppelt zu zählen, speichert dein Browser zwei kleine Daten auf deinem eigenen Gerät (galadin_teller: das Datum und welche Spiele du heute geöffnet hast; galadin_hart: bei welchen Spielen du ein Herz gegeben hast). Sie gehen nirgendwohin.</li><li>Wir zählen Besuche, keine Personen: einmal pro Browser und Tag für die Seite und pro Spiel, und ein Herz pro Browser und Spiel.</li><li>Die Spiele selbst und die Apps rufen diesen Dienst nicht auf; sie senden nichts an uns oder an andere.</li></ul>
+<p>Du möchtest nicht mitgezählt werden? Dann kannst du in den Einstellungen deines Browsers den Speicher von galadin.nl löschen oder Anfragen an abacus.jasoncameron.dev blockieren; die Seite und die Spiele funktionieren dann ganz normal.</p>
+<h2>Die Spiele</h2>
+<p>Die Spiele laufen vollständig in deinem Browser. Sie senden nichts an uns oder an andere. Dein Fortschritt (deine Tiere, Münzen und Einstellungen) wird im Speicher deines eigenen Browsers auf deinem eigenen Gerät gespeichert. Löschst du die Daten dieser Website in deinem Browser, ist der Fortschritt weg. Auch deine Sprachwahl (die Sprache der Liste mit Flaggen) wird auf diesem Gerät im selben Speicher gespeichert (Schlüssel galadin_taal). Sie wird nirgendwohin gesendet und nicht zum Verfolgen verwendet.</p>
+<p>Willst du dein Spiel auf ein anderes Gerät mitnehmen, erstellst du im Elternmenü einen Code ("Spiel mitnehmen") und fügst ihn auf dem anderen Gerät ein ("Spiel abholen"). Dieser Code enthält nur die Spieldaten und Einstellungen, keinen Namen und keine E-Mail-Adresse. Du verschickst ihn selbst; er läuft nicht über uns.</p>
+<p>Auf einem iPhone oder iPad speichert Safari den Fortschritt nur dauerhaft, wenn du das Spiel auf den Home-Bildschirm gelegt hast.</p>
+<h2>Kinder</h2>
+<p>Die Spiele sind für Kinder geeignet. Weil die Spiele nichts sammeln, wird auch von Kindern nichts gesammelt. Der Zähler auf der Startseite zählt nur Anzahlen, wie oben beschrieben.</p>
+<h2>Tester für Google Play</h2>
+<p>Wenn du ein Spiel für Google Play testen möchtest, kannst du unserer Google-Gruppe für dieses Spiel beitreten (zum Beispiel "Le Frawg testers") oder uns eine E-Mail schicken. Deine E-Mail-Adresse verwenden wir nur, um dich zur Testliste von Google Play für dieses Spiel hinzuzufügen. Die Mitgliederliste der Gruppe ist nur für uns sichtbar, nicht für andere Mitglieder. Wir geben deine Adresse an niemanden weiter und entfernen dich von der Liste, sobald du es verlangst oder der Test vorbei ist. Google verarbeitet deine Adresse dabei gemäß der <a href="https://policies.google.com/privacy">Datenschutzerklärung von Google</a>.</p>
+<h2>Daten einsehen oder löschen</h2>
+<p>Außer der E-Mail-Adresse von Testern haben wir keine Daten über dich. Was auf deinem eigenen Gerät gespeichert ist, entfernst du über die Einstellungen deines Browsers. Willst du von der Testliste, schreib uns.</p>
+<h2>Kontakt</h2>
+<p>Fragen? Schreib an <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><small>Zuletzt aktualisiert: 17. Oktober 2026</small></p>
+<p><small data-noot="1">Translations are provided for convenience; if they differ, the Dutch and English versions apply. / Vertalingen zijn bedoeld als gemak; bij verschil gelden de Nederlandse en Engelse tekst.</small></p>
+</div>
+<div data-l="fr" hidden>
+<h1>Confidentialité</h1>
+<p><strong>En bref : les jeux ne collectent rien. Le site compte seulement combien de fois quelque chose est ouvert, pas par qui.</strong></p>
+<h2>Le site web</h2>
+<p>galadin.nl est un site web de Galadin, un petit studio de jeux des Pays-Bas. Le site n'a ni cookies ni publicités. Tu n'as pas besoin de t'inscrire nulle part.</p>
+<p>Le site est hébergé par GitHub Pages. Comme tout serveur web, GitHub peut traiter des données techniques, comme ton adresse IP, lorsqu'une page est demandée. Nous n'y avons pas accès. Voir la <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">déclaration de confidentialité de GitHub</a>.</p>
+<h2>Le compteur de la page d'accueil</h2>
+<p>La page d'accueil indique combien de fois le site a été visité, combien de fois chaque jeu a été ouvert et combien de cœurs chaque jeu a reçus. Pour cela, la page d'accueil appelle un service de comptage externe, <strong>Abacus</strong> (un service gratuit de Jason Cameron, https://abacus.jasoncameron.dev). Cela fonctionne ainsi :</p>
+<ul><li>Quand la page ou un jeu est ouvert, ou quand un cœur est donné, ton navigateur demande à ce service d'augmenter un compteur de un. La requête contient uniquement le nom du compteur (par exemple "spel-le-frawg"). Pas de nom, pas d'adresse e-mail, pas de cookie.</li><li>Comme pour toute requête sur internet, ce service voit alors ton adresse IP. Nous ne la voyons pas ; nous recevons seulement le nombre. Le service ne publie pas de déclaration de confidentialité ; ce qu'il fait de l'adresse IP (par exemple seulement limiter le nombre de requêtes par seconde) nous ne pouvons pas le vérifier. Un compteur qui n'est pas utilisé pendant six mois expire.</li><li>Pour ne pas compter deux fois, ton navigateur conserve deux petites données sur ton propre appareil (galadin_teller : la date et les jeux que tu as ouverts aujourd'hui ; galadin_hart : les jeux auxquels tu as donné un cœur). Elles ne vont nulle part.</li><li>Nous comptons des visites, pas des personnes : une fois par navigateur et par jour pour le site et par jeu, et un cœur par navigateur et par jeu.</li><li>Les jeux eux-mêmes et les applications n'appellent pas ce service ; ils n'envoient rien ni à nous ni à d'autres.</li></ul>
+<p>Tu ne veux pas être compté ? Tu peux alors effacer le stockage de galadin.nl dans les réglages de ton navigateur ou bloquer les requêtes vers abacus.jasoncameron.dev ; le site et les jeux fonctionnent alors normalement.</p>
+<h2>Les jeux</h2>
+<p>Les jeux fonctionnent entièrement dans ton navigateur. Ils n'envoient rien ni à nous ni à d'autres. Ta progression (tes animaux, pièces et réglages) est conservée dans le stockage de ton propre navigateur, sur ton propre appareil. Si tu effaces les données de ce site dans ton navigateur, la progression disparaît. Ton choix de langue (la langue de la liste avec drapeaux) est aussi conservé sur cet appareil, dans le même stockage (clé galadin_taal). Il n'est envoyé nulle part et n'est pas utilisé pour te suivre.</p>
+<p>Si tu veux emporter ton jeu sur un autre appareil, tu crées un code dans le menu parents (« Emporter le jeu ») et tu le colles sur l'autre appareil (« Récupérer le jeu »). Ce code contient uniquement les données du jeu et les réglages, ni nom ni adresse e-mail. Tu l'envoies toi-même ; il ne passe pas par nous.</p>
+<p>Sur un iPhone ou un iPad, Safari ne conserve la progression de façon durable que si tu as placé le jeu sur l'écran d'accueil.</p>
+<h2>Enfants</h2>
+<p>Les jeux conviennent aux enfants. Comme les jeux ne collectent rien, rien n'est collecté sur les enfants. Le compteur de la page d'accueil ne compte que des nombres, comme décrit ci-dessus.</p>
+<h2>Testeurs pour Google Play</h2>
+<p>Si tu veux tester un jeu pour Google Play, tu peux rejoindre notre groupe Google pour ce jeu (par exemple « Le Frawg testers ») ou nous envoyer un e-mail. Nous utilisons ton adresse e-mail uniquement pour t'ajouter à la liste de test de Google Play pour ce jeu. La liste des membres du groupe n'est visible que par nous, pas par les autres membres. Nous ne donnons ton adresse à personne d'autre et nous te retirons de la liste dès que tu le demandes ou que le test est terminé. Google traite ton adresse à cette occasion selon la <a href="https://policies.google.com/privacy">politique de confidentialité de Google</a>.</p>
+<h2>Consulter ou supprimer des données</h2>
+<p>À part l'adresse e-mail des testeurs, nous n'avons aucune donnée sur toi. Ce qui se trouve sur ton propre appareil, tu le supprimes dans les réglages de ton navigateur. Tu veux quitter la liste de test ? Écris-nous.</p>
+<h2>Contact</h2>
+<p>Des questions ? Écris à <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><small>Dernière mise à jour : 17 octobre 2026</small></p>
+<p><small data-noot="1">Translations are provided for convenience; if they differ, the Dutch and English versions apply. / Vertalingen zijn bedoeld als gemak; bij verschil gelden de Nederlandse en Engelse tekst.</small></p>
+</div>
+<div data-l="es" hidden>
+<h1>Privacidad</h1>
+<p><strong>En resumen: los juegos no recopilan nada. El sitio solo cuenta cuántas veces se abre algo, no quién lo abre.</strong></p>
+<h2>El sitio web</h2>
+<p>galadin.nl es un sitio web de Galadin, un pequeño estudio de juegos de los Países Bajos. El sitio no tiene cookies ni anuncios. No necesitas registrarte en ningún sitio.</p>
+<p>El sitio está alojado en GitHub Pages. Como cualquier servidor web, GitHub puede procesar datos técnicos, como tu dirección IP, cuando se solicita una página. Nosotros no tenemos acceso a eso. Consulta la <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">declaración de privacidad de GitHub</a>.</p>
+<h2>El contador de la página de inicio</h2>
+<p>La página de inicio muestra cuántas veces se ha visitado el sitio, cuántas veces se ha abierto cada juego y cuántos corazones ha recibido cada juego. Para ello, la página de inicio llama a un servicio de recuento externo, <strong>Abacus</strong> (un servicio gratuito de Jason Cameron, https://abacus.jasoncameron.dev). Funciona así:</p>
+<ul><li>Al abrir la página o un juego, o al dar un corazón, tu navegador le pide a ese servicio que aumente un contador en uno. La solicitud solo contiene el nombre del contador (por ejemplo "spel-le-frawg"). Sin nombre, sin correo electrónico, sin cookie.</li><li>Como en cualquier solicitud por internet, ese servicio ve tu dirección IP. Nosotros no la vemos; solo recibimos el número. El servicio no publica una declaración de privacidad; lo que hace con la dirección IP (por ejemplo, solo limitar cuántas veces por segundo puedes preguntar) no podemos comprobarlo. Un contador que no se usa durante medio año caduca.</li><li>Para no contar dos veces, tu navegador guarda dos pequeños datos en tu propio dispositivo (galadin_teller: la fecha y qué juegos abriste hoy; galadin_hart: a qué juegos diste un corazón). No van a ninguna parte.</li><li>Contamos visitas, no personas: una vez por navegador y día para el sitio y por juego, y un corazón por navegador y juego.</li><li>Los juegos en sí y las apps no llaman a ese servicio; no envían nada ni a nosotros ni a otros.</li></ul>
+<p>¿No quieres que te cuenten? Entonces puedes borrar el almacenamiento de galadin.nl en los ajustes de tu navegador o bloquear las solicitudes a abacus.jasoncameron.dev; el sitio y los juegos funcionan igual.</p>
+<h2>Los juegos</h2>
+<p>Los juegos funcionan por completo en tu navegador. No envían nada ni a nosotros ni a otros. Tu progreso (tus animales, monedas y ajustes) se guarda en el almacenamiento de tu propio navegador, en tu propio dispositivo. Si borras los datos de este sitio en tu navegador, ese progreso se pierde. Tu elección de idioma (el idioma de la lista con banderas) también se guarda en este dispositivo, en el mismo almacenamiento (clave galadin_taal). No se envía a ninguna parte ni se usa para seguirte.</p>
+<p>Si quieres llevar tu juego a otro dispositivo, creas un código en el menú para padres ("Llevar el juego") y lo pegas en el otro dispositivo ("Recoger el juego"). Ese código solo contiene los datos del juego y los ajustes, sin nombre ni correo electrónico. Lo envías tú mismo; no pasa por nosotros.</p>
+<p>En un iPhone o iPad, Safari solo guarda el progreso de forma permanente si has puesto el juego en la pantalla de inicio.</p>
+<h2>Niños</h2>
+<p>Los juegos son aptos para niños. Como los juegos no recopilan nada, tampoco se recopila nada de los niños. El contador de la página de inicio solo cuenta números, como se describe arriba.</p>
+<h2>Probadores para Google Play</h2>
+<p>Si quieres probar un juego para Google Play, puedes unirte a nuestro grupo de Google para ese juego (por ejemplo "Le Frawg testers") o enviarnos un correo electrónico. Usamos tu dirección de correo solo para añadirte a la lista de pruebas de Google Play para ese juego. La lista de miembros del grupo solo es visible para nosotros, no para otros miembros. No damos tu dirección a nadie más y te quitamos de la lista en cuanto lo pidas o cuando termine la prueba. Google trata tu dirección en ese proceso según la <a href="https://policies.google.com/privacy">política de privacidad de Google</a>.</p>
+<h2>Consultar o eliminar datos</h2>
+<p>Aparte de la dirección de correo de los probadores, no tenemos datos tuyos. Lo que hay en tu propio dispositivo lo eliminas desde los ajustes de tu navegador. ¿Quieres salir de la lista de pruebas? Escríbenos.</p>
+<h2>Contacto</h2>
+<p>¿Preguntas? Escribe a <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><small>Última actualización: 17 de octubre de 2026</small></p>
+<p><small data-noot="1">Translations are provided for convenience; if they differ, the Dutch and English versions apply. / Vertalingen zijn bedoeld als gemak; bij verschil gelden de Nederlandse en Engelse tekst.</small></p>
+</div>
+<div data-l="it" hidden>
+<h1>Privacy</h1>
+<p><strong>In breve: i giochi non raccolgono nulla. Il sito conta solo quante volte viene aperto qualcosa, non da chi.</strong></p>
+<h2>Il sito web</h2>
+<p>galadin.nl è un sito web di Galadin, un piccolo studio di giochi dei Paesi Bassi. Il sito non ha cookie né pubblicità. Non devi registrarti da nessuna parte.</p>
+<p>Il sito è ospitato da GitHub Pages. Come ogni server web, GitHub può trattare dati tecnici, come il tuo indirizzo IP, quando viene richiesta una pagina. Noi non vi abbiamo accesso. Vedi l'<a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">informativa sulla privacy di GitHub</a>.</p>
+<h2>Il contatore sulla pagina iniziale</h2>
+<p>La pagina iniziale mostra quante volte il sito è stato visitato, quante volte è stato aperto ogni gioco e quanti cuori ha ricevuto ogni gioco. Per questo la pagina iniziale chiama un servizio di conteggio esterno, <strong>Abacus</strong> (un servizio gratuito di Jason Cameron, https://abacus.jasoncameron.dev). Funziona così:</p>
+<ul><li>Quando si apre la pagina o un gioco, o si dà un cuore, il tuo browser chiede a quel servizio di aumentare un contatore di uno. La richiesta contiene solo il nome del contatore (ad esempio "spel-le-frawg"). Nessun nome, nessun indirizzo e-mail, nessun cookie.</li><li>Come in ogni richiesta via internet, quel servizio vede il tuo indirizzo IP. Noi non lo vediamo; riceviamo solo il numero. Il servizio non pubblica un'informativa sulla privacy; cosa faccia dell'indirizzo IP (ad esempio solo limitare quante volte al secondo puoi chiedere) non possiamo verificarlo. Un contatore non usato per sei mesi scade.</li><li>Per non contare due volte, il tuo browser conserva due piccoli dati sul tuo dispositivo (galadin_teller: la data e quali giochi hai aperto oggi; galadin_hart: a quali giochi hai dato un cuore). Non vanno da nessuna parte.</li><li>Contiamo le visite, non le persone: una volta per browser al giorno per il sito e per gioco, e un cuore per browser per gioco.</li><li>I giochi stessi e le app non chiamano quel servizio; non inviano nulla né a noi né ad altri.</li></ul>
+<p>Non vuoi essere conteggiato? Allora puoi cancellare la memoria di galadin.nl nelle impostazioni del browser o bloccare le richieste a abacus.jasoncameron.dev; il sito e i giochi funzionano comunque.</p>
+<h2>I giochi</h2>
+<p>I giochi funzionano interamente nel tuo browser. Non inviano nulla né a noi né ad altri. I tuoi progressi (i tuoi animali, le monete e le impostazioni) sono salvati nella memoria del tuo browser, sul tuo dispositivo. Se cancelli i dati di questo sito nel browser, i progressi vanno persi. Anche la tua scelta della lingua (la lingua dell'elenco con le bandiere) è salvata su questo dispositivo, nella stessa memoria (chiave galadin_taal). Non viene inviata da nessuna parte e non serve a tracciarti.</p>
+<p>Se vuoi portare il tuo gioco su un altro dispositivo, crei un codice nel menu per i genitori ("Porta con te il gioco") e lo incolli sull'altro dispositivo ("Recupera il gioco"). Quel codice contiene solo i dati del gioco e le impostazioni, nessun nome o indirizzo e-mail. Lo invii tu stesso; non passa da noi.</p>
+<p>Su un iPhone o iPad, Safari conserva i progressi in modo permanente solo se hai messo il gioco nella schermata Home.</p>
+<h2>Bambini</h2>
+<p>I giochi sono adatti ai bambini. Poiché i giochi non raccolgono nulla, non viene raccolto nulla nemmeno dei bambini. Il contatore sulla pagina iniziale conta solo numeri, come descritto sopra.</p>
+<h2>Tester per Google Play</h2>
+<p>Se vuoi testare un gioco per Google Play, puoi unirti al nostro gruppo Google per quel gioco (ad esempio "Le Frawg testers") o mandarci un'e-mail. Usiamo il tuo indirizzo e-mail solo per aggiungerti all'elenco di test di Google Play per quel gioco. L'elenco dei membri del gruppo è visibile solo a noi, non agli altri membri. Non diamo il tuo indirizzo a nessun altro e ti togliamo dall'elenco appena lo chiedi o appena il test è finito. Google tratta il tuo indirizzo in questo caso secondo l'<a href="https://policies.google.com/privacy">informativa sulla privacy di Google</a>.</p>
+<h2>Consultare o eliminare i dati</h2>
+<p>Oltre all'indirizzo e-mail dei tester, non abbiamo dati su di te. Ciò che si trova sul tuo dispositivo lo elimini dalle impostazioni del browser. Vuoi uscire dall'elenco di test? Scrivici.</p>
+<h2>Contatto</h2>
+<p>Domande? Scrivi a <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><small>Ultimo aggiornamento: 17 ottobre 2026</small></p>
+<p><small data-noot="1">Translations are provided for convenience; if they differ, the Dutch and English versions apply. / Vertalingen zijn bedoeld als gemak; bij verschil gelden de Nederlandse en Engelse tekst.</small></p>
+</div>
+<div data-l="pt" hidden>
+<h1>Privacidade</h1>
+<p><strong>Em resumo: os jogos não recolhem nada. O site só conta quantas vezes algo é aberto, não por quem.</strong></p>
+<h2>O site</h2>
+<p>galadin.nl é um site da Galadin, um pequeno estúdio de jogos dos Países Baixos. O site não tem cookies nem anúncios. Não precisas de te registar em lado nenhum.</p>
+<p>O site está alojado no GitHub Pages. Como qualquer servidor web, o GitHub pode tratar dados técnicos, como o teu endereço IP, quando uma página é pedida. Nós não temos acesso a isso. Consulta a <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">declaração de privacidade do GitHub</a>.</p>
+<h2>O contador da página inicial</h2>
+<p>A página inicial mostra quantas vezes o site foi visitado, quantas vezes cada jogo foi aberto e quantos corações cada jogo recebeu. Para isso, a página inicial chama um serviço de contagem externo, o <strong>Abacus</strong> (um serviço gratuito de Jason Cameron, https://abacus.jasoncameron.dev). Funciona assim:</p>
+<ul><li>Ao abrir a página ou um jogo, ou ao dar um coração, o teu navegador pede a esse serviço que aumente um contador em um. O pedido contém apenas o nome do contador (por exemplo "spel-le-frawg"). Sem nome, sem endereço de e-mail, sem cookie.</li><li>Como em qualquer pedido pela internet, esse serviço vê o teu endereço IP. Nós não o vemos; só recebemos o número. O serviço não publica uma declaração de privacidade; o que faz com o endereço IP (por exemplo, só limitar quantas vezes por segundo podes pedir) não podemos verificar. Um contador que não seja usado durante meio ano expira.</li><li>Para não contar duas vezes, o teu navegador guarda dois pequenos dados no teu próprio dispositivo (galadin_teller: a data e os jogos que abriste hoje; galadin_hart: os jogos a que deste um coração). Não vão para lado nenhum.</li><li>Contamos visitas, não pessoas: uma vez por navegador por dia para o site e por jogo, e um coração por navegador por jogo.</li><li>Os jogos em si e as apps não chamam esse serviço; não enviam nada a nós nem a outros.</li></ul>
+<p>Não queres ser contado? Então podes limpar o armazenamento de galadin.nl nas definições do teu navegador ou bloquear pedidos a abacus.jasoncameron.dev; o site e os jogos funcionam na mesma.</p>
+<h2>Os jogos</h2>
+<p>Os jogos funcionam inteiramente no teu navegador. Não enviam nada a nós nem a outros. O teu progresso (os teus animais, moedas e definições) é guardado no armazenamento do teu próprio navegador, no teu próprio dispositivo. Se limpares os dados deste site no navegador, esse progresso perde-se. A tua escolha de idioma (o idioma da lista com bandeiras) também é guardada neste dispositivo, no mesmo armazenamento (chave galadin_taal). Não é enviada para lado nenhum nem usada para te seguir.</p>
+<p>Se quiseres levar o teu jogo para outro dispositivo, crias um código no menu dos pais ("Levar o jogo") e colas no outro dispositivo ("Buscar o jogo"). Esse código contém apenas os dados do jogo e as definições, sem nome nem endereço de e-mail. Envias tu mesmo; não passa por nós.</p>
+<p>Num iPhone ou iPad, o Safari só guarda o progresso de forma permanente se tiveres colocado o jogo no ecrã principal.</p>
+<h2>Crianças</h2>
+<p>Os jogos são adequados para crianças. Como os jogos não recolhem nada, também não se recolhe nada das crianças. O contador da página inicial conta apenas números, como descrito acima.</p>
+<h2>Testadores para o Google Play</h2>
+<p>Se quiseres testar um jogo para o Google Play, podes juntar-te ao nosso grupo Google desse jogo (por exemplo "Le Frawg testers") ou enviar-nos um e-mail. Usamos o teu endereço de e-mail apenas para te adicionar à lista de teste do Google Play desse jogo. A lista de membros do grupo só é visível para nós, não para outros membros. Não damos o teu endereço a mais ninguém e retiramos-te da lista assim que o pedires ou quando o teste terminar. O Google trata o teu endereço nesse processo de acordo com a <a href="https://policies.google.com/privacy">política de privacidade da Google</a>.</p>
+<h2>Consultar ou apagar dados</h2>
+<p>Além do endereço de e-mail dos testadores, não temos dados teus. O que está no teu próprio dispositivo, removes nas definições do navegador. Queres sair da lista de teste? Escreve-nos.</p>
+<h2>Contacto</h2>
+<p>Perguntas? Escreve para <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><small>Última atualização: 17 de outubro de 2026</small></p>
+<p><small data-noot="1">Translations are provided for convenience; if they differ, the Dutch and English versions apply. / Vertalingen zijn bedoeld als gemak; bij verschil gelden de Nederlandse en Engelse tekst.</small></p>
+</div>
+<div data-missing="1" hidden><p><small>This text is not yet available in your language; the English version is shown. Deze tekst is nog niet in jouw taal beschikbaar; de Engelse versie wordt getoond.</small></p></div>
+<script>
+function galadinTaalKeuze(host, cfg) {
+  var langs = cfg.langs, names = cfg.names, flags = cfg.flags, cur = cfg.current, focus = 0, open = false;
+  host.classList.add('tk'); host.textContent = '';
+  var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'tk-knop';
+  btn.setAttribute('aria-haspopup', 'listbox'); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-label', cfg.label || 'Language');
+  var fl = document.createElement('img'); fl.className = 'tk-vlag'; fl.alt = '';
+  var nm = document.createElement('span'); var pijl = document.createElement('span'); pijl.setAttribute('aria-hidden', 'true'); pijl.textContent = '▾';
+  btn.appendChild(fl); btn.appendChild(nm); btn.appendChild(pijl);
+  var ul = document.createElement('ul'); ul.className = 'tk-lijst'; ul.setAttribute('role', 'listbox'); ul.hidden = true; ul.tabIndex = -1;
+  ul.setAttribute('aria-label', cfg.label || 'Language');
+  var opties = langs.map(function (c) {
+    var li = document.createElement('li'); li.className = 'tk-optie'; li.setAttribute('role', 'option'); li.setAttribute('lang', c); li.dataset.c = c;
+    var im = document.createElement('img'); im.className = 'tk-vlag'; im.alt = ''; im.src = flags[c];
+    var sp = document.createElement('span'); sp.textContent = names[c];
+    li.appendChild(im); li.appendChild(sp); ul.appendChild(li); return li;
+  });
+  host.appendChild(btn); host.appendChild(ul);
+  function toon() {
+    fl.src = flags[cur]; nm.textContent = names[cur]; nm.setAttribute('lang', cur);
+    opties.forEach(function (li) { li.setAttribute('aria-selected', li.dataset.c === cur ? 'true' : 'false'); });
+  }
+  function zetFocus(i) {
+    focus = (i + langs.length) % langs.length;
+    opties.forEach(function (li, k) { li.classList.toggle('tk-focus', k === focus); });
+    opties[focus].scrollIntoView({ block: 'nearest' });
+  }
+  function toggle(aan) {
+    open = aan; ul.hidden = !aan; btn.setAttribute('aria-expanded', aan ? 'true' : 'false');
+    if (aan) { zetFocus(langs.indexOf(cur)); ul.focus(); }
+  }
+  function kies(c) { toggle(false); btn.focus(); if (c !== cur) { cur = c; toon(); if (cfg.onChange) cfg.onChange(c); } }
+  btn.addEventListener('click', function () { toggle(!open); });
+  ul.addEventListener('click', function (e) { var li = e.target.closest ? e.target.closest('.tk-optie') : null; if (li) kies(li.dataset.c); });
+  ul.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); zetFocus(focus + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); zetFocus(focus - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); zetFocus(0); }
+    else if (e.key === 'End') { e.preventDefault(); zetFocus(langs.length - 1); }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); kies(langs[focus]); }
+    else if (e.key === 'Escape' || e.key === 'Tab') { toggle(false); btn.focus(); }
+  });
+  document.addEventListener('click', function (e) { if (open && !host.contains(e.target)) toggle(false); });
+  toon();
+  return { set: function (c) { cur = c; toon(); } };
+}
 
-<p><small>Laatst bijgewerkt: 11 oktober 2026</small></p>
+(function () {
+  'use strict';
+  var LANGS = ["nl", "en", "de", "fr", "es", "it", "pt", "da", "sv", "fi", "et", "lv", "lt", "pl", "cs", "sk", "sl", "hr", "hu", "ro", "bg", "el", "mt", "ga"], KEY = 'galadin_taal', DEFAULT = 'nl';
+  var NAMES = {"nl": "Nederlands", "en": "English", "de": "Deutsch", "fr": "Français", "es": "Español", "it": "Italiano", "pt": "Português", "da": "Dansk", "sv": "Svenska", "fi": "Suomi", "et": "Eesti", "lv": "Latviešu", "lt": "Lietuvių", "pl": "Polski", "cs": "Čeština", "sk": "Slovenčina", "sl": "Slovenščina", "hr": "Hrvatski", "hu": "Magyar", "ro": "Română", "bg": "Български", "el": "Ελληνικά", "mt": "Malti", "ga": "Gaeilge"}, FLAGS = {"nl": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23AE1C28%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%2321468B%22/%3E%3C/svg%3E", "en": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23012169%22/%3E%3Cpath d=%22M0,0 L30,20 M30,0 L0,20%22 stroke=%22%23fff%22 stroke-width=%224%22/%3E%3Cpath d=%22M0,0 L30,20 M30,0 L0,20%22 stroke=%22%23C8102E%22 stroke-width=%221.6%22/%3E%3Cpath d=%22M15,0 V20 M0,10 H30%22 stroke=%22%23fff%22 stroke-width=%226%22/%3E%3Cpath d=%22M15,0 V20 M0,10 H30%22 stroke=%22%23C8102E%22 stroke-width=%223.4%22/%3E%3C/svg%3E", "de": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23000000%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23DD0000%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23FFCE00%22/%3E%3C/svg%3E", "fr": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%230055A4%22/%3E%3Crect x=%2210.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%2220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23EF4135%22/%3E%3C/svg%3E", "es": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%225.020%22 fill=%22%23AA151B%22/%3E%3Crect x=%220%22 y=%225.000%22 width=%2230%22 height=%2210.020%22 fill=%22%23F1BF00%22/%3E%3Crect x=%220%22 y=%2215.000%22 width=%2230%22 height=%225.020%22 fill=%22%23AA151B%22/%3E%3C/svg%3E", "it": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23009246%22/%3E%3Crect x=%2210.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%2220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23CE2B37%22/%3E%3C/svg%3E", "pt": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect width=%2212%22 height=%2220%22 fill=%22%23006600%22/%3E%3Crect x=%2212%22 width=%2218%22 height=%2220%22 fill=%22%23FF0000%22/%3E%3Ccircle cx=%2212%22 cy=%2210%22 r=%223.2%22 fill=%22%23FFE000%22/%3E%3Ccircle cx=%2212%22 cy=%2210%22 r=%221.6%22 fill=%22%23FF0000%22/%3E%3C/svg%3E", "da": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23C8102E%22/%3E%3Crect x=%229%22 width=%224%22 height=%2220%22 fill=%22%23FFFFFF%22/%3E%3Crect y=%228%22 width=%2230%22 height=%224%22 fill=%22%23FFFFFF%22/%3E%3C/svg%3E", "sv": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23006AA7%22/%3E%3Crect x=%229%22 width=%224%22 height=%2220%22 fill=%22%23FECC02%22/%3E%3Crect y=%228%22 width=%2230%22 height=%224%22 fill=%22%23FECC02%22/%3E%3C/svg%3E", "fi": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%229%22 width=%224%22 height=%2220%22 fill=%22%23003580%22/%3E%3Crect y=%228%22 width=%2230%22 height=%224%22 fill=%22%23003580%22/%3E%3C/svg%3E", "et": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%230072CE%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23000000%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3C/svg%3E", "lv": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%228.020%22 fill=%22%239E3039%22/%3E%3Crect x=%220%22 y=%228.000%22 width=%2230%22 height=%224.020%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2212.000%22 width=%2230%22 height=%228.020%22 fill=%22%239E3039%22/%3E%3C/svg%3E", "lt": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23FDB913%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23006A44%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23C1272D%22/%3E%3C/svg%3E", "pl": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%2210.020%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2210.000%22 width=%2230%22 height=%2210.020%22 fill=%22%23DC143C%22/%3E%3C/svg%3E", "cs": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect width=%2230%22 height=%2210%22 fill=%22%23FFFFFF%22/%3E%3Crect y=%2210%22 width=%2230%22 height=%2210%22 fill=%22%23D7141A%22/%3E%3Cpolygon points=%220,0 15,10 0,20%22 fill=%22%2311457E%22/%3E%3C/svg%3E", "sk": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%230B4EA2%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23EE1C25%22/%3E%3C/svg%3E", "sl": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23005DA4%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23ED1C24%22/%3E%3C/svg%3E", "hr": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23FF0000%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23171796%22/%3E%3C/svg%3E", "hu": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23CD2A3E%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23436F4D%22/%3E%3C/svg%3E", "ro": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23002B7F%22/%3E%3Crect x=%2210.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23FCD116%22/%3E%3Crect x=%2220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23CE1126%22/%3E%3C/svg%3E", "bg": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%2300966E%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23D62612%22/%3E%3C/svg%3E", "el": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%222.242%22 fill=%22%230D5EAF%22/%3E%3Crect x=%220%22 y=%222.222%22 width=%2230%22 height=%222.242%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%224.444%22 width=%2230%22 height=%222.242%22 fill=%22%230D5EAF%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%222.242%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%228.889%22 width=%2230%22 height=%222.242%22 fill=%22%230D5EAF%22/%3E%3Crect x=%220%22 y=%2211.111%22 width=%2230%22 height=%222.242%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%222.242%22 fill=%22%230D5EAF%22/%3E%3Crect x=%220%22 y=%2215.556%22 width=%2230%22 height=%222.242%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2217.778%22 width=%2230%22 height=%222.242%22 fill=%22%230D5EAF%22/%3E%3Crect width=%2211.12%22 height=%2211.12%22 fill=%22%230D5EAF%22/%3E%3Crect x=%224.45%22 width=%222.22%22 height=%2211.12%22 fill=%22%23fff%22/%3E%3Crect y=%224.45%22 width=%2211.12%22 height=%222.22%22 fill=%22%23fff%22/%3E%3C/svg%3E", "mt": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220.000%22 y=%220%22 width=%2215.020%22 height=%2220%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%2215.000%22 y=%220%22 width=%2215.020%22 height=%2220%22 fill=%22%23CF142B%22/%3E%3C/svg%3E", "ga": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23169B62%22/%3E%3Crect x=%2210.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%2220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23FF883E%22/%3E%3C/svg%3E"};
+  function valid(c) { return LANGS.indexOf(c) > -1; }
+  function fromUrl() { try { var m = /[?&]taal=([a-z]{2})(&|$)/.exec(location.search); return m && valid(m[1]) ? m[1] : null; } catch (e) { return null; } }
+  function fromStore() { try { var v = localStorage.getItem(KEY); return valid(v) ? v : null; } catch (e) { return null; } }
+  var cur = fromUrl() || fromStore() || DEFAULT;
+  var tk = galadinTaalKeuze(document.getElementById('taalhost'), {
+    langs: LANGS, names: NAMES, flags: FLAGS, current: cur, label: 'Taal / Language',
+    onChange: function (c) { cur = c; try { localStorage.setItem(KEY, c); } catch (e) { } apply(); }
+  });
+  function apply() {
+    document.documentElement.lang = cur; tk.set(cur);
+    var bl = document.querySelectorAll('[data-l]');
+    var heeft = !!document.querySelector('[data-l="' + cur + '"]'), toon = heeft ? cur : 'en';
+    for (var i = 0; i < bl.length; i++) { var l = bl[i].getAttribute('data-l'); bl[i].hidden = (l !== toon); }
+    var nt = document.querySelector('[data-missing]'); if (nt) nt.hidden = heeft;
+    var ls = document.querySelectorAll('a[data-taal]');
+    for (var j = 0; j < ls.length; j++) { var b = ls[j].getAttribute('data-basis') || ls[j].getAttribute('href'); ls[j].setAttribute('data-basis', b); ls[j].setAttribute('href', b + (b.indexOf('?') > -1 ? '&' : '?') + 'taal=' + cur); }
+  }
+  apply();
+})();
+</script>
 </body>
 </html>

@@ -3,70 +3,267 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Privacyverklaring Android-apps – Galadin</title>
+<title>Privacy Android-apps – Galadin</title>
 <style>
   body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #222; background: #fff; }
   h1 { font-size: 1.6rem; }
   h2 { font-size: 1.1rem; margin-top: 1.5rem; }
   a { color: #1a5fb4; }
+  [data-l][hidden] { display: none; }
+  .taal { text-align: right; font-size: .9rem; }
+  :root { --tk-bg: #ffffff; --tk-fg: #222; --tk-rand: #bbb; --tk-accent: #1a5fb4; }
+  @media (prefers-color-scheme: dark) { :root { --tk-bg: #1e2127; --tk-fg: #e6e6e6; --tk-rand: #3a3f48; --tk-accent: #7fb4ff; } }
+  .tk { position: relative; display: inline-block; font: inherit; }
+  .tk-knop { display: inline-flex; align-items: center; gap: .5rem; background: var(--tk-bg, #1b1e25); color: var(--tk-fg, #e8e8e8); border: 1px solid var(--tk-rand, #2d323d); border-radius: .5rem; padding: .3rem .6rem; font: inherit; cursor: pointer; }
+  .tk-knop:hover { border-color: var(--tk-accent, #fca311); }
+  .tk-vlag { width: 24px; height: 16px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(128,128,128,.45); object-fit: cover; flex: none; }
+  .tk-lijst { position: absolute; z-index: 1000; top: calc(100% + 4px); left: 50%; transform: translateX(-50%); min-width: 13rem; max-height: min(60vh, 22rem); overflow: auto; margin: 0; padding: .25rem; list-style: none; text-align: left; background: var(--tk-bg, #1b1e25); color: var(--tk-fg, #e8e8e8); border: 1px solid var(--tk-rand, #2d323d); border-radius: .6rem; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+  .tk-lijst[hidden] { display: none; }
+  .tk-optie { display: flex; align-items: center; gap: .6rem; padding: .35rem .5rem; border-radius: .4rem; cursor: pointer; }
+  .tk-optie:hover, .tk-optie.tk-focus { background: rgba(252,163,17,.2); }
+  .tk-optie[aria-selected="true"] { font-weight: 700; }
+  @media (prefers-color-scheme: dark) { body { background: #14161a; color: #e6e6e6; } a { color: #7fb4ff; } }
 </style>
 </head>
 <body>
+<p class="taal" id="taalhost"></p>
+<div data-l="nl">
 <h1>Privacyverklaring Android-apps</h1>
-<p><small>Laatst bijgewerkt: 16 oktober 2026</small></p>
-
-<p>De Android-apps <strong>Le Frawg</strong> en <strong>Dress for the Slide</strong> zijn gemaakt door <strong>Galadin</strong>, een
-kleine, onafhankelijke maker uit Nederland. Deze verklaring geldt voor die twee apps.</p>
-
-<p><strong>Kort: de apps verzamelen niets.</strong> Wij krijgen geen gegevens van jou of je kind, en de apps sturen niets
-naar ons of naar anderen.</p>
-
+<p><small>Laatst bijgewerkt: 17 oktober 2026</small></p>
+<p>De Android-apps <strong>Le Frawg</strong> en <strong>Dress for the Slide</strong> zijn gemaakt door <strong>Galadin</strong>, een kleine, onafhankelijke maker uit Nederland. Deze verklaring geldt voor die twee apps.</p>
+<p><strong>Kort: de apps verzamelen niets.</strong> Wij krijgen geen gegevens van jou of je kind, en de apps sturen niets naar ons of naar anderen.</p>
 <h2>Wat de apps niet doen</h2>
-<ul>
-  <li>De apps hebben geen toegang tot internet en maken geen verbinding met een server.</li>
-  <li>Er is geen account en je hoeft je nergens aan te melden.</li>
-  <li>Er zijn geen advertenties en er is geen meetsoftware.</li>
-  <li>De apps vragen niet om je naam, e-mailadres, locatie, contacten, foto's, camera of microfoon.</li>
-</ul>
-
+<ul><li>De apps hebben geen toegang tot internet en maken geen verbinding met een server.</li><li>Er is geen account en je hoeft je nergens aan te melden.</li><li>Er zijn geen advertenties en er is geen meetsoftware.</li><li>De apps vragen niet om je naam, e-mailadres, locatie, contacten, foto's, camera of microfoon.</li></ul>
 <h2>Wat er op het toestel blijft</h2>
-<ul>
-  <li><strong>De voortgang van het spel</strong> (en de instellingen) wordt bewaard in een bestand op het toestel zelf. Bij
-  Le Frawg zijn dat je kikkers, munten, spullen en de namen die je je kikkers geeft; bij Dress for the Slide je motoren,
-  onderdelen, uitrusting, geld en uitslagen. Verwijder je de app, dan is dat bestand weg.</li>
-  <li><strong>Trillen</strong>: de apps kunnen je toestel laten trillen. Je zet dat uit in het spel of in de instellingen van
-  je telefoon.</li>
-  <li><strong>Meldingen</strong> (alleen Le Frawg, "je kikker heeft honger"): de app maakt ze zelf op het toestel aan. Ze komen
-  niet via internet. Je kunt ze uitzetten in de instellingen van je telefoon, of de toestemming weigeren als de app erom
-  vraagt. In het oudermenu stel je de stille uren in. Dress for the Slide stuurt geen meldingen.</li>
-</ul>
-
+<ul><li><strong>De voortgang van het spel</strong> (en de instellingen) wordt bewaard in een bestand op het toestel zelf. Bij Le Frawg zijn dat je kikkers, munten, spullen en de namen die je je kikkers geeft; bij Dress for the Slide je motoren, onderdelen, uitrusting, geld en uitslagen. Verwijder je de app, dan is dat bestand weg.</li><li><strong>Trillen</strong>: de apps kunnen je toestel laten trillen. Je zet dat uit in het spel of in de instellingen van je telefoon.</li><li><strong>Meldingen</strong> (alleen Le Frawg, "je kikker heeft honger"): de app maakt ze zelf op het toestel aan. Ze komen niet via internet. Je kunt ze uitzetten in de instellingen van je telefoon, of de toestemming weigeren als de app erom vraagt. In het oudermenu stel je de stille uren in. Dress for the Slide stuurt geen meldingen.</li></ul>
 <h2>Back-up van Android</h2>
-<p>Staat op je telefoon de back-up van Google aan, dan kan Android de voortgang van het spel meenemen in de back-up van
-je eigen Google-account, zodat die op een nieuwe telefoon terugkomt. Dat regelt Android; wij kunnen die back-up niet
-inzien. Je beheert dit in de instellingen van je telefoon.</p>
-
+<p>Staat op je telefoon de back-up van Google aan, dan kan Android de voortgang van het spel meenemen in de back-up van je eigen Google-account, zodat die op een nieuwe telefoon terugkomt. Dat regelt Android; wij kunnen die back-up niet inzien. Je beheert dit in de instellingen van je telefoon.</p>
 <h2>Le Frawg: je spel meenemen naar een ander toestel</h2>
-<p>In het oudermenu van Le Frawg maak je met "Spel meenemen" een code van je voortgang en instellingen; op het andere
-toestel plak je die bij "Spel ophalen". De code bevat geen naam, e-mailadres of kenmerk van het toestel, en je verstuurt
-hem zelf: hij gaat niet langs ons.</p>
-
+<p>In het oudermenu van Le Frawg maak je met "Spel meenemen" een code van je voortgang en instellingen; op het andere toestel plak je die bij "Spel ophalen". De code bevat geen naam, e-mailadres of kenmerk van het toestel, en je verstuurt hem zelf: hij gaat niet langs ons.</p>
 <h2>Kinderen</h2>
-<p>Le Frawg is geschikt voor kinderen; het oudermenu staat achter een rekensom. Dress for the Slide is een motorrace met
-valpartijen zonder bloed en is bedoeld voor spelers vanaf 7 jaar. Omdat de apps niets verzamelen, verzamelen ze ook niets
-van kinderen.</p>
-
+<p>Le Frawg is geschikt voor kinderen; het oudermenu staat achter een rekensom. Dress for the Slide is een motorrace met valpartijen zonder bloed en is bedoeld voor spelers vanaf 7 jaar. Omdat de apps niets verzamelen, verzamelen ze ook niets van kinderen.</p>
 <h2>Gegevens inzien of verwijderen</h2>
-<p>Wij hebben geen gegevens van je, dus er is niets om in te zien of te verwijderen. Wat op je toestel staat, verwijder
-je door de app te verwijderen of in de instellingen van je telefoon de opslag van de app te wissen.</p>
-
+<p>Wij hebben geen gegevens van je, dus er is niets om in te zien of te verwijderen. Wat op je toestel staat, verwijder je door de app te verwijderen of in de instellingen van je telefoon de opslag van de app te wissen.</p>
 <h2>Wijzigingen</h2>
-<p>Verandert een app zo dat deze verklaring niet meer klopt, dan passen wij de verklaring aan voordat de nieuwe versie
-verschijnt. Komen er apps bij, dan worden ze hier genoemd.</p>
-
+<p>Verandert een app zo dat deze verklaring niet meer klopt, dan passen wij de verklaring aan voordat de nieuwe versie verschijnt. Komen er apps bij, dan worden ze hier genoemd.</p>
 <h2>Contact</h2>
-<p>Vragen? <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a></p>
+<p>Vragen? Mail naar <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><a href="./" data-taal="1">Terug naar Galadin</a> · <a href="privacy.html" data-taal="1">Privacy van de website en de webspellen</a></p>
+</div>
+<div data-l="en" hidden>
+<h1>Privacy statement Android apps</h1>
+<p><small>Last updated: 17 October 2026</small></p>
+<p>The Android apps <strong>Le Frawg</strong> and <strong>Dress for the Slide</strong> are made by <strong>Galadin</strong>, a small, independent maker from the Netherlands. This statement applies to those two apps.</p>
+<p><strong>In short: the apps collect nothing.</strong> We receive no data from you or your child, and the apps send nothing to us or to anyone else.</p>
+<h2>What the apps do not do</h2>
+<ul><li>The apps have no access to the internet and make no connection to a server.</li><li>There is no account and you do not need to sign in anywhere.</li><li>There are no ads and no measuring software.</li><li>The apps do not ask for your name, email address, location, contacts, photos, camera or microphone.</li></ul>
+<h2>What stays on the device</h2>
+<ul><li><strong>The progress of the game</strong> (and the settings) is stored in a file on the device itself. In Le Frawg that is your frogs, coins, items and the names you give your frogs; in Dress for the Slide your motorcycles, parts, gear, money and results. Delete the app and that file is gone.</li><li><strong>Vibration</strong>: the apps can make your device vibrate. You turn that off in the game or in your phone's settings.</li><li><strong>Notifications</strong> (Le Frawg only, "your frog is hungry"): the app creates them itself on the device. They do not come via the internet. You can turn them off in your phone's settings, or refuse the permission if the app asks for it. In the parent menu you set the quiet hours. Dress for the Slide sends no notifications.</li></ul>
+<h2>Android backup</h2>
+<p>If Google's backup is on on your phone, Android can include the progress of the game in the backup of your own Google account, so that it comes back on a new phone. Android handles that; we cannot see that backup. You manage this in your phone's settings.</p>
+<h2>Le Frawg: taking your game to another device</h2>
+<p>In the parent menu of Le Frawg you make a code of your progress and settings with "Take game along"; on the other device you paste it at "Fetch game". The code contains no name, email address or device identifier, and you send it yourself: it does not pass through us.</p>
+<h2>Children</h2>
+<p>Le Frawg is suitable for children; the parent menu is behind a sum. Dress for the Slide is a motorcycle race with crashes without blood and is meant for players from 7 years. Because the apps collect nothing, they collect nothing from children either.</p>
+<h2>Viewing or deleting data</h2>
+<p>We have no data about you, so there is nothing to view or delete. What is on your device, you delete by deleting the app or by clearing the app's storage in your phone's settings.</p>
+<h2>Changes</h2>
+<p>If an app changes so that this statement no longer holds, we will change the statement before the new version appears. If apps are added, they are named here.</p>
+<h2>Contact</h2>
+<p>Questions? Email <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><a href="./" data-taal="1">Back to Galadin</a> · <a href="privacy.html" data-taal="1">Privacy of the website and the web games</a></p>
+</div>
+<div data-l="de" hidden>
+<h1>Datenschutzerklärung Android-Apps</h1>
+<p><small>Zuletzt aktualisiert: 17. Oktober 2026</small></p>
+<p>Die Android-Apps <strong>Le Frawg</strong> und <strong>Dress for the Slide</strong> wurden von <strong>Galadin</strong> gemacht, einem kleinen, unabhängigen Entwickler aus den Niederlanden. Diese Erklärung gilt für diese beiden Apps.</p>
+<p><strong>Kurz: Die Apps sammeln nichts.</strong> Wir erhalten keine Daten von dir oder deinem Kind, und die Apps senden nichts an uns oder an andere.</p>
+<h2>Was die Apps nicht tun</h2>
+<ul><li>Die Apps haben keinen Zugriff auf das Internet und stellen keine Verbindung zu einem Server her.</li><li>Es gibt kein Konto, und du musst dich nirgends anmelden.</li><li>Es gibt keine Werbung und keine Messsoftware.</li><li>Die Apps fragen nicht nach deinem Namen, deiner E-Mail-Adresse, deinem Standort, deinen Kontakten, Fotos, deiner Kamera oder deinem Mikrofon.</li></ul>
+<h2>Was auf dem Gerät bleibt</h2>
+<ul><li><strong>Der Fortschritt des Spiels</strong> (und die Einstellungen) wird in einer Datei auf dem Gerät selbst gespeichert. Bei Le Frawg sind das deine Frösche, Münzen, Gegenstände und die Namen, die du deinen Fröschen gibst; bei Dress for the Slide deine Motorräder, Teile, Ausrüstung, dein Geld und deine Ergebnisse. Löschst du die App, ist diese Datei weg.</li><li><strong>Vibration</strong>: Die Apps können dein Gerät vibrieren lassen. Du schaltest das im Spiel oder in den Einstellungen deines Telefons aus.</li><li><strong>Benachrichtigungen</strong> (nur Le Frawg, "dein Frosch hat Hunger"): Die App erstellt sie selbst auf dem Gerät. Sie kommen nicht über das Internet. Du kannst sie in den Einstellungen deines Telefons ausschalten oder die Berechtigung verweigern, wenn die App danach fragt. Im Elternmenü stellst du die Ruhezeiten ein. Dress for the Slide sendet keine Benachrichtigungen.</li></ul>
+<h2>Android-Backup</h2>
+<p>Ist auf deinem Telefon das Backup von Google eingeschaltet, kann Android den Fortschritt des Spiels in das Backup deines eigenen Google-Kontos aufnehmen, damit er auf einem neuen Telefon wieder da ist. Das regelt Android; wir können dieses Backup nicht einsehen. Du verwaltest das in den Einstellungen deines Telefons.</p>
+<h2>Le Frawg: dein Spiel auf ein anderes Gerät mitnehmen</h2>
+<p>Im Elternmenü von Le Frawg erstellst du mit "Spiel mitnehmen" einen Code deines Fortschritts und deiner Einstellungen; auf dem anderen Gerät fügst du ihn bei "Spiel abholen" ein. Der Code enthält keinen Namen, keine E-Mail-Adresse und kein Gerätemerkmal, und du verschickst ihn selbst: Er läuft nicht über uns.</p>
+<h2>Kinder</h2>
+<p>Le Frawg ist für Kinder geeignet; das Elternmenü liegt hinter einer Rechenaufgabe. Dress for the Slide ist ein Motorradrennen mit Stürzen ohne Blut und für Spieler ab 7 Jahren gedacht. Weil die Apps nichts sammeln, sammeln sie auch nichts von Kindern.</p>
+<h2>Daten einsehen oder löschen</h2>
+<p>Wir haben keine Daten über dich, also gibt es nichts einzusehen oder zu löschen. Was auf deinem Gerät gespeichert ist, löschst du, indem du die App löschst oder in den Einstellungen deines Telefons den Speicher der App leerst.</p>
+<h2>Änderungen</h2>
+<p>Ändert sich eine App so, dass diese Erklärung nicht mehr stimmt, passen wir die Erklärung an, bevor die neue Version erscheint. Kommen Apps dazu, werden sie hier genannt.</p>
+<h2>Kontakt</h2>
+<p>Fragen? Schreib an <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><a href="./" data-taal="1">Zurück zu Galadin</a> · <a href="privacy.html" data-taal="1">Datenschutz der Website und der Webspiele</a></p>
+<p><small data-noot="1">Translations are provided for convenience; if they differ, the Dutch and English versions apply. / Vertalingen zijn bedoeld als gemak; bij verschil gelden de Nederlandse en Engelse tekst.</small></p>
+</div>
+<div data-l="fr" hidden>
+<h1>Déclaration de confidentialité des applications Android</h1>
+<p><small>Dernière mise à jour : 17 octobre 2026</small></p>
+<p>Les applications Android <strong>Le Frawg</strong> et <strong>Dress for the Slide</strong> sont créées par <strong>Galadin</strong>, un petit créateur indépendant des Pays-Bas. Cette déclaration s'applique à ces deux applications.</p>
+<p><strong>En bref : les applications ne collectent rien.</strong> Nous ne recevons aucune donnée de toi ou de ton enfant, et les applications n'envoient rien ni à nous ni à d'autres.</p>
+<h2>Ce que les applications ne font pas</h2>
+<ul><li>Les applications n'ont pas accès à internet et ne se connectent à aucun serveur.</li><li>Il n'y a pas de compte et tu n'as pas besoin de te connecter nulle part.</li><li>Il n'y a ni publicités ni logiciel de mesure.</li><li>Les applications ne demandent ni ton nom, ni ton adresse e-mail, ni ta position, ni tes contacts, ni tes photos, ni ton appareil photo, ni ton micro.</li></ul>
+<h2>Ce qui reste sur l'appareil</h2>
+<ul><li><strong>La progression du jeu</strong> (et les réglages) est conservée dans un fichier sur l'appareil lui-même. Dans Le Frawg, ce sont tes grenouilles, pièces, objets et les noms que tu donnes à tes grenouilles ; dans Dress for the Slide, tes motos, pièces, équipement, argent et résultats. Si tu supprimes l'application, ce fichier disparaît.</li><li><strong>Vibration</strong> : les applications peuvent faire vibrer ton appareil. Tu la désactives dans le jeu ou dans les réglages de ton téléphone.</li><li><strong>Notifications</strong> (Le Frawg uniquement, « ta grenouille a faim ») : l'application les crée elle-même sur l'appareil. Elles ne passent pas par internet. Tu peux les désactiver dans les réglages de ton téléphone, ou refuser l'autorisation si l'application la demande. Dans le menu parents, tu règles les heures calmes. Dress for the Slide n'envoie pas de notifications.</li></ul>
+<h2>Sauvegarde Android</h2>
+<p>Si la sauvegarde de Google est activée sur ton téléphone, Android peut inclure la progression du jeu dans la sauvegarde de ton propre compte Google, pour qu'elle revienne sur un nouveau téléphone. C'est Android qui s'en occupe ; nous ne pouvons pas consulter cette sauvegarde. Tu la gères dans les réglages de ton téléphone.</p>
+<h2>Le Frawg : emporter ton jeu sur un autre appareil</h2>
+<p>Dans le menu parents de Le Frawg, tu crées avec « Emporter le jeu » un code de ta progression et de tes réglages ; sur l'autre appareil, tu le colles dans « Récupérer le jeu ». Le code ne contient ni nom, ni adresse e-mail, ni identifiant d'appareil, et tu l'envoies toi-même : il ne passe pas par nous.</p>
+<h2>Enfants</h2>
+<p>Le Frawg convient aux enfants ; le menu parents est protégé par un calcul. Dress for the Slide est une course de moto avec des chutes sans sang, destinée aux joueurs à partir de 7 ans. Comme les applications ne collectent rien, elles ne collectent rien sur les enfants.</p>
+<h2>Consulter ou supprimer des données</h2>
+<p>Nous n'avons aucune donnée sur toi, il n'y a donc rien à consulter ni à supprimer. Ce qui se trouve sur ton appareil, tu le supprimes en désinstallant l'application ou en effaçant le stockage de l'application dans les réglages de ton téléphone.</p>
+<h2>Modifications</h2>
+<p>Si une application change de sorte que cette déclaration n'est plus exacte, nous adaptons la déclaration avant la sortie de la nouvelle version. Si des applications s'ajoutent, elles sont citées ici.</p>
+<h2>Contact</h2>
+<p>Des questions ? Écris à <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><a href="./" data-taal="1">Retour à Galadin</a> · <a href="privacy.html" data-taal="1">Confidentialité du site web et des jeux web</a></p>
+<p><small data-noot="1">Translations are provided for convenience; if they differ, the Dutch and English versions apply. / Vertalingen zijn bedoeld als gemak; bij verschil gelden de Nederlandse en Engelse tekst.</small></p>
+</div>
+<div data-l="es" hidden>
+<h1>Declaración de privacidad de las apps de Android</h1>
+<p><small>Última actualización: 17 de octubre de 2026</small></p>
+<p>Las apps de Android <strong>Le Frawg</strong> y <strong>Dress for the Slide</strong> las hace <strong>Galadin</strong>, un pequeño creador independiente de los Países Bajos. Esta declaración se aplica a esas dos apps.</p>
+<p><strong>En resumen: las apps no recopilan nada.</strong> No recibimos datos tuyos ni de tu hijo, y las apps no envían nada ni a nosotros ni a otros.</p>
+<h2>Lo que las apps no hacen</h2>
+<ul><li>Las apps no tienen acceso a internet y no se conectan a ningún servidor.</li><li>No hay cuenta y no necesitas iniciar sesión en ningún sitio.</li><li>No hay anuncios ni software de medición.</li><li>Las apps no piden tu nombre, correo electrónico, ubicación, contactos, fotos, cámara ni micrófono.</li></ul>
+<h2>Lo que se queda en el dispositivo</h2>
+<ul><li><strong>El progreso del juego</strong> (y los ajustes) se guarda en un archivo en el propio dispositivo. En Le Frawg son tus ranas, monedas, objetos y los nombres que das a tus ranas; en Dress for the Slide tus motos, piezas, equipo, dinero y resultados. Si eliminas la app, ese archivo desaparece.</li><li><strong>Vibración</strong>: las apps pueden hacer vibrar tu dispositivo. Lo desactivas en el juego o en los ajustes de tu teléfono.</li><li><strong>Notificaciones</strong> (solo Le Frawg, "tu rana tiene hambre"): la app las crea ella misma en el dispositivo. No llegan por internet. Puedes desactivarlas en los ajustes de tu teléfono o rechazar el permiso si la app lo pide. En el menú para padres configuras las horas de silencio. Dress for the Slide no envía notificaciones.</li></ul>
+<h2>Copia de seguridad de Android</h2>
+<p>Si la copia de seguridad de Google está activada en tu teléfono, Android puede incluir el progreso del juego en la copia de seguridad de tu propia cuenta de Google, para que vuelva en un teléfono nuevo. Eso lo gestiona Android; nosotros no podemos ver esa copia. Lo gestionas en los ajustes de tu teléfono.</p>
+<h2>Le Frawg: llevar tu juego a otro dispositivo</h2>
+<p>En el menú para padres de Le Frawg creas con "Llevar el juego" un código de tu progreso y tus ajustes; en el otro dispositivo lo pegas en "Recoger el juego". El código no contiene nombre, correo electrónico ni identificador del dispositivo, y lo envías tú mismo: no pasa por nosotros.</p>
+<h2>Niños</h2>
+<p>Le Frawg es apto para niños; el menú para padres está tras una operación matemática. Dress for the Slide es una carrera de motos con caídas sin sangre y está pensado para jugadores a partir de 7 años. Como las apps no recopilan nada, tampoco recopilan nada de los niños.</p>
+<h2>Consultar o eliminar datos</h2>
+<p>No tenemos datos tuyos, así que no hay nada que consultar ni eliminar. Lo que hay en tu dispositivo lo eliminas borrando la app o vaciando el almacenamiento de la app en los ajustes de tu teléfono.</p>
+<h2>Cambios</h2>
+<p>Si una app cambia de modo que esta declaración deje de ser correcta, modificaremos la declaración antes de que aparezca la nueva versión. Si se añaden apps, se nombrarán aquí.</p>
+<h2>Contacto</h2>
+<p>¿Preguntas? Escribe a <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><a href="./" data-taal="1">Volver a Galadin</a> · <a href="privacy.html" data-taal="1">Privacidad del sitio web y de los juegos web</a></p>
+<p><small data-noot="1">Translations are provided for convenience; if they differ, the Dutch and English versions apply. / Vertalingen zijn bedoeld als gemak; bij verschil gelden de Nederlandse en Engelse tekst.</small></p>
+</div>
+<div data-l="it" hidden>
+<h1>Informativa sulla privacy delle app Android</h1>
+<p><small>Ultimo aggiornamento: 17 ottobre 2026</small></p>
+<p>Le app Android <strong>Le Frawg</strong> e <strong>Dress for the Slide</strong> sono realizzate da <strong>Galadin</strong>, un piccolo creatore indipendente dei Paesi Bassi. Questa informativa vale per queste due app.</p>
+<p><strong>In breve: le app non raccolgono nulla.</strong> Non riceviamo dati da te o da tuo figlio, e le app non inviano nulla né a noi né ad altri.</p>
+<h2>Cosa non fanno le app</h2>
+<ul><li>Le app non hanno accesso a internet e non si collegano a nessun server.</li><li>Non c'è alcun account e non devi accedere da nessuna parte.</li><li>Non ci sono pubblicità né software di misurazione.</li><li>Le app non chiedono il tuo nome, indirizzo e-mail, posizione, contatti, foto, fotocamera o microfono.</li></ul>
+<h2>Cosa resta sul dispositivo</h2>
+<ul><li><strong>I progressi del gioco</strong> (e le impostazioni) sono salvati in un file sul dispositivo stesso. In Le Frawg sono le tue rane, le monete, gli oggetti e i nomi che dai alle rane; in Dress for the Slide le tue moto, i pezzi, l'equipaggiamento, i soldi e i risultati. Se elimini l'app, quel file sparisce.</li><li><strong>Vibrazione</strong>: le app possono far vibrare il tuo dispositivo. La disattivi nel gioco o nelle impostazioni del telefono.</li><li><strong>Notifiche</strong> (solo Le Frawg, "la tua rana ha fame"): l'app le crea da sola sul dispositivo. Non arrivano via internet. Puoi disattivarle nelle impostazioni del telefono o rifiutare il permesso se l'app lo chiede. Nel menu per i genitori imposti le ore di silenzio. Dress for the Slide non invia notifiche.</li></ul>
+<h2>Backup di Android</h2>
+<p>Se sul telefono è attivo il backup di Google, Android può includere i progressi del gioco nel backup del tuo account Google, così tornano su un nuovo telefono. Se ne occupa Android; noi non possiamo vedere quel backup. Lo gestisci nelle impostazioni del telefono.</p>
+<h2>Le Frawg: portare il gioco su un altro dispositivo</h2>
+<p>Nel menu per i genitori di Le Frawg crei con "Porta con te il gioco" un codice dei tuoi progressi e delle impostazioni; sull'altro dispositivo lo incolli in "Recupera il gioco". Il codice non contiene nome, indirizzo e-mail né identificativo del dispositivo, e lo invii tu stesso: non passa da noi.</p>
+<h2>Bambini</h2>
+<p>Le Frawg è adatto ai bambini; il menu per i genitori è protetto da un calcolo. Dress for the Slide è una gara di moto con cadute senza sangue ed è pensato per giocatori dai 7 anni. Poiché le app non raccolgono nulla, non raccolgono nulla nemmeno dei bambini.</p>
+<h2>Consultare o eliminare i dati</h2>
+<p>Non abbiamo dati su di te, quindi non c'è nulla da consultare o eliminare. Ciò che si trova sul tuo dispositivo lo elimini eliminando l'app o cancellando la memoria dell'app nelle impostazioni del telefono.</p>
+<h2>Modifiche</h2>
+<p>Se un'app cambia in modo che questa informativa non sia più corretta, modifichiamo l'informativa prima che esca la nuova versione. Se si aggiungono app, saranno indicate qui.</p>
+<h2>Contatto</h2>
+<p>Domande? Scrivi a <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><a href="./" data-taal="1">Torna a Galadin</a> · <a href="privacy.html" data-taal="1">Privacy del sito web e dei giochi web</a></p>
+<p><small data-noot="1">Translations are provided for convenience; if they differ, the Dutch and English versions apply. / Vertalingen zijn bedoeld als gemak; bij verschil gelden de Nederlandse en Engelse tekst.</small></p>
+</div>
+<div data-l="pt" hidden>
+<h1>Declaração de privacidade das apps Android</h1>
+<p><small>Última atualização: 17 de outubro de 2026</small></p>
+<p>As apps Android <strong>Le Frawg</strong> e <strong>Dress for the Slide</strong> são feitas pela <strong>Galadin</strong>, um pequeno criador independente dos Países Baixos. Esta declaração aplica-se a essas duas apps.</p>
+<p><strong>Em resumo: as apps não recolhem nada.</strong> Não recebemos dados teus nem do teu filho, e as apps não enviam nada a nós nem a outros.</p>
+<h2>O que as apps não fazem</h2>
+<ul><li>As apps não têm acesso à internet e não se ligam a nenhum servidor.</li><li>Não há conta e não precisas de iniciar sessão em lado nenhum.</li><li>Não há anúncios nem software de medição.</li><li>As apps não pedem o teu nome, endereço de e-mail, localização, contactos, fotografias, câmara ou microfone.</li></ul>
+<h2>O que fica no dispositivo</h2>
+<ul><li><strong>O progresso do jogo</strong> (e as definições) é guardado num ficheiro no próprio dispositivo. No Le Frawg são as tuas rãs, moedas, objetos e os nomes que dás às rãs; no Dress for the Slide as tuas motas, peças, equipamento, dinheiro e resultados. Se eliminares a app, esse ficheiro desaparece.</li><li><strong>Vibração</strong>: as apps podem fazer o teu dispositivo vibrar. Desativas isso no jogo ou nas definições do telemóvel.</li><li><strong>Notificações</strong> (só Le Frawg, "a tua rã tem fome"): a app cria-as ela própria no dispositivo. Não chegam pela internet. Podes desativá-las nas definições do telemóvel ou recusar a permissão se a app a pedir. No menu dos pais defines as horas de silêncio. O Dress for the Slide não envia notificações.</li></ul>
+<h2>Cópia de segurança do Android</h2>
+<p>Se a cópia de segurança do Google estiver ativa no teu telemóvel, o Android pode incluir o progresso do jogo na cópia de segurança da tua própria conta Google, para que volte num telemóvel novo. Isso é tratado pelo Android; nós não podemos ver essa cópia. Geres isto nas definições do telemóvel.</p>
+<h2>Le Frawg: levar o teu jogo para outro dispositivo</h2>
+<p>No menu dos pais do Le Frawg crias com "Levar o jogo" um código do teu progresso e das tuas definições; no outro dispositivo colas em "Buscar o jogo". O código não contém nome, endereço de e-mail nem identificador do dispositivo, e envias tu mesmo: não passa por nós.</p>
+<h2>Crianças</h2>
+<p>O Le Frawg é adequado para crianças; o menu dos pais está protegido por uma conta. O Dress for the Slide é uma corrida de motas com quedas sem sangue e destina-se a jogadores a partir dos 7 anos. Como as apps não recolhem nada, também não recolhem nada das crianças.</p>
+<h2>Consultar ou apagar dados</h2>
+<p>Não temos dados teus, por isso não há nada para consultar ou apagar. O que está no teu dispositivo, apagas eliminando a app ou limpando o armazenamento da app nas definições do telemóvel.</p>
+<h2>Alterações</h2>
+<p>Se uma app mudar de modo a que esta declaração deixe de estar correta, alteramos a declaração antes de a nova versão aparecer. Se forem acrescentadas apps, serão nomeadas aqui.</p>
+<h2>Contacto</h2>
+<p>Perguntas? Escreve para <a href="mailto:galadingames@outlook.com">galadingames@outlook.com</a>.</p>
+<p><a href="./" data-taal="1">Voltar à Galadin</a> · <a href="privacy.html" data-taal="1">Privacidade do site e dos jogos web</a></p>
+<p><small data-noot="1">Translations are provided for convenience; if they differ, the Dutch and English versions apply. / Vertalingen zijn bedoeld als gemak; bij verschil gelden de Nederlandse en Engelse tekst.</small></p>
+</div>
+<div data-missing="1" hidden><p><small>This text is not yet available in your language; the English version is shown. Deze tekst is nog niet in jouw taal beschikbaar; de Engelse versie wordt getoond.</small></p></div>
+<script>
+function galadinTaalKeuze(host, cfg) {
+  var langs = cfg.langs, names = cfg.names, flags = cfg.flags, cur = cfg.current, focus = 0, open = false;
+  host.classList.add('tk'); host.textContent = '';
+  var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'tk-knop';
+  btn.setAttribute('aria-haspopup', 'listbox'); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-label', cfg.label || 'Language');
+  var fl = document.createElement('img'); fl.className = 'tk-vlag'; fl.alt = '';
+  var nm = document.createElement('span'); var pijl = document.createElement('span'); pijl.setAttribute('aria-hidden', 'true'); pijl.textContent = '▾';
+  btn.appendChild(fl); btn.appendChild(nm); btn.appendChild(pijl);
+  var ul = document.createElement('ul'); ul.className = 'tk-lijst'; ul.setAttribute('role', 'listbox'); ul.hidden = true; ul.tabIndex = -1;
+  ul.setAttribute('aria-label', cfg.label || 'Language');
+  var opties = langs.map(function (c) {
+    var li = document.createElement('li'); li.className = 'tk-optie'; li.setAttribute('role', 'option'); li.setAttribute('lang', c); li.dataset.c = c;
+    var im = document.createElement('img'); im.className = 'tk-vlag'; im.alt = ''; im.src = flags[c];
+    var sp = document.createElement('span'); sp.textContent = names[c];
+    li.appendChild(im); li.appendChild(sp); ul.appendChild(li); return li;
+  });
+  host.appendChild(btn); host.appendChild(ul);
+  function toon() {
+    fl.src = flags[cur]; nm.textContent = names[cur]; nm.setAttribute('lang', cur);
+    opties.forEach(function (li) { li.setAttribute('aria-selected', li.dataset.c === cur ? 'true' : 'false'); });
+  }
+  function zetFocus(i) {
+    focus = (i + langs.length) % langs.length;
+    opties.forEach(function (li, k) { li.classList.toggle('tk-focus', k === focus); });
+    opties[focus].scrollIntoView({ block: 'nearest' });
+  }
+  function toggle(aan) {
+    open = aan; ul.hidden = !aan; btn.setAttribute('aria-expanded', aan ? 'true' : 'false');
+    if (aan) { zetFocus(langs.indexOf(cur)); ul.focus(); }
+  }
+  function kies(c) { toggle(false); btn.focus(); if (c !== cur) { cur = c; toon(); if (cfg.onChange) cfg.onChange(c); } }
+  btn.addEventListener('click', function () { toggle(!open); });
+  ul.addEventListener('click', function (e) { var li = e.target.closest ? e.target.closest('.tk-optie') : null; if (li) kies(li.dataset.c); });
+  ul.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); zetFocus(focus + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); zetFocus(focus - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); zetFocus(0); }
+    else if (e.key === 'End') { e.preventDefault(); zetFocus(langs.length - 1); }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); kies(langs[focus]); }
+    else if (e.key === 'Escape' || e.key === 'Tab') { toggle(false); btn.focus(); }
+  });
+  document.addEventListener('click', function (e) { if (open && !host.contains(e.target)) toggle(false); });
+  toon();
+  return { set: function (c) { cur = c; toon(); } };
+}
 
-<p><a href="./">Terug naar Galadin</a> · <a href="privacy.html">Privacy van de website en de webspellen</a></p>
+(function () {
+  'use strict';
+  var LANGS = ["nl", "en", "de", "fr", "es", "it", "pt", "da", "sv", "fi", "et", "lv", "lt", "pl", "cs", "sk", "sl", "hr", "hu", "ro", "bg", "el", "mt", "ga"], KEY = 'galadin_taal', DEFAULT = 'nl';
+  var NAMES = {"nl": "Nederlands", "en": "English", "de": "Deutsch", "fr": "Français", "es": "Español", "it": "Italiano", "pt": "Português", "da": "Dansk", "sv": "Svenska", "fi": "Suomi", "et": "Eesti", "lv": "Latviešu", "lt": "Lietuvių", "pl": "Polski", "cs": "Čeština", "sk": "Slovenčina", "sl": "Slovenščina", "hr": "Hrvatski", "hu": "Magyar", "ro": "Română", "bg": "Български", "el": "Ελληνικά", "mt": "Malti", "ga": "Gaeilge"}, FLAGS = {"nl": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23AE1C28%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%2321468B%22/%3E%3C/svg%3E", "en": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23012169%22/%3E%3Cpath d=%22M0,0 L30,20 M30,0 L0,20%22 stroke=%22%23fff%22 stroke-width=%224%22/%3E%3Cpath d=%22M0,0 L30,20 M30,0 L0,20%22 stroke=%22%23C8102E%22 stroke-width=%221.6%22/%3E%3Cpath d=%22M15,0 V20 M0,10 H30%22 stroke=%22%23fff%22 stroke-width=%226%22/%3E%3Cpath d=%22M15,0 V20 M0,10 H30%22 stroke=%22%23C8102E%22 stroke-width=%223.4%22/%3E%3C/svg%3E", "de": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23000000%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23DD0000%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23FFCE00%22/%3E%3C/svg%3E", "fr": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%230055A4%22/%3E%3Crect x=%2210.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%2220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23EF4135%22/%3E%3C/svg%3E", "es": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%225.020%22 fill=%22%23AA151B%22/%3E%3Crect x=%220%22 y=%225.000%22 width=%2230%22 height=%2210.020%22 fill=%22%23F1BF00%22/%3E%3Crect x=%220%22 y=%2215.000%22 width=%2230%22 height=%225.020%22 fill=%22%23AA151B%22/%3E%3C/svg%3E", "it": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23009246%22/%3E%3Crect x=%2210.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%2220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23CE2B37%22/%3E%3C/svg%3E", "pt": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect width=%2212%22 height=%2220%22 fill=%22%23006600%22/%3E%3Crect x=%2212%22 width=%2218%22 height=%2220%22 fill=%22%23FF0000%22/%3E%3Ccircle cx=%2212%22 cy=%2210%22 r=%223.2%22 fill=%22%23FFE000%22/%3E%3Ccircle cx=%2212%22 cy=%2210%22 r=%221.6%22 fill=%22%23FF0000%22/%3E%3C/svg%3E", "da": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23C8102E%22/%3E%3Crect x=%229%22 width=%224%22 height=%2220%22 fill=%22%23FFFFFF%22/%3E%3Crect y=%228%22 width=%2230%22 height=%224%22 fill=%22%23FFFFFF%22/%3E%3C/svg%3E", "sv": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23006AA7%22/%3E%3Crect x=%229%22 width=%224%22 height=%2220%22 fill=%22%23FECC02%22/%3E%3Crect y=%228%22 width=%2230%22 height=%224%22 fill=%22%23FECC02%22/%3E%3C/svg%3E", "fi": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%229%22 width=%224%22 height=%2220%22 fill=%22%23003580%22/%3E%3Crect y=%228%22 width=%2230%22 height=%224%22 fill=%22%23003580%22/%3E%3C/svg%3E", "et": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%230072CE%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23000000%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3C/svg%3E", "lv": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%228.020%22 fill=%22%239E3039%22/%3E%3Crect x=%220%22 y=%228.000%22 width=%2230%22 height=%224.020%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2212.000%22 width=%2230%22 height=%228.020%22 fill=%22%239E3039%22/%3E%3C/svg%3E", "lt": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23FDB913%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23006A44%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23C1272D%22/%3E%3C/svg%3E", "pl": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%2210.020%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2210.000%22 width=%2230%22 height=%2210.020%22 fill=%22%23DC143C%22/%3E%3C/svg%3E", "cs": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect width=%2230%22 height=%2210%22 fill=%22%23FFFFFF%22/%3E%3Crect y=%2210%22 width=%2230%22 height=%2210%22 fill=%22%23D7141A%22/%3E%3Cpolygon points=%220,0 15,10 0,20%22 fill=%22%2311457E%22/%3E%3C/svg%3E", "sk": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%230B4EA2%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23EE1C25%22/%3E%3C/svg%3E", "sl": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23005DA4%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23ED1C24%22/%3E%3C/svg%3E", "hr": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23FF0000%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23171796%22/%3E%3C/svg%3E", "hu": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23CD2A3E%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23436F4D%22/%3E%3C/svg%3E", "ro": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23002B7F%22/%3E%3Crect x=%2210.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23FCD116%22/%3E%3Crect x=%2220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23CE1126%22/%3E%3C/svg%3E", "bg": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%226.687%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%226.687%22 fill=%22%2300966E%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%226.687%22 fill=%22%23D62612%22/%3E%3C/svg%3E", "el": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220%22 y=%220.000%22 width=%2230%22 height=%222.242%22 fill=%22%230D5EAF%22/%3E%3Crect x=%220%22 y=%222.222%22 width=%2230%22 height=%222.242%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%224.444%22 width=%2230%22 height=%222.242%22 fill=%22%230D5EAF%22/%3E%3Crect x=%220%22 y=%226.667%22 width=%2230%22 height=%222.242%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%228.889%22 width=%2230%22 height=%222.242%22 fill=%22%230D5EAF%22/%3E%3Crect x=%220%22 y=%2211.111%22 width=%2230%22 height=%222.242%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2213.333%22 width=%2230%22 height=%222.242%22 fill=%22%230D5EAF%22/%3E%3Crect x=%220%22 y=%2215.556%22 width=%2230%22 height=%222.242%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%220%22 y=%2217.778%22 width=%2230%22 height=%222.242%22 fill=%22%230D5EAF%22/%3E%3Crect width=%2211.12%22 height=%2211.12%22 fill=%22%230D5EAF%22/%3E%3Crect x=%224.45%22 width=%222.22%22 height=%2211.12%22 fill=%22%23fff%22/%3E%3Crect y=%224.45%22 width=%2211.12%22 height=%222.22%22 fill=%22%23fff%22/%3E%3C/svg%3E", "mt": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220.000%22 y=%220%22 width=%2215.020%22 height=%2220%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%2215.000%22 y=%220%22 width=%2215.020%22 height=%2220%22 fill=%22%23CF142B%22/%3E%3C/svg%3E", "ga": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 20%22 width=%2230%22 height=%2220%22%3E%3Crect x=%220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23169B62%22/%3E%3Crect x=%2210.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23FFFFFF%22/%3E%3Crect x=%2220.000%22 y=%220%22 width=%2210.020%22 height=%2220%22 fill=%22%23FF883E%22/%3E%3C/svg%3E"};
+  function valid(c) { return LANGS.indexOf(c) > -1; }
+  function fromUrl() { try { var m = /[?&]taal=([a-z]{2})(&|$)/.exec(location.search); return m && valid(m[1]) ? m[1] : null; } catch (e) { return null; } }
+  function fromStore() { try { var v = localStorage.getItem(KEY); return valid(v) ? v : null; } catch (e) { return null; } }
+  var cur = fromUrl() || fromStore() || DEFAULT;
+  var tk = galadinTaalKeuze(document.getElementById('taalhost'), {
+    langs: LANGS, names: NAMES, flags: FLAGS, current: cur, label: 'Taal / Language',
+    onChange: function (c) { cur = c; try { localStorage.setItem(KEY, c); } catch (e) { } apply(); }
+  });
+  function apply() {
+    document.documentElement.lang = cur; tk.set(cur);
+    var bl = document.querySelectorAll('[data-l]');
+    var heeft = !!document.querySelector('[data-l="' + cur + '"]'), toon = heeft ? cur : 'en';
+    for (var i = 0; i < bl.length; i++) { var l = bl[i].getAttribute('data-l'); bl[i].hidden = (l !== toon); }
+    var nt = document.querySelector('[data-missing]'); if (nt) nt.hidden = heeft;
+    var ls = document.querySelectorAll('a[data-taal]');
+    for (var j = 0; j < ls.length; j++) { var b = ls[j].getAttribute('data-basis') || ls[j].getAttribute('href'); ls[j].setAttribute('data-basis', b); ls[j].setAttribute('href', b + (b.indexOf('?') > -1 ? '&' : '?') + 'taal=' + cur); }
+  }
+  apply();
+})();
+</script>
 </body>
 </html>
