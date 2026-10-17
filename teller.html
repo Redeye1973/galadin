@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Teller – Galadin</title>
+<style>
+  :root { --bg: #fff; --fg: #222; --zacht: #666; --lijn: #ddd; --balk: #1a5fb4; --nu: #2e9e4f; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #14161a; --fg: #e6e6e6; --zacht: #9aa0a6; --lijn: #2c3036; --balk: #7fb4ff; --nu: #5fd07f; } }
+  body { font-family: system-ui, sans-serif; max-width: 42rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: var(--fg); background: var(--bg); }
+  h1 { font-size: 1.5rem; margin-bottom: .2rem; }
+  h2 { font-size: 1.1rem; margin: 1.6rem 0 .4rem; }
+  .klein { color: var(--zacht); font-size: .85rem; }
+  .rij { display: flex; gap: 1.2rem; flex-wrap: wrap; margin: .4rem 0 .6rem; }
+  .vak { border: 1px solid var(--lijn); border-radius: .5rem; padding: .5rem .8rem; min-width: 6.5rem; }
+  .vak b { display: block; font-size: 1.6rem; line-height: 1.2; }
+  .vak.nu b { color: var(--nu); }
+  .grafiek { display: flex; align-items: flex-end; gap: 2px; height: 5rem; border-bottom: 1px solid var(--lijn); }
+  .grafiek i { flex: 1; background: var(--balk); min-height: 1px; border-radius: 2px 2px 0 0; opacity: .85; }
+  .grafiek i.leeg { background: var(--lijn); }
+  .as { display: flex; justify-content: space-between; color: var(--zacht); font-size: .75rem; }
+</style>
+</head>
+<body>
+<h1>Teller</h1>
+<p class="klein">Hoeveel voorpagina's van de sites in een tijdvak van tien minuten open waren. Alleen aantallen: geen namen, geen adressen, niets uit de spellen. Ververst zichzelf elke halve minuut. Deze pagina staat niet in de zoekmachines en er staat geen link naar.</p>
+<div id="uit"></div>
+<p class="klein" id="melding"></p>
+<p class="klein">Let op: een speler die na het openen van de voorpagina een spel opent, telt alleen mee op het moment van de voorpagina; de spellen zelf sturen niets. Het getal is dus het aantal bezoeken per tien minuten, niet het aantal mensen.</p>
+<script>
+(function () {
+  'use strict';
+  var DIENST = 'https://abacus.jasoncameron.dev', BLOK = 600000, ZES_UUR = 36;
+  var SITES = [{ naam: 'galadin.nl', ruimte: 'galadin-nl' }, { naam: 'galadin.eu', ruimte: 'galadin-eu' }];
+  var cache = {}, wacht = Promise.resolve(), fout = false;
+  function pauze(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function vraag(ruimte, n, ververs) {
+    var sl = ruimte + '/live-' + n;
+    if (!ververs && cache[sl] != null) return Promise.resolve(cache[sl]);
+    wacht = wacht.then(function () { return pauze(380); }).then(function () {
+      return fetch(DIENST + '/get/' + sl, { cache: 'no-store' }).then(function (r) {
+        if (r.status === 404) return 0;
+        if (!r.ok) { fout = true; return null; }
+        return r.json().then(function (j) { return typeof j.value === 'number' ? j.value : null; });
+      }).catch(function () { fout = true; return null; });
+    }).then(function (v) { if (v != null) cache[sl] = v; return v; });
+    return wacht;
+  }
+  function tijd(n) { var d = new Date(n * BLOK); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
+  function teken(site, n0) {
+    var w = 0, blokken = [];
+    for (var i = ZES_UUR - 1; i >= 0; i--) { var v = cache[site.ruimte + '/live-' + (n0 - i)]; blokken.push(v == null ? null : v); }
+    var som = function (aantal) { var s = 0; for (var k = blokken.length - aantal; k < blokken.length; k++) s += blokken[k] || 0; return s; };
+    var max = Math.max.apply(null, blokken.map(function (x) { return x || 0; }).concat([1]));
+    var el = document.getElementById('site-' + site.ruimte);
+    if (!el) { el = document.createElement('section'); el.id = 'site-' + site.ruimte; document.getElementById('uit').appendChild(el); }
+    el.innerHTML = '<h2>' + site.naam + '</h2><div class="rij">' +
+      '<div class="vak nu"><b>' + (blokken[blokken.length - 1] == null ? '…' : blokken[blokken.length - 1]) + '</b><span class="klein">nu (laatste 10 min)</span></div>' +
+      '<div class="vak"><b>' + som(3) + '</b><span class="klein">laatste 30 min</span></div>' +
+      '<div class="vak"><b>' + som(6) + '</b><span class="klein">laatste uur</span></div>' +
+      '<div class="vak"><b>' + som(ZES_UUR) + '</b><span class="klein">laatste 6 uur</span></div></div>' +
+      '<div class="grafiek">' + blokken.map(function (x, i) { return '<i class="' + (x ? '' : 'leeg') + '" style="height:' + Math.max(2, Math.round(100 * (x || 0) / max)) + '%" title="' + tijd(n0 - (ZES_UUR - 1 - i)) + ': ' + (x == null ? '?' : x) + '"></i>'; }).join('') + '</div>' +
+      '<div class="as"><span>' + tijd(n0 - ZES_UUR + 1) + '</span><span>' + tijd(n0) + '</span></div>';
+  }
+  async function rond(eerste) {
+    var n0 = Math.floor(Date.now() / BLOK);
+    fout = false;
+    for (var s = 0; s < SITES.length; s++) {
+      var st = SITES[s];
+      var lijst = eerste ? Array.from({ length: ZES_UUR }, function (_, i) { return n0 - i; }) : [n0, n0 - 1];
+      for (var k = 0; k < lijst.length; k++) { await vraag(st.ruimte, lijst[k], lijst[k] >= n0 - 1); if (k % 6 === 5 || k === lijst.length - 1) teken(st, n0); }
+    }
+    document.getElementById('melding').textContent = (fout ? 'Een deel kon niet worden opgehaald (de teldienst begrenst het aantal vragen); het wordt de volgende ronde opnieuw geprobeerd. ' : '') + 'Bijgewerkt om ' + ('0' + new Date().getHours()).slice(-2) + ':' + ('0' + new Date().getMinutes()).slice(-2) + '.';
+  }
+  rond(true);
+  setInterval(function () { rond(false); }, 30000);
+})();
+</script>
+</body>
+</html>
