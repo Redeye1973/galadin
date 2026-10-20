@@ -786,5 +786,39 @@ function galadinTaalKeuze(host, cfg) {
   new MutationObserver(bouw).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 })();
 </script>
+<script id="uitleg-script">
+(function () {
+  'use strict';
+  var G = [{"titel": "Le Frawg", "sites": ["nl"], "en": ["Look after Le Frawg and the other frogs in your terrarium. Tap a frog, in the terrarium or in the row of names below it, and its six meters show how it is doing: Hunger, Fun, Energy, Health, Moisture and Clean. Then feed it, give it a snack, stroke it, mist the terrarium, clean up, turn the light off, or call the doctor. Play Bug Hunt (a bug-matching puzzle), Hide and seek, or catch a Swarm of flies, and spend the coins you earn in the shop on food, medicine, plants, houses, hats and other extras, and bigger terrariums. Time keeps going while the app is closed, and the frogs sleep at night. Grown-ups can set bedtime and wake-up time in the parents' menu, behind a maths question."], "nl": ["Zorg voor Le Frawg en de andere kikkers in je terrarium. Tik op een kikker, in het terrarium of in de rij met namen eronder, en de zes meters laten zien hoe het gaat: honger, plezier, energie, gezondheid, vocht en schoon. Geef hem dan eten of een snack, aai hem, besproei het terrarium, maak de bak schoon, doe het licht uit, of roep de dierenarts. Speel Bugjacht (een puzzelspel met insecten), verstoppertje, of vang een zwerm vliegen, en geef de munten die je verdient in de winkel uit aan voer, medicijnen, planten, huisjes, hoedjes en andere extra's, en grotere terrariums. De tijd loopt door als de app dicht is, en 's nachts slapen de kikkers. Volwassenen stellen bedtijd en opstaantijd in het oudermenu in, achter een rekensom."]}];
+  if (!G.length) return;
+  var KOP = { nl: 'Zo speel je', en: 'How to play' };
+  var sec = null;
+  function lang() { var l = (document.documentElement.lang || 'en').slice(0, 2).toLowerCase(); return l === 'nl' ? 'nl' : 'en'; }
+  function bouw() {
+    if (!sec) {
+      sec = document.createElement('section'); sec.id = 'uitleg';
+      sec.style.cssText = 'max-width:42rem;margin:1.6rem auto 1rem;padding:1rem 1.1rem;border:1px solid rgba(128,128,128,.35);border-radius:.6rem';
+      var fb = document.getElementById('feedback'), foot = document.querySelector('footer');
+      if (fb && fb.parentNode) fb.parentNode.insertBefore(sec, fb);
+      else if (foot && foot.parentNode) foot.parentNode.insertBefore(sec, foot);
+      else document.body.appendChild(sec);
+    }
+    var l = lang(); sec.textContent = ''; sec.lang = l;
+    var h = document.createElement('h2'); h.textContent = KOP[l]; h.style.cssText = 'margin:0 0 .6rem;font-size:1.15rem;text-align:center';
+    sec.appendChild(h);
+    G.forEach(function (g) {
+      var d = document.createElement('details'); d.style.cssText = 'margin:.35rem 0;border-top:1px solid rgba(128,128,128,.25);padding-top:.35rem';
+      var s = document.createElement('summary'); s.textContent = g.titel; s.style.cssText = 'cursor:pointer;font-weight:600;padding:.25rem 0';
+      d.appendChild(s);
+      (g[l] || g.en).forEach(function (p) {
+        var e = document.createElement('p'); e.textContent = p; e.style.cssText = 'margin:.45rem 0;font-size:.95rem;line-height:1.45'; d.appendChild(e);
+      });
+      sec.appendChild(d);
+    });
+  }
+  bouw();
+  new MutationObserver(bouw).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+})();
+</script>
 </body>
 </html>
